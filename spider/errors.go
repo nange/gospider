@@ -13,5 +13,9 @@ var (
 )
 
 var (
+	ErrTaskRunningTimeout = errors.New("task running timeout")
+)
+
+var (
 	ErrOutputFieldsNotMatchOutputRow = errors.New("output fields not match out put row")
 )

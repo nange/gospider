@@ -8,7 +8,22 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
+
+var db *gorm.DB
+
+func init() {
+	var err error
+	db, err = newGormDBFromEnv()
+	if err != nil {
+		logrus.Fatalf("GetGormDBFromEnv failed! err:%#v", err)
+	}
+}
+
+func GetDB() *gorm.DB {
+	return db
+}
 
 type MySQLConf struct {
 	Host     string
@@ -31,7 +46,7 @@ func newGormDB(conf MySQLConf) (*gorm.DB, error) {
 	return db, nil
 }
 
-func GetGormDBFromEnv() (*gorm.DB, error) {
+func newGormDBFromEnv() (*gorm.DB, error) {
 	host, ok := os.LookupEnv("GOSPIDER_DB_HOST")
 	if !ok {
 		host = "127.0.0.1"

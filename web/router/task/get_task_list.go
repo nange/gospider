@@ -9,20 +9,28 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type GetTaskListReq struct {
+	Size   int `json:"size" form:"size"`
+	Offset int `json:"offset" form:"offset"`
+}
+
 type GetTaskListResp struct {
 	Total int          `json:"total"`
 	Data  []model.Task `json:"data"`
 }
 
 func GetTaskList(c *gin.Context) {
-	db, err := common.GetGormDBFromEnv()
-	if err != nil {
-		logrus.Errorf("GetDBFromEnv failed! err:%#v", err)
-		c.Data(http.StatusInternalServerError, "", nil)
+	db := common.GetDB()
+
+	var req GetTaskListReq
+	if err := c.BindQuery(&req); err != nil {
+		logrus.Warnf("query param is invalid")
+		c.Data(http.StatusBadRequest, "", nil)
 		return
 	}
+	logrus.Infof("get task list req:%+v", req)
 
-	tasks, count, err := model.GetTaskList(db, -1, -1)
+	tasks, count, err := model.GetTaskList(db, req.Size, req.Offset)
 	if err != nil {
 		logrus.Errorf("GetTaskList failed! err:%#v", err)
 		c.Data(http.StatusInternalServerError, "", nil)

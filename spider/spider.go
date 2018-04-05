@@ -10,36 +10,29 @@ import (
 
 // TODO: Context添加KV功能，能够结束请求链功能
 // TODO: 思考出错, 中断后续爬虫的方法
-func Run(task *Task) error {
+func Run(task *Task) (<-chan struct{}, error) {
 	var db *sql.DB
 	var err error
 	if task.OutputConfig.Type == OutputTypeMySQL {
 		db, err = newDB(task.TaskConfig.OutputConfig.MySQLConf)
 		if err != nil {
 			logrus.Errorf("newDB failed! err:%#v", err)
-			return err
+			return nil, err
 		}
 	}
-	c := newCollector(task.TaskConfig)
 
 	nodesLen := len(task.Rule.Nodes)
-	cNodes := make([]*colly.Collector, 0, nodesLen)
+	collectors := make([]*colly.Collector, 0, nodesLen)
 	for i := 0; i < len(task.Rule.Nodes); i++ {
-		cNodes = append(cNodes, c.Clone())
-	}
-
-	headCtx := newContext(task, c, cNodes[0])
-	if err := task.Rule.Head(headCtx); err != nil {
-		logrus.Errorf("exec rule head func err:%#v", err)
-		return errors.WithStack(err)
+		collectors = append(collectors, newCollector(task.TaskConfig))
 	}
 
 	var ctx *Context
 	for i := 0; i < nodesLen; i++ {
 		if i != nodesLen-1 {
-			ctx = newContext(task, cNodes[i], cNodes[i+1])
+			ctx = newContext(task, collectors[i], collectors[i+1])
 		} else {
-			ctx = newContext(task, cNodes[i], nil)
+			ctx = newContext(task, collectors[i], nil)
 		}
 		if task.OutputConfig.Type == OutputTypeMySQL {
 			ctx.setOutputDB(db)
@@ -47,11 +40,24 @@ func Run(task *Task) error {
 
 		addCallback(ctx, task.Rule.Nodes[i])
 	}
-	for i := 0; i < nodesLen; i++ {
-		cNodes[i].Wait()
+
+	c := newCollector(task.TaskConfig)
+	headCtx := newContext(task, c, collectors[0])
+	if err := task.Rule.Head(headCtx); err != nil {
+		logrus.Errorf("exec rule head func err:%#v", err)
+		return nil, errors.WithStack(err)
 	}
-	logrus.Infof("task run completed...")
-	return nil
+
+	retCh := make(chan struct{}, 1)
+	go func() {
+		for i := 0; i < nodesLen; i++ {
+			collectors[i].Wait()
+		}
+		retCh <- struct{}{}
+		logrus.Infof("task:%s run completed...", task.Name)
+	}()
+
+	return retCh, nil
 }
 
 func addCallback(ctx *Context, node *Node) {

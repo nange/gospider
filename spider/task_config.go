@@ -35,6 +35,7 @@ type Option struct {
 }
 
 type Limit struct {
+	Enable bool
 	// DomainRegexp is a regular expression to match against domains
 	DomainRegexp string
 	// DomainRegexp is a glob pattern to match against domains
@@ -97,24 +98,28 @@ func newCollector(config TaskConfig) *colly.Collector {
 
 	c := colly.NewCollector(opts...)
 
-	var limit colly.LimitRule
-	if config.Limit.Delay > 0 {
-		limit.Delay = config.Limit.Delay
-	}
-	if config.Limit.DomainGlob != "" {
-		limit.DomainGlob = config.Limit.DomainGlob
-	}
-	if config.Limit.DomainRegexp != "" {
-		limit.DomainRegexp = config.Limit.DomainRegexp
-	}
-	if config.Limit.Parallelism > 0 {
-		limit.Parallelism = config.Limit.Parallelism
-	}
-	if config.Limit.RandomDelay > 0 {
-		limit.RandomDelay = config.Limit.RandomDelay
-	}
+	if config.Limit.Enable {
+		var limit colly.LimitRule
+		if config.Limit.Delay > 0 {
+			limit.Delay = config.Limit.Delay
+		}
+		if config.Limit.DomainGlob != "" {
+			limit.DomainGlob = config.Limit.DomainGlob
+		} else {
+			limit.DomainGlob = "*"
+		}
+		if config.Limit.DomainRegexp != "" {
+			limit.DomainRegexp = config.Limit.DomainRegexp
+		}
+		if config.Limit.Parallelism > 0 {
+			limit.Parallelism = config.Limit.Parallelism
+		}
+		if config.Limit.RandomDelay > 0 {
+			limit.RandomDelay = config.Limit.RandomDelay
+		}
 
-	c.Limit(&limit)
+		c.Limit(&limit)
+	}
 
 	return c
 }

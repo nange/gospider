@@ -1,5 +1,7 @@
 package spider
 
+import "github.com/pkg/errors"
+
 var rules = make(map[string]*TaskRule)
 
 func Register(rule *TaskRule) {
@@ -15,6 +17,13 @@ type TaskRule struct {
 	Namespace    string
 	OutputFields []string
 	Rule         *Rule
+}
+
+func GetTaskRule(ruleName string) (*TaskRule, error) {
+	if rule, ok := rules[ruleName]; ok {
+		return rule, nil
+	}
+	return nil, errors.WithStack(ErrTaskRuleNotExist)
 }
 
 type Rule struct {

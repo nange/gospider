@@ -11,6 +11,7 @@ const (
 	TaskStatusStopped
 	TaskStatusUnexceptedExited
 	TaskStatusCompleted
+	TaskStatusRunningTimeout
 )
 
 var tsMap = map[TaskStatus]string{
@@ -20,6 +21,7 @@ var tsMap = map[TaskStatus]string{
 	TaskStatusStopped:          "停止",
 	TaskStatusUnexceptedExited: "异常退出",
 	TaskStatusCompleted:        "完成",
+	TaskStatusRunningTimeout:   "运行超时",
 }
 
 func (ts TaskStatus) String() string {

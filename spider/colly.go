@@ -183,7 +183,7 @@ func (h *HTMLElement) ChildAttrs(goquerySelector, attrName string) []string {
 
 func (h *HTMLElement) ForEach(goquerySelector string, callback func(int, *HTMLElement)) {
 	cb := func(i int, el *colly.HTMLElement) {
-		callback(i, &HTMLElement{})
+		callback(i, newHTMLElement(el, h.Request.ctx))
 	}
 	h.el.ForEach(goquerySelector, cb)
 }
