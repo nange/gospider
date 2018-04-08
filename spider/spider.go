@@ -24,7 +24,11 @@ func Run(task *Task) (<-chan struct{}, error) {
 	nodesLen := len(task.Rule.Nodes)
 	collectors := make([]*colly.Collector, 0, nodesLen)
 	for i := 0; i < len(task.Rule.Nodes); i++ {
-		collectors = append(collectors, newCollector(task.TaskConfig))
+		c := newCollector(task.TaskConfig)
+		if task.DisableCookies {
+			c.DisableCookies()
+		}
+		collectors = append(collectors, c)
 	}
 
 	var ctx *Context

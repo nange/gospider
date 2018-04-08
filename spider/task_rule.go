@@ -12,11 +12,12 @@ func Register(rule *TaskRule) {
 }
 
 type TaskRule struct {
-	Name         string
-	Description  string
-	Namespace    string
-	OutputFields []string
-	Rule         *Rule
+	Name           string
+	Description    string
+	Namespace      string
+	OutputFields   []string
+	DisableCookies bool
+	Rule           *Rule
 }
 
 func GetTaskRule(ruleName string) (*TaskRule, error) {
