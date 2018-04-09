@@ -19,6 +19,14 @@ export function get(params) {
   })
 }
 
+// 查询所有rules
+export function getRules() {
+  return fetch({
+    url: port_table.getRules,
+    method: 'get'
+  })
+}
+
 //根据id删除数据
 export function del(data) {
   return fetch({

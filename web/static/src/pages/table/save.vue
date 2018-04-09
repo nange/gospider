@@ -11,7 +11,14 @@
               <el-input v-model="form.task_name" placeholder="请输入内容"></el-input>
             </el-form-item>
             <el-form-item label="任务规则名:">
-              <el-input v-model="form.task_rule_name" placeholder="请输入内容"></el-input>
+              <el-select v-model="form.task_rule_name" placeholder="请选择">
+                <el-option
+                  v-for="item in ruleOpts"
+                  :key="item"
+                  :label="item"
+                  :value="item">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="任务描述:">
               <el-input type="textarea" placeholder="请输入内容" :rows="2" v-model="form.task_desc">
@@ -81,6 +88,7 @@
         form: {
           opt_user_agent: navigator.userAgent
         },
+        ruleOpts: [],
         route_id: this.$route.params.id,
         load_data: false,
         on_submit_loading: false,
@@ -90,11 +98,12 @@
       }
     },
     created(){
+      this.getRules()
       this.route_id && this.get_form_data()
     },
     methods: {
       //获取数据
-      get_form_data(){
+      get_form_data() {
         this.load_data = true
         this.$fetch.api_table.get({
           id: this.route_id
@@ -107,8 +116,15 @@
             this.load_data = false
           })
       },
+      // 获取所有rules
+      getRules() {
+        this.$fetch.api_table.getRules()
+          .then((data) => {
+            this.ruleOpts = data.data
+          })
+      },
       //提交
-      on_submit_form(){
+      on_submit_form() {
         this.$refs.form.validate((valid) => {
           if (!valid) return false
           this.on_submit_loading = true

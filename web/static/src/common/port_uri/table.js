@@ -6,3 +6,5 @@ export const get = "/api/tasks/:id"
 export const del = "/api/tasks/:id"
 //添加或修改数据
 export const save = "/api/tasks"
+//获取rules
+export const getRules = "/api/rules"

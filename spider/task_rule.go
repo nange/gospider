@@ -30,6 +30,15 @@ func GetTaskRule(ruleName string) (*TaskRule, error) {
 	return nil, errors.WithStack(ErrTaskRuleNotExist)
 }
 
+func GetTaskRuleKeys() []string {
+	keys := make([]string, 0, len(rules))
+	for k := range rules {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
 type Rule struct {
 	Head  func(ctx *Context) error
 	Nodes map[int]*Node
