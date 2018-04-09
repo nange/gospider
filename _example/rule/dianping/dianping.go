@@ -16,11 +16,10 @@ func init() {
 
 // NOTICE: 目前这个例子仅实现了抓取美食类商家
 var rule = &spider.TaskRule{
-	Name:           "大众点评商家数据",
-	Description:    "抓取大众点评上全国各大城市所有类型的商家详情数据",
-	Namespace:      "dianping_shop",
-	OutputFields:   []string{"city", "adname", "big_category", "sub_category", "shop_name", "address", "tel", "photos"},
-	DisableCookies: true,
+	Name:         "大众点评商家数据",
+	Description:  "抓取大众点评上全国各大城市所有类型的商家详情数据",
+	Namespace:    "dianping_shop",
+	OutputFields: []string{"city", "adname", "big_category", "sub_category", "shop_name", "address", "tel", "photos"},
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error { // 定义入口
 			return ctx.VisitForNext("http://www.dianping.com/citylist")
@@ -57,7 +56,6 @@ var rule = &spider.TaskRule{
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
 					`.first-cate .first-item .span-container`: func(ctx *spider.Context, el *spider.HTMLElement) {
 						link := el.ChildAttr(".index-item", "href")
-						logrus.Infof("link:%s", link)
 						if link == "" {
 							return
 						}
@@ -129,8 +127,12 @@ var rule = &spider.TaskRule{
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.page a:eq(-2)`: func(ctx *spider.Context, el *spider.HTMLElement) {
+					`.page a:nth-last-child(2)`: func(ctx *spider.Context, el *spider.HTMLElement) {
 						countTxt := el.Text
+						if countTxt == "" {
+							return
+						}
+
 						count64, err := strconv.ParseInt(countTxt, 10, 64)
 						if err != nil {
 							logrus.Errorf("pase page count err:%s", err.Error())
@@ -138,10 +140,15 @@ var rule = &spider.TaskRule{
 						}
 
 						for i := 2; i <= int(count64); i++ {
-							el.Request.Visit(fmt.Sprintf("%sp%d", el.Request.URL.String(), i))
+							nextURL := fmt.Sprintf("%sp%d", el.Request.URL.String(), i)
+							logrus.Infof("nextURL:%s", nextURL)
+							el.Request.Visit(nextURL)
 						}
 					},
 					`.shop-list li .pic a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+						photo := el.ChildAttr(`img`, "src")
+						el.Request.PutReqContextValue("photos", photo)
+
 						el.Request.VisitForNextWithContext(el.Attr("href"))
 					},
 				},
@@ -152,7 +159,11 @@ var rule = &spider.TaskRule{
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
 					`#basic-info`: func(ctx *spider.Context, el *spider.HTMLElement) {
-						shopName := el.ChildText(`.shop-name`)
+						shopNameNodes := el.DOM.Find(`.shop-name`).Nodes
+						if len(shopNameNodes) == 0 {
+							return
+						}
+						shopName := shopNameNodes[0].FirstChild.Data
 						address := el.ChildText(`.address .item`)
 						tel := el.ChildText(`.tel .item`)
 
@@ -160,16 +171,17 @@ var rule = &spider.TaskRule{
 						adname := el.Request.GetReqContextValue("adname")
 						bigCate := el.Request.GetReqContextValue("big_category")
 						subCate := el.Request.GetReqContextValue("sub_category")
+						photos := el.Request.GetReqContextValue("photos")
 
 						ctx.Output(map[int]interface{}{
 							0: city,
-							2: adname,
-							3: bigCate,
-							4: subCate,
-							5: shopName,
-							6: address,
-							7: tel,
-							8: "",
+							1: adname,
+							2: bigCate,
+							3: subCate,
+							4: shopName,
+							5: address,
+							6: tel,
+							7: photos,
 						})
 					},
 				},

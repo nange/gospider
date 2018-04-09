@@ -85,16 +85,18 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnHTML != nil {
 		for selector, fn := range node.OnHTML {
+			f := fn
 			ctx.c.OnHTML(selector, func(el *colly.HTMLElement) {
-				fn(ctx, newHTMLElement(el, ctx))
+				f(ctx, newHTMLElement(el, ctx))
 			})
 		}
 	}
 
 	if node.OnXML != nil {
 		for selector, fn := range node.OnXML {
+			f := fn
 			ctx.c.OnXML(selector, func(el *colly.XMLElement) {
-				fn(ctx, newXMLElement(el, ctx))
+				f(ctx, newXMLElement(el, ctx))
 			})
 		}
 	}
