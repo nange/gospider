@@ -7,10 +7,10 @@
       <el-row>
         <el-col :span="12">
           <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-            <el-form-item label="任务名称:">
+            <el-form-item label="任务名称:" prop="task_name">
               <el-input v-model="form.task_name" placeholder="请输入内容"></el-input>
             </el-form-item>
-            <el-form-item label="任务规则名:">
+            <el-form-item label="任务规则名:" prop="task_rule_name">
               <el-select v-model="form.task_rule_name" placeholder="请选择">
                 <el-option
                   v-for="item in ruleOpts"
@@ -39,7 +39,7 @@
             <el-form-item label="最大body值:">
               <el-input-number v-model="form.opt_max_body_size" :controls="false"></el-input-number>
             </el-form-item>
-            <el-form-item label="导出类型:">
+            <el-form-item label="导出类型:" prop="output_type">
               <el-select v-model="form.output_type" placeholder="请选择">
                 <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
                 <el-option key="csv" label="CSV" value="csv"></el-option>
@@ -70,7 +70,7 @@
             </el-form-item>
 
             <el-form-item>
-              <el-button type="primary" @click="on_submit_form" :loading="on_submit_loading">立即提交</el-button>
+              <el-button type="primary" @click="on_submit_form" :loading="on_submit_loading" :disabled="submit_disable">立即提交</el-button>
             </el-form-item>
           </el-form>
         </el-col>
@@ -92,8 +92,11 @@
         route_id: this.$route.params.id,
         load_data: false,
         on_submit_loading: false,
+        submit_disable: false,
         rules: {
-          task_name: [{required: true, message: '任务名不能为空', trigger: 'blur'}]
+          task_name: [{required: true, message: '任务名不能为空', trigger: 'blur'}],
+          task_rule_name: [{required: true, message: '请选择规则名称', trigger: 'change'}],
+          output_type: [{required: true, message: '请选择规导出类型', trigger: 'change'}]
         }
       }
     },
@@ -132,7 +135,7 @@
             .then((ret) => {
               this.$message.success('任务创建成功!  任务ID:' + ret.id + '  3秒钟后跳转到任务列表页面!')
               this.on_submit_loading = false
-
+              this.submit_disable = true
               setTimeout(() => this.$router.push({name: 'tableBase'}), 3000)
             })
             .catch(() => {
