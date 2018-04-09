@@ -25,9 +25,6 @@ func Run(task *Task) (<-chan struct{}, error) {
 	collectors := make([]*colly.Collector, 0, nodesLen)
 	for i := 0; i < len(task.Rule.Nodes); i++ {
 		c := newCollector(task.TaskConfig)
-		if task.DisableCookies {
-			c.DisableCookies()
-		}
 		collectors = append(collectors, c)
 	}
 

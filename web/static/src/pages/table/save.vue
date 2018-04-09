@@ -32,11 +32,6 @@
             <el-form-item label="最大body值:">
               <el-input-number v-model="form.opt_max_body_size" :controls="false"></el-input-number>
             </el-form-item>
-            <div class="el-form-item">
-              <el-checkbox v-model="form.opt_allow_url_revisit">URL可重复访问</el-checkbox>
-              <el-checkbox v-model="form.opt_ignore_robots_txt">忽略Robots.txt</el-checkbox>
-              <el-checkbox v-model="form.opt_parse_http_error_response">http错误时解析response</el-checkbox>
-            </div>
             <el-form-item label="导出类型:">
               <el-select v-model="form.output_type" placeholder="请选择">
                 <el-option key="mysql" label="MYSQL" value="mysql"></el-option>

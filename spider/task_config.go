@@ -32,6 +32,7 @@ type Option struct {
 	MaxBodySize            int
 	IgnoreRobotsTxt        bool
 	ParseHTTPErrorResponse bool
+	DisableCookies         bool
 }
 
 type Limit struct {
@@ -97,6 +98,9 @@ func newCollector(config TaskConfig) *colly.Collector {
 	}
 
 	c := colly.NewCollector(opts...)
+	if config.Option.DisableCookies {
+		c.DisableCookies()
+	}
 
 	if config.Limit.Enable {
 		var limit colly.LimitRule

@@ -10,10 +10,11 @@ func init() {
 }
 
 var rule = &spider.TaskRule{
-	Name:         "百度新闻规则",
-	Description:  "抓取百度新闻各个分类的最新焦点新闻",
-	Namespace:    "baidu_news",
-	OutputFields: []string{"category", "title", "link"},
+	Name:            "百度新闻规则",
+	Description:     "抓取百度新闻各个分类的最新焦点新闻",
+	Namespace:       "baidu_news",
+	OutputFields:    []string{"category", "title", "link"},
+	AllowURLRevisit: true,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error {
 			return ctx.VisitForNext("http://news.baidu.com")

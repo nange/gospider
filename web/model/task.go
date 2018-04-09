@@ -18,14 +18,11 @@ type Task struct {
 	Status       common.TaskStatus `json:"status"`
 	Counts       int               `json:"counts"`
 	// 参数配置部分
-	OptUserAgent              string `json:"opt_user_agent"`
-	OptMaxDepth               int    `json:"opt_max_depth"`
-	OptAllowedDomains         string `json:"opt_allowed_domains"`
-	OptURLFilters             string `json:"opt_url_filters"`
-	OptAllowURLRevisit        bool   `json:"opt_allow_url_revisit"`
-	OptMaxBodySize            int    `json:"opt_max_body_size"`
-	OptIgnoreRobotsTxt        bool   `json:"opt_ignore_robots_txt"`
-	OptParseHTTPErrorResponse bool   `json:"opt_parse_http_error_response"`
+	OptUserAgent      string `json:"opt_user_agent"`
+	OptMaxDepth       int    `json:"opt_max_depth"`
+	OptAllowedDomains string `json:"opt_allowed_domains"`
+	OptURLFilters     string `json:"opt_url_filters"`
+	OptMaxBodySize    int    `json:"opt_max_body_size"`
 	// 频率限制
 	LimitEnable       bool      `json:"limit_enable"`
 	LimitDomainRegexp string    `json:"limit_domain_regexp"`
