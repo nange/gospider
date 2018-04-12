@@ -24,7 +24,7 @@ var rule = &spider.TaskRule{
 			return ctx.VisitForNext("https://tianqi.moji.com/aqi/china")
 		},
 		Nodes: map[int]*spider.Node{
-			0: &spider.Node{ // 第一步: 找到全国各省的链接
+			0: &spider.Node{ // 第一步: 找到全国各省城市区县的链接
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
@@ -36,31 +36,15 @@ var rule = &spider.TaskRule{
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
 					`.city a`: func(ctx *spider.Context, el *spider.HTMLElement) {
 						link := el.Attr("href")
-						province := el.Text
-						el.Request.PutReqContextValue("province", province) // 记录省份
-						el.Request.VisitForNextWithContext(link)
+						el.Request.Visit(link)
 					},
-				},
-			},
-			1: &spider.Node{ // 第二步: 找到省下面各城市区县链接
-				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Infof("Visiting %s", req.URL.String())
-				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
-					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
-					// 出错时重试三次
-					Retry(res.Request, 3)
-				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
 					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) {
 						link := el.Attr("href")
-						area := el.Text
-						el.Request.PutReqContextValue("area", area) // 记录城市区县
-						el.Request.VisitForNextWithContext(link)
+						el.Request.VisitForNext(link)
 					},
 				},
 			},
-			2: &spider.Node{ // 第三步: 爬取各城市区县页面上具体的空气质量数据
+			1: &spider.Node{ // 第二步: 爬取各城市区县页面上具体的空气质量数据
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
@@ -102,6 +86,11 @@ var rule = &spider.TaskRule{
 						body.Request.PutReqContextValue("co", co)
 						body.Request.PutReqContextValue("publish_time", publishTime)
 
+						province := body.ChildText(`.crumb li:nth-last-child(2)`)
+						area := body.ChildText(`.crumb li:nth-last-child(1)`)
+						body.Request.PutReqContextValue("province", province)
+						body.Request.PutReqContextValue("area", area)
+
 						internalID := body.ChildAttr(`#internal_id`, "value")
 						if internalID == "" {
 							return
@@ -111,7 +100,7 @@ var rule = &spider.TaskRule{
 					},
 				},
 			},
-			3: &spider.Node{ // 第四步: 由于tips字段是另外单独的请求,所以第四步单独获取tips(温馨提示)字段内容
+			2: &spider.Node{ // 第三步: 由于tips字段是另外单独的请求,所以第四步单独获取tips(温馨提示)字段内容
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
