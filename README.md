@@ -15,6 +15,7 @@ Alpha, 核心功能可用(任务创建、任务列表), 但功能还不完善。
 * 任务级别的可配置异步并发控制(请求延迟, 请求并发度)
 * 自动cookie和session处理
 * 支持各种导出类型(mysql,csv等)
+* 支持定时任务(兼容crontab格式)
 * 支持任务级别的可配置代理IP池(comming soon)
 * Robots.txt 支持
 
