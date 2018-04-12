@@ -20,7 +20,7 @@ Alpha, 核心功能可用(任务创建、任务列表), 但功能还不完善。
 * Robots.txt 支持
 
 ## 依赖
-MySQL(需要配置数据库相关环境变量, GOSPIDER_DB_HOST、GOSPIDER_DB_USER、GOSPIDER_DB_PASSWORD、GOSPIDER_DB_NAME)
+MySQL(需要配置数据库相关环境变量, GOSPIDER_DB_HOST、GOSPIDER_DB_PORT、GOSPIDER_DB_USER、GOSPIDER_DB_PASSWORD、GOSPIDER_DB_NAME)
 
 后续会考虑支持sqlite和更灵活的配置方式。
 
