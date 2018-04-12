@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nange/gospider/web/common"
+	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/web/model"
 	"github.com/sirupsen/logrus"
 )

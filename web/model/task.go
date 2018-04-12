@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/nange/gospider/web/common"
+	"github.com/nange/gospider/common"
 	"github.com/pkg/errors"
 )
 
@@ -17,6 +17,7 @@ type Task struct {
 	TaskDesc     string            `json:"task_desc" gorm:"column:task_desc;type:varchar(512);not null;default:''"`
 	Status       common.TaskStatus `json:"status" gorm:"column:status;type:tinyint;not null;default:'0'"`
 	Counts       int               `json:"counts" gorm:"column:counts;type:int;not null;default:'0'"`
+	CronSpec     string            `json:"cron_spec" gorm:"column:cron_spec;type:varchar(64);not null;default:''"`
 	// 参数配置部分
 	OptUserAgent      string `json:"opt_user_agent" gorm:"column:opt_user_agent;type:varchar(128);not null;default:''"`
 	OptMaxDepth       int    `json:"opt_max_depth" gorm:"column:opt_max_depth;type:int;not null;default:'0'"`

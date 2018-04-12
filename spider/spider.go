@@ -4,20 +4,21 @@ import (
 	"database/sql"
 
 	"github.com/gocolly/colly"
+	"github.com/nange/gospider/common"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 // TODO: Context添加KV功能，能够结束请求链功能
 // TODO: 思考出错, 中断后续爬虫的方法
-func Run(task *Task) (<-chan struct{}, error) {
+func Run(task *Task, retCh chan<- common.TaskStatus) error {
 	var db *sql.DB
 	var err error
 	if task.OutputConfig.Type == OutputTypeMySQL {
 		db, err = newDB(task.TaskConfig.OutputConfig.MySQLConf)
 		if err != nil {
 			logrus.Errorf("newDB failed! err:%#v", err)
-			return nil, err
+			return err
 		}
 	}
 
@@ -46,19 +47,19 @@ func Run(task *Task) (<-chan struct{}, error) {
 	headCtx := newContext(task, c, collectors[0])
 	if err := task.Rule.Head(headCtx); err != nil {
 		logrus.Errorf("exec rule head func err:%#v", err)
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
-	retCh := make(chan struct{}, 1)
 	go func() {
+		defer db.Close()
 		for i := 0; i < nodesLen; i++ {
 			collectors[i].Wait()
 		}
-		retCh <- struct{}{}
+		retCh <- common.TaskStatusCompleted
 		logrus.Infof("task:%s run completed...", task.Name)
 	}()
 
-	return retCh, nil
+	return nil
 }
 
 func addCallback(ctx *Context, node *Node) {

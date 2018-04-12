@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/spider"
-	"github.com/nange/gospider/web/common"
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -55,33 +55,44 @@ func CreateTask(c *gin.Context) {
 	}
 
 	spiderTask := spider.NewTask(*rule, *config)
-	retCh, err := spider.Run(spiderTask)
+	retCh := make(chan common.TaskStatus, 1)
+	err = spider.Run(spiderTask, retCh)
 	if err != nil {
 		logrus.Errorf("spider run task failed! err:%+v", err)
 		c.Data(http.StatusInternalServerError, "", nil)
 		return
 	}
 
-	go func() {
-		t := time.NewTimer(time.Hour)
-		defer t.Stop()
-		select {
-		case <-retCh:
-			task.Status = common.TaskStatusCompleted
-			task.Counts += 1
-			if err := task.Update(db, model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
-				logrus.Errorf("update task status failed! err:%+v", errors.WithStack(err))
-				return
-			}
-		case <-t.C:
-			task.Status = common.TaskStatusRunningTimeout
-			task.Counts += 1
-			if err := task.Update(db, model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
-				logrus.Errorf("update task status failed! err:%+v", errors.WithStack(err))
-				return
+	if task.CronSpec != "" {
+		logrus.Infof("starting cron task:%s", task.CronSpec)
+		ct, err := spider.NewCronTask(spiderTask, retCh)
+		if err != nil {
+			logrus.Errorf("new cron task failed! err:%+v", err)
+		} else {
+			if err := ct.Start(); err != nil {
+				logrus.Errorf("start cron task failed! err:%+v", err)
 			}
 		}
 
+	}
+
+	// TODO: 定时任务停止功能
+	go func() {
+		for {
+			select {
+			case status := <-retCh:
+				task.Status = status
+				if status == common.TaskStatusCompleted {
+					task.Counts += 1
+				}
+
+				if err := task.Update(db, model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
+					logrus.Errorf("update task status failed! err:%+v", errors.WithStack(err))
+					return
+				}
+
+			}
+		}
 	}()
 
 	c.JSON(http.StatusOK, &CreateTaskResp{
@@ -113,6 +124,7 @@ func getTaskRuleAndConfig(req *CreateTaskReq) (*spider.TaskRule, *spider.TaskCon
 	}
 
 	config := &spider.TaskConfig{
+		CronSpec: req.CronSpec,
 		Option: spider.Option{
 			UserAgent:              req.OptUserAgent,
 			MaxDepth:               req.OptMaxDepth,

@@ -18,6 +18,7 @@ const (
 
 //TODO: 定时任务配置
 type TaskConfig struct {
+	CronSpec     string
 	Option       Option
 	Limit        Limit
 	OutputConfig OutputConfig

@@ -24,6 +24,9 @@
               <el-input type="textarea" placeholder="请输入内容" :rows="2" v-model="form.task_desc">
               </el-input>
             </el-form-item>
+            <el-form-item label="定时执行:">
+              <el-input v-model="form.cron_spec" placeholder="兼容crontab语法"></el-input>
+            </el-form-item>
             <el-form-item label="User Agent:">
               <el-input v-model="form.opt_user_agent" placeholder="User Agent"></el-input>
             </el-form-item>
@@ -74,7 +77,7 @@
             </el-form-item>
           </el-form>
         </el-col>
-        
+
       </el-row>
     </div>
   </div>
