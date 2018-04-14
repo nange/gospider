@@ -5,8 +5,10 @@ golang实现的爬虫框架，使用者只需关心页面规则，提供web管�
 ## 当前状态
 Alpha, 核心功能可用(任务创建、任务列表), 但功能还不完善。接口随时可能改变。
 
-限制: 目前只能单机运行, 不能实现真正的分布式运行。 但大部分情况下, 如果你不是需要同时爬取成百上千个站点, 其实并不需要真正的分布式, 
+限制: 
+* 目前只能单机运行, 不能实现真正的分布式运行。 但大部分情况下, 如果你不是需要同时爬取成百上千个站点, 其实并不需要真正的分布式, 
 只需要一个代理IP池即可。
+* 不能用于大文件下载
 
 
 ## 特性
@@ -20,9 +22,11 @@ Alpha, 核心功能可用(任务创建、任务列表), 但功能还不完善。
 * Robots.txt 支持
 
 ## 依赖
-MySQL(需要配置数据库相关环境变量, GOSPIDER_DB_HOST、GOSPIDER_DB_PORT、GOSPIDER_DB_USER、GOSPIDER_DB_PASSWORD、GOSPIDER_DB_NAME)
+MySQL
 
-后续会考虑支持sqlite和更灵活的配置方式。
+需要配置数据库相关环境变量: GOSPIDER_DB_HOST、GOSPIDER_DB_PORT、GOSPIDER_DB_USER、GOSPIDER_DB_PASSWORD、GOSPIDER_DB_NAME、GOSPIDER_WEB_IP、GOSPIDER_WEB_PORT
+
+后续会考虑支持sqlite
 
 ## 使用方式
 `_example` 目录提供了使用实例, rule目录里面包含了爬取规则, 编译成功后直接运行。在浏览器打开: http://localhost:8080/admin

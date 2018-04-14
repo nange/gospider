@@ -45,10 +45,9 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	db := common.GetDB()
 	task := req.Task
 	task.Status = common.TaskStatusRunning
-	if err := task.Create(db); err != nil {
+	if err := task.Create(model.GetDB()); err != nil {
 		logrus.Errorf("create task failed! err:%+v", err)
 		c.Data(http.StatusInternalServerError, "", nil)
 		return
@@ -86,7 +85,7 @@ func CreateTask(c *gin.Context) {
 					task.Counts += 1
 				}
 
-				if err := task.Update(db, model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
+				if err := task.Update(model.GetDB(), model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
 					logrus.Errorf("update task status failed! err:%+v", errors.WithStack(err))
 					return
 				}

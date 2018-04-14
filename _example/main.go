@@ -9,9 +9,10 @@ import (
 )
 
 func init() {
-	logrus.SetFormatter(&logrus.TextFormatter{DisableTimestamp: false})
+	logrus.SetFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05.000"})
 }
 
 func main() {
-	gospider.Run()
+	gs := gospider.New()
+	logrus.Fatal(gs.Run())
 }

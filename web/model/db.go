@@ -9,6 +9,16 @@ import (
 
 var modelList []Model
 
+var db *gorm.DB
+
+func SetDB(gdb *gorm.DB) {
+	db = gdb
+}
+
+func GetDB() *gorm.DB {
+	return db
+}
+
 type Model interface {
 	TableName() string
 }
@@ -26,7 +36,7 @@ func Register(model Model) {
 	modelList = append(modelList, model)
 }
 
-func AutoMigrate(db *gorm.DB) (err error) {
+func AutoMigrate() error {
 	for _, model := range modelList {
 		if err := db.Debug().AutoMigrate(model).Error; err != nil {
 			return errors.Wrap(err, "db auto migrate failed")
