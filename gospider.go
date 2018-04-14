@@ -114,6 +114,7 @@ func (gs *GoSpider) init() {
 
 func (gs *GoSpider) print() {
 	log.Println(Name, Version)
+	log.Printf("gospider backend conf:%+v\n", gs.mysql)
 }
 
 var envMap = map[string]func(*GoSpider, string){
