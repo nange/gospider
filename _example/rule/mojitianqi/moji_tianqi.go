@@ -18,7 +18,7 @@ var rule = &spider.TaskRule{
 	Name:         "墨迹天气全国空气质量",
 	Description:  "抓取墨迹天气全国各个城市区县空气质量数据",
 	Namespace:    "moji_tianqi",
-	OutputFields: []string{"province", "area", "aqi", "pm10", "pm25", "no2", "so2", "o3", "co", "tip", "publish_time"},
+	OutputFields: []string{"province", "area", "aqi", "quality_grade", "pm10", "pm25", "no2", "so2", "o3", "co", "tip", "publish_time"},
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error { // 定义入口
 			return ctx.VisitForNext("https://tianqi.moji.com/aqi/china")
@@ -74,10 +74,12 @@ var rule = &spider.TaskRule{
 							}
 						})
 						aqi := body.ChildText("#aqi_value")
+						qualityGrade := body.ChildText(`#aqi_desc`)
 						publishTime = body.ChildText(".aqi_info_time b")
 						publishTime = strings.TrimLeft(publishTime, "发布日期：")
 
 						body.Request.PutReqContextValue("aqi", aqi)
+						body.Request.PutReqContextValue("quality_grade", qualityGrade)
 						body.Request.PutReqContextValue("pm10", pm10)
 						body.Request.PutReqContextValue("pm25", pm25)
 						body.Request.PutReqContextValue("no2", no2)
@@ -121,6 +123,7 @@ var rule = &spider.TaskRule{
 					province := res.Request.GetReqContextValue("province")
 					area := res.Request.GetReqContextValue("area")
 					aqi := res.Request.GetReqContextValue("aqi")
+					qualityGrade := res.Request.GetReqContextValue("quality_grade")
 					pm10 := res.Request.GetReqContextValue("pm10")
 					pm25 := res.Request.GetReqContextValue("pm25")
 					no2 := res.Request.GetReqContextValue("no2")
@@ -133,14 +136,15 @@ var rule = &spider.TaskRule{
 						0:  province,
 						1:  area,
 						2:  aqi,
-						3:  pm10,
-						4:  pm25,
-						5:  no2,
-						6:  so2,
-						7:  o3,
-						8:  co,
-						9:  tips,
-						10: publishTime,
+						3:  qualityGrade,
+						4:  pm10,
+						5:  pm25,
+						6:  no2,
+						7:  so2,
+						8:  o3,
+						9:  co,
+						10: tips,
+						11: publishTime,
 					})
 				},
 			},
