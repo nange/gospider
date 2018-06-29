@@ -1,10 +1,12 @@
 //导入模块
 import * as api_table from './table'
 import * as api_user from './user'
+import * as api_sysdb from './sysdb'
 
 const apiObj = {
   api_table,
-  api_user
+  api_user,
+  api_sysdb
 }
 
 const install = function (Vue) {

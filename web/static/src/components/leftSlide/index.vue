@@ -65,7 +65,8 @@
           icon: "fa-table",
           child: [
             {
-              title: "系统配置"
+              title: "导出数据库管理",
+              path: "/sysmgt/database"
             }
           ]
         }]

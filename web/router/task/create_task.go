@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/spider"
+	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -36,7 +37,7 @@ func CreateTask(c *gin.Context) {
 		c.Data(http.StatusBadRequest, "", nil)
 		return
 	}
-	logrus.Infof("task:%#v", req)
+	logrus.Infof("req:%+v", req)
 
 	rule, config, err := getTaskRuleAndConfig(&req)
 	if err != nil {
@@ -47,7 +48,7 @@ func CreateTask(c *gin.Context) {
 
 	task := req.Task
 	task.Status = common.TaskStatusRunning
-	if err := task.Create(model.GetDB()); err != nil {
+	if err := task.Create(core.GetDB()); err != nil {
 		logrus.Errorf("create task failed! err:%+v", err)
 		c.Data(http.StatusInternalServerError, "", nil)
 		return
@@ -85,7 +86,7 @@ func CreateTask(c *gin.Context) {
 					task.Counts += 1
 				}
 
-				if err := task.Update(model.GetDB(), model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
+				if err := task.Update(core.GetDB(), model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
 					logrus.Errorf("update task status failed! err:%+v", errors.WithStack(err))
 					return
 				}

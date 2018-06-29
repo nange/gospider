@@ -43,12 +43,4 @@ export function save(data) {
     data
   })
 }
-//批量删除
-export function batch_del(data) {
-  return fetch({
-    url: port_table.batch_del,
-    method: 'post',
-    data
-  })
-}
 

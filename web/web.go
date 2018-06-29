@@ -5,8 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/nange/gospider/web/model"
+	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/router"
+	"github.com/nange/gospider/web/service"
 	"github.com/pkg/errors"
 )
 
@@ -18,13 +19,17 @@ type Server struct {
 
 func (s *Server) SetDB(gdb *gorm.DB) {
 	s.db = gdb
+	s.db.LogMode(true)
 }
 
 func (s *Server) Run() error {
-	model.SetDB(s.db)
-	if err := model.AutoMigrate(); err != nil {
+	core.SetDB(s.db)
+	if err := core.AutoMigrate(); err != nil {
 		return errors.Wrap(err, "model auto migrate failed")
 	}
+
+	// 启动服务时，先检查task相关状态
+	go service.CheckTask()
 
 	engine := gin.Default()
 	router.Route(engine)

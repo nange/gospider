@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/nange/gospider/common"
+	"github.com/nange/gospider/web/core"
 	"github.com/pkg/errors"
 )
 
@@ -39,27 +40,27 @@ func (o *Task) TableName() string {
 }
 
 func init() {
-	Register(&Task{})
+	core.Register(&Task{})
 }
 
 func GetTaskList(size, offset int) ([]Task, int, error) {
+	db := core.GetDB()
 	queryset := NewTaskQuerySet(db)
 	count, err := queryset.Count()
 	if err != nil {
 		return nil, 0, errors.WithStack(err)
 	}
 
-	if size > 0 {
-		db = db.Limit(size)
-	}
-	if offset > 0 {
-		db = db.Offset(offset)
-	}
-	queryset = NewTaskQuerySet(db)
+	queryset = NewTaskQuerySet(db.Limit(size).Offset(offset))
 	ret := make([]Task, 0)
 	if err := queryset.OrderDescByCreatedAt().All(&ret); err != nil {
 		return nil, 0, errors.WithStack(err)
 	}
 
 	return ret, count, nil
+}
+
+func UpdateTaskStatus(status common.TaskStatus) error {
+	updater := NewTaskUpdater(core.GetDB())
+	return errors.WithStack(updater.SetStatus(common.TaskStatusUnexceptedExited).Update())
 }

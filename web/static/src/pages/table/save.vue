@@ -2,7 +2,7 @@
   <div class="panel">
     <panel-title :title="$route.meta.title"></panel-title>
     <div class="panel-body"
-         v-loading="load_data"
+         v-loading="loadData"
          element-loading-text="拼命加载中">
       <el-row>
         <el-col :span="12">
@@ -93,7 +93,7 @@
         },
         ruleOpts: [],
         route_id: this.$route.params.id,
-        load_data: false,
+        loadData: false,
         on_submit_loading: false,
         submit_disable: false,
         rules: {
@@ -110,16 +110,16 @@
     methods: {
       //获取数据
       get_form_data() {
-        this.load_data = true
+        this.loadData = true
         this.$fetch.api_table.get({
           id: this.route_id
         })
           .then(({data}) => {
             this.form = data
-            this.load_data = false
+            this.loadData = false
           })
           .catch(() => {
-            this.load_data = false
+            this.loadData = false
           })
       },
       // 获取所有rules

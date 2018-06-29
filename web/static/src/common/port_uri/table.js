@@ -8,3 +8,5 @@ export const del = "/api/tasks/:id"
 export const save = "/api/tasks"
 //获取rules
 export const getRules = "/api/rules"
+//获取导出数据库
+export const sysdbs = "/api/sysdbs"

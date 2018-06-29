@@ -18,6 +18,9 @@ import loginComponent from 'pages/user/login'
 import baseTableComponent from 'pages/table/base'
 //save table
 import saveTableComponent from 'pages/table/save'
+// sysmgt database
+import sysmgtDatabase from 'pages/sysmgt/database'
+import sysmgtDBAdd from 'pages/sysmgt/sysdbadd'
 
 
 Vue.use(VueRouter)
@@ -69,6 +72,22 @@ const routes = [{
     component: saveTableComponent,
     meta: {
       title: "添加任务",
+      auth: true
+    }
+  }, {
+    path: '/sysmgt/database',
+    name: 'sysDBMgt',
+    component: sysmgtDatabase,
+    meta: {
+      title: "导出数据库管理",
+      auth: true
+    }
+  }, {
+    path: '/sysmgt/sysdb/add',
+    name: 'sysDBAdd',
+    component: sysmgtDBAdd,
+    meta: {
+      title: "添加导出数据库",
       auth: true
     }
   }]

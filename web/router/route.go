@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr"
 	"github.com/nange/gospider/web/router/rule"
+	"github.com/nange/gospider/web/router/sysdb"
 	"github.com/nange/gospider/web/router/task"
 )
 
@@ -14,6 +15,9 @@ func Route(engine *gin.Engine) {
 		api.POST("/tasks", task.CreateTask)
 
 		api.GET("/rules", rule.GetRuleList)
+
+		api.GET("/sysdbs", sysdb.GetSysDBs)
+		api.POST("/sysdbs", sysdb.CreateSysDB)
 	}
 
 	box := packr.NewBox("../static/dist")
