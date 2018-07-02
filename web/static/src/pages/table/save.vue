@@ -43,17 +43,18 @@
               <el-input-number v-model="form.opt_max_body_size" :controls="false"></el-input-number>
             </el-form-item>
             <el-form-item label="导出类型:" prop="output_type">
-              <el-select v-model="form.output_type" placeholder="请选择">
+              <el-select v-model="form.output_type" placeholder="请选择" @change="outputTypeChange">
                 <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
                 <el-option key="csv" label="CSV" value="csv"></el-option>
               </el-select>
-              <el-row>
-                <el-col :span="8"> <el-input v-model="form.output_mysql_host" placeholder="host"></el-input> </el-col>
-                <el-col :span="8"> <el-input-number v-model="form.output_mysql_port" :controls="false"></el-input-number> </el-col>
-                <el-col :span="8"> <el-input v-model="form.output_mysql_user" placeholder="user"></el-input> </el-col>
-                <el-col :span="8"> <el-input v-model="form.output_mysql_password" placeholder="password"></el-input> </el-col>
-                <el-col :span="8"> <el-input v-model="form.output_mysql_dbname" placeholder="dbname"></el-input> </el-col>
-              </el-row>
+              <el-select v-model="form.sysdb_id" placeholder="请选择" v-if="showSysDB">
+                <el-option
+                  v-for="item in sysDBs"
+                  :key="item.id"
+                  :label="item.show_name"
+                  :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
 
             <el-form-item label="频率限制:">
@@ -89,10 +90,14 @@
     data(){
       return {
         form: {
-          opt_user_agent: navigator.userAgent
+          opt_user_agent: navigator.userAgent,
+          limit_enable: true,
+          limit_parallelism: 1
         },
+        showSysDB: false,
         ruleOpts: [],
-        route_id: this.$route.params.id,
+        sysDBs: [],
+        routeID: this.$route.params.id,
         loadData: false,
         on_submit_loading: false,
         submit_disable: false,
@@ -105,14 +110,15 @@
     },
     created(){
       this.getRules()
-      this.route_id && this.get_form_data()
+      this.routeID && this.getTaskRuleList()
+      this.getSysDBList()
     },
     methods: {
       //获取数据
-      get_form_data() {
+      getTaskRuleList() {
         this.loadData = true
         this.$fetch.api_table.get({
-          id: this.route_id
+          id: this.routeID
         })
           .then(({data}) => {
             this.form = data
@@ -122,12 +128,36 @@
             this.loadData = false
           })
       },
+      // 获取导出数据库列表
+      getSysDBList() {
+        this.loadData = true
+        this.$fetch.api_sysdb.list({
+          offset: 0,
+          size: -1
+        }).then((ret) => {
+          console.log(ret.data)
+          this.sysDBs = ret.data
+        }).catch(() => {
+          console.log("load sysdb list failed!")
+        })
+
+        this.loadData = false
+
+      },
       // 获取所有rules
       getRules() {
         this.$fetch.api_table.getRules()
           .then((data) => {
             this.ruleOpts = data.data
           })
+      },
+      // 改变output type
+      outputTypeChange(output) {
+        if (output === 'mysql') {
+          this.showSysDB = true
+        } else {
+          this.showSysDB = false
+        }
       },
       //提交
       on_submit_form() {

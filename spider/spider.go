@@ -14,7 +14,7 @@ import (
 func Run(task *Task, retCh chan<- common.TaskStatus) error {
 	var db *sql.DB
 	var err error
-	if task.OutputConfig.Type == OutputTypeMySQL {
+	if task.OutputConfig.Type == common.OutputTypeMySQL {
 		db, err = newDB(task.TaskConfig.OutputConfig.MySQLConf)
 		if err != nil {
 			logrus.Errorf("newDB failed! err:%#v", err)
@@ -36,7 +36,7 @@ func Run(task *Task, retCh chan<- common.TaskStatus) error {
 		} else {
 			ctx = newContext(task, collectors[i], nil)
 		}
-		if task.OutputConfig.Type == OutputTypeMySQL {
+		if task.OutputConfig.Type == common.OutputTypeMySQL {
 			ctx.setOutputDB(db)
 		}
 

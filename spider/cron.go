@@ -33,7 +33,6 @@ func NewCronTask(task *Task, retCh chan<- common.TaskStatus) (*CronTask, error) 
 }
 
 func (ct *CronTask) Run() {
-	logrus.Infof("test run....")
 	err := Run(ct.task, ct.retCh)
 	if err != nil {
 		logrus.Errorf("cron task run err:%+v", err)

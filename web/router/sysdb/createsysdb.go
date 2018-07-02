@@ -28,6 +28,16 @@ func CreateSysDB(c *gin.Context) {
 	}
 	logrus.Infof("req:%+v", req)
 
+	if req.Host == "" {
+		req.Host = "127.0.0.1"
+	}
+	if req.Port == 0 {
+		req.Port = 3306
+	}
+	if req.User == "" {
+		req.User = "root"
+	}
+
 	db := core.GetDB()
 	if err := req.Create(db); err != nil {
 		logrus.Errorf("create sysdb err: %+v", err)

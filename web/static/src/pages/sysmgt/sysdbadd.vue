@@ -14,13 +14,13 @@
               <el-input v-model="form.host" placeholder="请输入内容, 默认127.0.0.1"></el-input>
             </el-form-item>
             <el-form-item label="端口:" prop="port">
-              <el-input-number v-model="form.port" default="3306" :controls="false"></el-input-number>
+              <el-input-number v-model="form.port" :controls="false"></el-input-number>
             </el-form-item>
             <el-form-item label="用户名:" prop="user">
               <el-input v-model="form.user" placeholder="请输入内容, 默认root"></el-input>
             </el-form-item>
             <el-form-item label="密码:" prop="password">
-              <el-input type="password" v-model="form.password" placeholder="请输入内容, 默认root"></el-input>
+              <el-input type="password" v-model="form.password" placeholder="请输入内容"></el-input>
             </el-form-item>
             <el-form-item label="数据库名:" prop="db_name">
               <el-input v-model="form.db_name" placeholder="请输入内容"></el-input>
@@ -41,11 +41,16 @@
   export default{
     data(){
       return {
-        form: {},
+        form: {
+          port: 3306
+        },
         loadData: false,
         submitLoading: false,
         submitDisable: false,
-        rules: {}
+        rules: {
+          show_name: [{required: true, message: '显示名不能为空', trigger: 'blur'}],
+          db_name: [{required: true, message: '数据库名不能为空', trigger: 'blur'}]
+        }
       }
     },
     methods: {

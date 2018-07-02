@@ -5,6 +5,7 @@ import (
 
 	qb "github.com/didi/gendry/builder"
 	"github.com/gocolly/colly"
+	"github.com/nange/gospider/common"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -61,7 +62,7 @@ func (ctx *Context) Output(row map[int]interface{}) error {
 	}
 	logrus.Infof("output row:%#v", row)
 
-	if ctx.task.OutputConfig.Type == OutputTypeMySQL {
+	if ctx.task.OutputConfig.Type == common.OutputTypeMySQL {
 		if err := ctx.outputToDB(row); err != nil {
 			return err
 		}

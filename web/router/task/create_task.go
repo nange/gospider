@@ -3,6 +3,7 @@ package task
 import (
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,12 +18,7 @@ import (
 
 type CreateTaskReq struct {
 	model.Task
-	OutputType          string `json:"output_type"`
-	OutputMysqlHost     string `json:"output_mysql_host"`
-	OutputMysqlPort     int    `json:"output_mysql_port"`
-	OutputMysqlUser     string `json:"output_mysql_user"`
-	OutputMysqlPassword string `json:"output_mysql_password"`
-	OutputMysqlDBname   string `json:"output_mysql_dbname"`
+	OutputSysDBID string `json:"sysdb_id"`
 }
 
 type CreateTaskResp struct {
@@ -38,6 +34,13 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 	logrus.Infof("req:%+v", req)
+
+	intID, err := strconv.Atoi(req.OutputSysDBID)
+	if err != nil {
+		c.Data(http.StatusBadRequest, "", nil)
+		return
+	}
+	req.Task.OutputSysDBID = uint64(intID)
 
 	rule, config, err := getTaskRuleAndConfig(&req)
 	if err != nil {
@@ -123,6 +126,13 @@ func getTaskRuleAndConfig(req *CreateTaskReq) (*spider.TaskRule, *spider.TaskCon
 		}
 	}
 
+	sdb := model.SysDB{}
+	query := model.NewSysDBQuerySet(core.GetDB())
+	if err := query.IDEq(req.Task.OutputSysDBID).One(&sdb); err != nil {
+		logrus.Errorf("query sysdb err: %+v, id:%d", err, req.OutputSysDBID)
+		return nil, nil, errors.WithStack(err)
+	}
+
 	config := &spider.TaskConfig{
 		CronSpec: req.CronSpec,
 		Option: spider.Option{
@@ -146,11 +156,11 @@ func getTaskRuleAndConfig(req *CreateTaskReq) (*spider.TaskRule, *spider.TaskCon
 		OutputConfig: spider.OutputConfig{
 			Type: req.OutputType,
 			MySQLConf: spider.MySQLConf{
-				Host:     req.OutputMysqlHost,
-				Port:     req.OutputMysqlPort,
-				User:     req.OutputMysqlUser,
-				Password: req.OutputMysqlPassword,
-				DBName:   req.OutputMysqlDBname,
+				Host:     sdb.Host,
+				Port:     sdb.Port,
+				User:     sdb.User,
+				Password: sdb.Password,
+				DBName:   sdb.DBName,
 			},
 		},
 	}
