@@ -19,6 +19,7 @@ type MySQLConf struct {
 }
 
 func NewGormDB(conf MySQLConf) (*gorm.DB, error) {
+
 	////检测数据库是否存在，不存在创建
 	sqlArgs := fmt.Sprintf("%s:%s@(%s:%d)/?charset=utf8&parseTime=True&loc=Local",
 		conf.User, conf.Password, conf.Host, conf.Port)
@@ -26,7 +27,7 @@ func NewGormDB(conf MySQLConf) (*gorm.DB, error) {
 	if(sqlErr != nil) {
 		return nil, errors.WithStack(sqlErr)
 	}
-	_,sqlErr = sqlDb.Exec("CREATE DATABASE IF NOT EXISTS "+conf.DBName)
+	_,sqlErr = sqlDb.Exec("CREATE DATABASE IF NOT EXISTS " + conf.DBName)
     if sqlErr != nil {
 		return nil, errors.WithStack(sqlErr)
     }
