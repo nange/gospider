@@ -31,7 +31,7 @@ func NewGormDB(conf MySQLConf) (*gorm.DB, error) {
     if sqlErr != nil {
 		return nil, errors.WithStack(sqlErr)
     }
-
+    sqlDb.Close()
 
 	args := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName)
