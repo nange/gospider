@@ -108,6 +108,7 @@ func (gs *GoSpider) init() {
 	gs.mysql.User = "root"
 	gs.mysql.MaxIdleConns = 3
 	gs.mysql.MaxOpenConns = 10
+	gs.mysql.DBName = "gospider"
 
 	gs.web = &web.Server{Port: 8080}
 }
