@@ -92,7 +92,7 @@
     "debug",
     "storage"
   ]
-  revision = "a22e0d396c7abb406fb624397ee3d5f2e55134c0"
+  revision = "dc3a35f352c1baffa8bce20d9e9cd4ece8413ed0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
