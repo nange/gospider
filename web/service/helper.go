@@ -59,7 +59,6 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 			RandomDelay: time.Duration(task.LimitRandomDelay) * time.Millisecond,
 			Parallelism: task.LimitParallelism,
 		},
-		ProxyURLs: strings.Split(task.ProxyURLs, ","),
 		OutputConfig: spider.OutputConfig{
 			Type: task.OutputType,
 			MySQLConf: spider.MySQLConf{
@@ -70,6 +69,9 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 				DBName:   sdb.DBName,
 			},
 		},
+	}
+	if urls := strings.TrimSpace(task.ProxyURLs); len(urls) > 0 {
+		config.ProxyURLs = strings.Split(urls, ",")
 	}
 
 	return spider.NewTask(task.ID, *rule, config), nil
