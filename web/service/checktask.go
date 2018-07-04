@@ -12,6 +12,7 @@ import (
 // 1. 将TaskStatusRunning标记为TaskStatusUnexceptedExited
 // 2. 将TaskStatusCompleted并且是定时任务的状态重新启动
 func CheckTask() {
+	logrus.Infof("starting check task goroutine")
 	qs := model.NewTaskQuerySet(core.GetDB())
 
 	tasks := make([]model.Task, 0)
@@ -45,9 +46,19 @@ func CheckTask() {
 
 }
 
-// TODO:
 func RestartTask(task model.Task) error {
 	logrus.Infof("restarting task, taskID:%v", task.ID)
+
+	ct, err := NewCronTask(&task, GetMTSChan())
+	if err != nil {
+		logrus.Errorf("new cron task failed! err:%+v", err)
+		return err
+	}
+
+	if err := ct.Start(); err != nil {
+		logrus.Errorf("start cron task failed! err:%+v", err)
+		return err
+	}
 
 	return nil
 }

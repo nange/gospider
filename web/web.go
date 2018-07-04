@@ -30,6 +30,8 @@ func (s *Server) Run() error {
 
 	// 启动服务时，先检查task相关状态
 	go service.CheckTask()
+	// 管理task状态(如task运行完成之后需要将状态标为已完成)
+	go service.ManageTaskStatus()
 
 	engine := gin.Default()
 	router.Route(engine)

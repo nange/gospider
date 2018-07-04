@@ -1,13 +1,15 @@
 package spider
 
 type Task struct {
+	ID uint64
 	TaskRule
 	TaskConfig
 }
 
-func NewTask(rule TaskRule, config TaskConfig) *Task {
+func NewTask(id uint64, rule TaskRule, config TaskConfig) *Task {
 	return &Task{
-		TaskRule: rule,
+		ID:         id,
+		TaskRule:   rule,
 		TaskConfig: config,
 	}
 }
