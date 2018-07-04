@@ -59,6 +59,7 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 			RandomDelay: time.Duration(task.LimitRandomDelay) * time.Millisecond,
 			Parallelism: task.LimitParallelism,
 		},
+		ProxyURLs: strings.Split(task.ProxyURLs, ","),
 		OutputConfig: spider.OutputConfig{
 			Type: task.OutputType,
 			MySQLConf: spider.MySQLConf{

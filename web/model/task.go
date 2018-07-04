@@ -33,6 +33,7 @@ type Task struct {
 	LimitDelay        int       `json:"limit_delay" gorm:"column:limit_delay;type:int;not null;default:'0'"`
 	LimitRandomDelay  int       `json:"limit_random_delay" gorm:"column:limit_random_delay;type:int;not null;default:'0'"`
 	LimitParallelism  int       `json:"limit_parallelism" gorm:"column:limit_parallelism;type:int;not null;default:'0'"`
+	ProxyURLs         string    `json:"proxy_urls" gorm:"column:proxy_urls;type:varchar(2048);not null;default:''"`
 	CreatedAt         time.Time `json:"created_at" gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;index:idx_created_at"`
 	UpdatedAt         time.Time `json:"updated_at" gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;index:idx_updated_at"`
 }
