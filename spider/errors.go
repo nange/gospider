@@ -19,7 +19,3 @@ var (
 var (
 	ErrOutputFieldsNotMatchOutputRow = errors.New("output fields not match out put row")
 )
-
-var (
-	ErrCronTaskDuplicated = errors.New("cron task is Duplicated")
-)

@@ -11,7 +11,7 @@ import (
 
 // TODO: Context添加KV功能，能够结束请求链功能
 // TODO: 思考出错, 中断后续爬虫的方法
-func Run(task *Task, retCh chan<- common.TaskStatus) error {
+func Run(task *Task, retCh chan<- common.MTS) error {
 	var db *sql.DB
 	var err error
 	if task.OutputConfig.Type == common.OutputTypeMySQL {
@@ -55,8 +55,9 @@ func Run(task *Task, retCh chan<- common.TaskStatus) error {
 		defer db.Close()
 		for i := 0; i < nodesLen; i++ {
 			collectors[i].Wait()
+			logrus.Infof("task:%s %d step completed...", task.Name, i+1)
 		}
-		retCh <- common.TaskStatusCompleted
+		retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusCompleted}
 		logrus.Infof("task:%s run completed...", task.Name)
 	}()
 

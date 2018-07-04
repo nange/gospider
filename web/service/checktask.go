@@ -12,6 +12,7 @@ import (
 // 1. 将TaskStatusRunning标记为TaskStatusUnexceptedExited
 // 2. 将TaskStatusCompleted并且是定时任务的状态重新启动
 func CheckTask() {
+	logrus.Infof("starting check task goroutine")
 	qs := model.NewTaskQuerySet(core.GetDB())
 
 	tasks := make([]model.Task, 0)
