@@ -27,8 +27,10 @@ func CheckTask() {
 	for _, task := range tasks {
 		if task.Status == common.TaskStatusRunning {
 			logrus.Infof("set task status to TaskStatusUnexceptedExited, taskID:%v", task.ID)
-			if err := model.UpdateTaskStatus(common.TaskStatusUnexceptedExited); err != nil {
-				logrus.Errorf("update task status err: %+v")
+			err := model.NewTaskQuerySet(core.GetDB()).IDEq(task.ID).
+				GetUpdater().SetStatus(common.TaskStatusUnexceptedExited).Update()
+			if err != nil {
+				logrus.Errorf("update task status err: %+v", err)
 				continue
 			}
 		}

@@ -22,15 +22,17 @@ func Run(task *Task, retCh chan<- common.TaskStatus) error {
 		}
 	}
 
+	c := newCollector(task.TaskConfig)
+
 	nodesLen := len(task.Rule.Nodes)
 	collectors := make([]*colly.Collector, 0, nodesLen)
 	for i := 0; i < len(task.Rule.Nodes); i++ {
-		c := newCollector(task.TaskConfig)
-		collectors = append(collectors, c)
+		nextC := c.Clone()
+		collectors = append(collectors, nextC)
 	}
 
-	var ctx *Context
 	for i := 0; i < nodesLen; i++ {
+		var ctx *Context
 		if i != nodesLen-1 {
 			ctx = newContext(task, collectors[i], collectors[i+1])
 		} else {
@@ -43,7 +45,6 @@ func Run(task *Task, retCh chan<- common.TaskStatus) error {
 		addCallback(ctx, task.Rule.Nodes[i])
 	}
 
-	c := newCollector(task.TaskConfig)
 	headCtx := newContext(task, c, collectors[0])
 	if err := task.Rule.Head(headCtx); err != nil {
 		logrus.Errorf("exec rule head func err:%#v", err)

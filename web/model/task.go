@@ -61,8 +61,3 @@ func GetTaskList(size, offset int) ([]Task, int, error) {
 
 	return ret, count, nil
 }
-
-func UpdateTaskStatus(status common.TaskStatus) error {
-	updater := NewTaskUpdater(core.GetDB())
-	return errors.WithStack(updater.SetStatus(common.TaskStatusUnexceptedExited).Update())
-}
