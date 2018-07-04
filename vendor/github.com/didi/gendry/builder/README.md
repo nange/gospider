@@ -14,7 +14,7 @@ package main
 import (
     "database/sql"
     _ "github.com/go-sql-driver/mysql"
-    qb "github.com/didichuxing/gendry/builder"
+    qb "github.com/didi/gendry/builder"
 )
 
 func main() {
@@ -84,7 +84,7 @@ where := map[string]interface{}{
 	"foo <>": "aha",
 	"bar <=": 45,
 	"sex in": []interface{}{"girl", "boy"},
-    "name like": "%James",
+	"name like": "%James",
 }
 ```
 
@@ -100,13 +100,15 @@ where := map[string]interface{}{
 	"age >": 100,
 	"_orderby": "fieldName asc",
 	"_groupby": "fieldName",
-    "_having": map[string]interface{}{"foo":"bar",},
+	"_having": map[string]interface{}{"foo":"bar",},
 	"_limit": []uint{begin,end},
 }
 ```
 Note:
 * _having will be ignored if _groupby isn't setted
-* value of _limit must be []uint{begin, end}
+* value of _limit could be:
+    * `"_limit": []uint{a,b}` => `LIMIT a,b`
+    * `"_limit": []uint{a}` => `LIMIT 0,a`
 
 #### Aggregate
 

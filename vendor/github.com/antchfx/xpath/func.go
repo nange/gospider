@@ -80,9 +80,11 @@ func sumFunc(q query, t iterator) interface{} {
 	case float64:
 		sum = typ
 	case string:
-		if v, err := strconv.ParseFloat(typ, 64); err != nil {
-			sum = v
+		v, err := strconv.ParseFloat(typ, 64)
+		if err != nil {
+			panic(errors.New("sum() function argument type must be a node-set or number"))
 		}
+		sum = v
 	}
 	return sum
 }
@@ -116,6 +118,33 @@ func startwithFunc(arg1, arg2 query) func(query, iterator) interface{} {
 			panic(errors.New("starts-with() function argument type must be string"))
 		}
 		return strings.HasPrefix(m, n)
+	}
+}
+
+// endwithFunc is a XPath functions ends-with(string, string).
+func endwithFunc(arg1, arg2 query) func(query, iterator) interface{} {
+	return func(q query, t iterator) interface{} {
+		var (
+			m, n string
+			ok   bool
+		)
+		switch typ := arg1.Evaluate(t).(type) {
+		case string:
+			m = typ
+		case query:
+			node := typ.Select(t)
+			if node == nil {
+				return false
+			}
+			m = node.Value()
+		default:
+			panic(errors.New("ends-with() function argument type must be string"))
+		}
+		n, ok = arg2.Evaluate(t).(string)
+		if !ok {
+			panic(errors.New("ends-with() function argument type must be string"))
+		}
+		return strings.HasSuffix(m, n)
 	}
 }
 
@@ -175,7 +204,7 @@ func substringFunc(arg1, arg2, arg3 query) func(query, iterator) interface{} {
 		case query:
 			node := typ.Select(t)
 			if node == nil {
-				return false
+				return ""
 			}
 			m = node.Value()
 		}

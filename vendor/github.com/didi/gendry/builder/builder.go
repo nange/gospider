@@ -11,13 +11,13 @@ import (
 
 var (
 	errSplitEmptyKey = errors.New("[builder] couldn't split a empty string")
-	errSplitOrderBy  = errors.New(`[builder] the value of _orderby should be "field direction"`)
+	errSplitOrderBy  = errors.New(`[builder] the value of _orderby should be "fieldName direction [,fieldName direction]"`)
 	// ErrUnsupportedOperator reports there's unsupported operators in where-condition
 	ErrUnsupportedOperator       = errors.New("[builder] unsupported operator")
 	errWhereInType               = errors.New(`[builder] the value of "xxx in" must be of []interface{} type`)
 	errGroupByValueType          = errors.New(`[builder] the value of "_groupby" must be of string type`)
 	errLimitValueType            = errors.New(`[builder] the value of "_limit" must be of []uint type`)
-	errLimitValueLength          = errors.New(`[builder] the value of "_limit" must contain two uint elements`)
+	errLimitValueLength          = errors.New(`[builder] the value of "_limit" must contain one or two uint elements`)
 	errEmptyINCondition          = errors.New(`[builder] the value of "in" must contain at least one element`)
 	errHavingValueType           = errors.New(`[builder] the value of "_having" must be of map[string]interface{}`)
 	errHavingUnsupportedOperator = errors.New(`[builder] "_having" contains unsupported operator`)
@@ -56,21 +56,18 @@ type eleLimit struct {
 // the value of _having must be a map just like where but only support =,in,>,>=,<,<=,<>,!=
 // for more examples,see README.md or open a issue.
 func BuildSelect(table string, where map[string]interface{}, selectField []string) (cond string, vals []interface{}, err error) {
-	var orderBy *eleOrderBy
+	var orderBy []eleOrderBy
 	var limit *eleLimit
 	var groupBy string
 	var having map[string]interface{}
 	copiedWhere := copyWhere(where)
 	if val, ok := copiedWhere["_orderby"]; ok {
-		f, order, e := splitOrderBy(val.(string))
+		eleOrderBy, e := splitOrderBy(val.(string))
 		if e != nil {
 			err = e
 			return
 		}
-		orderBy = &eleOrderBy{
-			field: f,
-			order: order,
-		}
+		orderBy = eleOrderBy
 		delete(copiedWhere, "_orderby")
 	}
 	if val, ok := copiedWhere["_groupby"]; ok {
@@ -98,8 +95,12 @@ func BuildSelect(table string, where map[string]interface{}, selectField []strin
 			return
 		}
 		if len(arr) != 2 {
-			err = errLimitValueLength
-			return
+			if len(arr) == 1 {
+				arr = []uint{0, arr[0]}
+			} else {
+				err = errLimitValueLength
+				return
+			}
 		}
 		begin, step := arr[0], arr[1]
 		limit = &eleLimit{
@@ -218,6 +219,9 @@ func getWhereConditions(where map[string]interface{}) ([]Comparable, func(), err
 		if nil != err {
 			return nil, emptyFunc, err
 		}
+		if _, ok := val.(NullType); ok {
+			operator = opNull
+		}
 		wms.add(operator, field, val)
 	}
 
@@ -234,6 +238,8 @@ const (
 	opLt   = "<"
 	opLte  = "<="
 	opLike = "like"
+	// special
+	opNull = "null"
 )
 
 type compareProducer func(m map[string]interface{}) (Comparable, error)
@@ -270,9 +276,12 @@ var op2Comparable = map[string]compareProducer{
 	opLike: func(m map[string]interface{}) (Comparable, error) {
 		return Like(m), nil
 	},
+	opNull: func(m map[string]interface{}) (Comparable, error) {
+		return nullCompareble(m), nil
+	},
 }
 
-var opOrder = []string{opEq, opIn, opNe1, opNe2, opGt, opGte, opLt, opLte, opLike}
+var opOrder = []string{opEq, opIn, opNe1, opNe2, opGt, opGte, opLt, opLte, opLike, opNull}
 
 func buildWhereCondition(mapSet *whereMapSet) ([]Comparable, func(), error) {
 	cpArr, release := getCpPool()
@@ -340,16 +349,24 @@ func splitKey(key string) (field string, operator string, err error) {
 	return
 }
 
-func splitOrderBy(orderby string) (field, direction string, err error) {
-	orderby = strings.Trim(orderby, " ")
-	idx := strings.IndexByte(orderby, ' ')
-	if idx == -1 {
-		err = errSplitOrderBy
-		return
+func splitOrderBy(orderby string) ([]eleOrderBy, error) {
+	var err error
+	var eleOrder []eleOrderBy
+	for _, val := range strings.Split(orderby, ",") {
+		val = strings.Trim(val, " ")
+		idx := strings.IndexByte(val, ' ')
+		if idx == -1 {
+			err = errSplitOrderBy
+			return eleOrder, err
+		}
+		field := val[:idx]
+		direction := strings.Trim(val[idx+1:], " ")
+		eleOrder = append(eleOrder, eleOrderBy{
+			field: field,
+			order: direction,
+		})
 	}
-	field = orderby[:idx]
-	direction = strings.Trim(orderby[idx+1:], " ")
-	return
+	return eleOrder, err
 }
 
 const (

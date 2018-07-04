@@ -37,6 +37,7 @@ Please note that because of the net/html dependency, goquery requires Go1.1+.
 
 **Note that goquery's API is now stable, and will not break.**
 
+*    **2018-06-07 (v1.4.1)** : Add `NewDocumentFromReader` examples.
 *    **2018-03-24 (v1.4.0)** : Deprecate `NewDocument(url)` and `NewDocumentFromResponse(response)`.
 *    **2018-01-28 (v1.3.0)** : Add `ToEnd` constant to `Slice` until the end of the selection (thanks to @davidjwilkins for raising the issue).
 *    **2018-01-11 (v1.2.0)** : Add `AddBack*` and deprecate `AndSelf` (thanks to @davidjwilkins).
@@ -95,12 +96,24 @@ package main
 import (
   "fmt"
   "log"
+  "net/http"
 
   "github.com/PuerkitoBio/goquery"
 )
 
 func ExampleScrape() {
-  doc, err := goquery.NewDocument("http://metalsucks.net")
+  // Request the HTML page.
+  res, err := http.Get("http://metalsucks.net")
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer res.Body.Close()
+  if res.StatusCode != 200 {
+    log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+  }
+
+  // Load the HTML document
+  doc, err := goquery.NewDocumentFromReader(res.Body)
   if err != nil {
     log.Fatal(err)
   }

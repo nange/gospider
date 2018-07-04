@@ -31,6 +31,7 @@ const (
 	MIMEPlain             = binding.MIMEPlain
 	MIMEPOSTForm          = binding.MIMEPOSTForm
 	MIMEMultipartPOSTForm = binding.MIMEMultipartPOSTForm
+	BodyBytesKey          = "_gin-gonic/gin/bodybyteskey"
 )
 
 const abortIndex int8 = math.MaxInt8 / 2
@@ -473,7 +474,7 @@ func (c *Context) BindQuery(obj interface{}) error {
 // See the binding package.
 func (c *Context) MustBindWith(obj interface{}, b binding.Binding) (err error) {
 	if err = c.ShouldBindWith(obj, b); err != nil {
-		c.AbortWithError(400, err).SetType(ErrorTypeBind)
+		c.AbortWithError(http.StatusBadRequest, err).SetType(ErrorTypeBind)
 	}
 
 	return
@@ -508,20 +509,40 @@ func (c *Context) ShouldBindWith(obj interface{}, b binding.Binding) error {
 	return b.Bind(c.Request, obj)
 }
 
+// ShouldBindBodyWith is similar with ShouldBindWith, but it stores the request
+// body into the context, and reuse when it is called again.
+//
+// NOTE: This method reads the body before binding. So you should use
+// ShouldBindWith for better performance if you need to call only once.
+func (c *Context) ShouldBindBodyWith(
+	obj interface{}, bb binding.BindingBody,
+) (err error) {
+	var body []byte
+	if cb, ok := c.Get(BodyBytesKey); ok {
+		if cbb, ok := cb.([]byte); ok {
+			body = cbb
+		}
+	}
+	if body == nil {
+		body, err = ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			return err
+		}
+		c.Set(BodyBytesKey, body)
+	}
+	return bb.BindBody(body, obj)
+}
+
 // ClientIP implements a best effort algorithm to return the real client IP, it parses
 // X-Real-IP and X-Forwarded-For in order to work properly with reverse-proxies such us: nginx or haproxy.
 // Use X-Forwarded-For before X-Real-Ip as nginx uses X-Real-Ip with the proxy's IP.
 func (c *Context) ClientIP() string {
 	if c.engine.ForwardedByClientIP {
 		clientIP := c.requestHeader("X-Forwarded-For")
-		if index := strings.IndexByte(clientIP, ','); index >= 0 {
-			clientIP = clientIP[0:index]
+		clientIP = strings.TrimSpace(strings.Split(clientIP, ",")[0])
+		if clientIP == "" {
+			clientIP = strings.TrimSpace(c.requestHeader("X-Real-Ip"))
 		}
-		clientIP = strings.TrimSpace(clientIP)
-		if clientIP != "" {
-			return clientIP
-		}
-		clientIP = strings.TrimSpace(c.requestHeader("X-Real-Ip"))
 		if clientIP != "" {
 			return clientIP
 		}
@@ -568,9 +589,9 @@ func bodyAllowedForStatus(status int) bool {
 	switch {
 	case status >= 100 && status <= 199:
 		return false
-	case status == 204:
+	case status == http.StatusNoContent:
 		return false
-	case status == 304:
+	case status == http.StatusNotModified:
 		return false
 	}
 	return true
@@ -670,10 +691,23 @@ func (c *Context) SecureJSON(code int, obj interface{}) {
 	c.Render(code, render.SecureJSON{Prefix: c.engine.secureJsonPrefix, Data: obj})
 }
 
+// JSONP serializes the given struct as JSON into the response body.
+// It add padding to response body to request data from a server residing in a different domain than the client.
+// It also sets the Content-Type as "application/javascript".
+func (c *Context) JSONP(code int, obj interface{}) {
+	c.Render(code, render.JsonpJSON{Callback: c.DefaultQuery("callback", ""), Data: obj})
+}
+
 // JSON serializes the given struct as JSON into the response body.
 // It also sets the Content-Type as "application/json".
 func (c *Context) JSON(code int, obj interface{}) {
 	c.Render(code, render.JSON{Data: obj})
+}
+
+// AsciiJSON serializes the given struct as JSON into the response body with unicode to ASCII string.
+// It also sets the Content-Type as "application/json".
+func (c *Context) AsciiJSON(code int, obj interface{}) {
+	c.Render(code, render.AsciiJSON{Data: obj})
 }
 
 // XML serializes the given struct as XML into the response body.
@@ -706,6 +740,16 @@ func (c *Context) Data(code int, contentType string, data []byte) {
 	c.Render(code, render.Data{
 		ContentType: contentType,
 		Data:        data,
+	})
+}
+
+// DataFromReader writes the specified reader into the body stream and updates the HTTP code.
+func (c *Context) DataFromReader(code int, contentLength int64, contentType string, reader io.Reader, extraHeaders map[string]string) {
+	c.Render(code, render.Reader{
+		Headers:       extraHeaders,
+		ContentType:   contentType,
+		ContentLength: contentLength,
+		Reader:        reader,
 	})
 }
 
@@ -798,18 +842,33 @@ func (c *Context) SetAccepted(formats ...string) {
 /***** GOLANG.ORG/X/NET/CONTEXT *****/
 /************************************/
 
+// Deadline returns the time when work done on behalf of this context
+// should be canceled. Deadline returns ok==false when no deadline is
+// set. Successive calls to Deadline return the same results.
 func (c *Context) Deadline() (deadline time.Time, ok bool) {
 	return
 }
 
+// Done returns a channel that's closed when work done on behalf of this
+// context should be canceled. Done may return nil if this context can
+// never be canceled. Successive calls to Done return the same value.
 func (c *Context) Done() <-chan struct{} {
 	return nil
 }
 
+// Err returns a non-nil error value after Done is closed,
+// successive calls to Err return the same error.
+// If Done is not yet closed, Err returns nil.
+// If Done is closed, Err returns a non-nil error explaining why:
+// Canceled if the context was canceled
+// or DeadlineExceeded if the context's deadline passed.
 func (c *Context) Err() error {
 	return nil
 }
 
+// Value returns the value associated with this context for key, or nil
+// if no value is associated with key. Successive calls to Value with
+// the same key returns the same result.
 func (c *Context) Value(key interface{}) interface{} {
 	if key == 0 {
 		return c.Request
