@@ -117,6 +117,7 @@ var rule = &spider.TaskRule{
 
 ![image](images/gospider_task_list.png)
 ![image](images/gospider_task_create.png)
+![image](images/gospider_sysdb.png)
 
 
 ## 感谢
