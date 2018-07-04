@@ -8,7 +8,6 @@ import (
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
-
 	"github.com/sirupsen/logrus"
 )
 
