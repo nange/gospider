@@ -27,6 +27,9 @@
             <el-form-item label="定时执行:">
               <el-input v-model="form.cron_spec" placeholder="兼容crontab语法"></el-input>
             </el-form-item>
+            <el-form-item label="代理列表:">
+              <el-input v-model="form.proxy_urls" placeholder="兼容socks5,http,https代理, 列表以逗号分割"></el-input>
+            </el-form-item>
             <el-form-item label="User Agent:">
               <el-input v-model="form.opt_user_agent" placeholder="User Agent"></el-input>
             </el-form-item>

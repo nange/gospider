@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/PuerkitoBio/goquery"
   packages = ["."]
-  revision = "a86ea073017a6beddef78c8659e7224e8ca634b0"
-  version = "v1.4.0"
+  revision = "dc2ec5c7ca4d9aae063b79b9f581dd3ea6afd2b2"
+  version = "v1.4.1"
 
 [[projects]]
   name = "github.com/andybalholm/cascadia"
@@ -17,19 +17,19 @@
   branch = "master"
   name = "github.com/antchfx/htmlquery"
   packages = ["."]
-  revision = "9f7717ac9bac5f660391c57e3d496b3c7cf9741f"
+  revision = "b4407197cfe83ed32ff00763f84809f65b6417c1"
 
 [[projects]]
   branch = "master"
   name = "github.com/antchfx/xmlquery"
   packages = ["."]
-  revision = "f3845cf372319e5428e4c6704089452ddff8ef8b"
+  revision = "9188d8442369f50d972011092e34175d53e10476"
 
 [[projects]]
   branch = "master"
   name = "github.com/antchfx/xpath"
   packages = ["."]
-  revision = "da6624a57bffc012f598c42f781bd5919fbfadb2"
+  revision = "077bca4d2caaf391ee780136adae00f59153dcd2"
 
 [[projects]]
   branch = "master"
@@ -38,7 +38,7 @@
     "builder",
     "manager"
   ]
-  revision = "6ab6c245cf76bd61b39dd7a2ece7cf3011a55cf9"
+  revision = "8be9c3b4654a1db312341a1c495c852e6f73f848"
 
 [[projects]]
   branch = "master"
@@ -55,19 +55,19 @@
     "json",
     "render"
   ]
-  revision = "6d913fc343cfac80d656db5be67a0ffb1323ba0d"
+  revision = "85221af84cf6ee99dc900bc41912abc09acfc1b5"
 
 [[projects]]
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
-  revision = "a0583e0143b1624142adab07e0e97fe106d99561"
-  version = "v1.3"
+  revision = "d523deb1b23d913de5bdada721a6071e71283618"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/gobuffalo/packr"
   packages = ["."]
-  revision = "3402a167bccf1bdd5c93ca820be9f27bba46261e"
-  version = "v1.10.7"
+  revision = "bd47f2894846e32edcf9aa37290fef76c327883f"
+  version = "v1.11.1"
 
 [[projects]]
   name = "github.com/gobwas/glob"
@@ -90,15 +90,16 @@
   packages = [
     ".",
     "debug",
+    "proxy",
     "storage"
   ]
-  revision = "dc3a35f352c1baffa8bce20d9e9cd4ece8413ed0"
+  revision = "f9e277f8f0b371c323de80d2b08cfcc7dadcbcd3"
 
 [[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/jinzhu/gorm"
@@ -115,8 +116,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "ca39e5af3ece67bbcda3d0f4f56a8e24d9f2dad4"
-  version = "1.1.3"
+  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
+  version = "1.1.4"
 
 [[projects]]
   name = "github.com/kennygrant/sanitize"
@@ -139,8 +140,8 @@
 [[projects]]
   name = "github.com/modern-go/reflect2"
   packages = ["."]
-  revision = "1df9eeb2bb81f327b96228865c5687bc2194af3f"
-  version = "1.0.0"
+  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
+  version = "1.0.1"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -151,8 +152,8 @@
 [[projects]]
   name = "github.com/robfig/cron"
   packages = ["."]
-  revision = "b024fc5ea0e34bc3f83d9941c8d60b0622bfaca4"
-  version = "v1"
+  revision = "b41be1df696709bb6395fe435af20370037c0b4c"
+  version = "v1.1"
 
 [[projects]]
   branch = "master"
@@ -175,14 +176,14 @@
 [[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
-  version = "v1.1"
+  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "b2aa35443fbc700ab74c586ae79b81c171851023"
+  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
   branch = "master"
@@ -193,7 +194,7 @@
     "html/atom",
     "html/charset"
   ]
-  revision = "b3c676e531a6dc479fa1b35ac961c13f5e2b4d2e"
+  revision = "ed29d75add3d7c4bf7ca65aac0c6df3d1420216f"
 
 [[projects]]
   branch = "master"
@@ -202,7 +203,7 @@
     "unix",
     "windows"
   ]
-  revision = "1d206c9fa8975fb4cf00df1dc8bf3283dc24ba0e"
+  revision = "151529c776cdc58ddbe7963ba9af779f3577b419"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -232,6 +233,7 @@
   name = "google.golang.org/appengine"
   packages = [
     ".",
+    "cloudsql",
     "internal",
     "internal/app_identity",
     "internal/base",
@@ -242,8 +244,8 @@
     "internal/urlfetch",
     "urlfetch"
   ]
-  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
-  version = "v1.0.0"
+  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
+  version = "v1.1.0"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -260,6 +262,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8c91502ec4074ca9291a4e75a44dc5f67980d6e778d843839907c40a204e9a67"
+  inputs-digest = "ca60f5934ab4d7556d1aef562cd6bee89a145267d945c7a3f36dc151c103732a"
   solver-name = "gps-cdcl"
   solver-version = 1

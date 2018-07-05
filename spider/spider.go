@@ -22,7 +22,11 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 		}
 	}
 
-	c := newCollector(task.TaskConfig)
+	c, err := newCollector(task.TaskConfig)
+	if err != nil {
+		logrus.Errorf("new collector err:%+v", err)
+		return err
+	}
 
 	nodesLen := len(task.Rule.Nodes)
 	collectors := make([]*colly.Collector, 0, nodesLen)

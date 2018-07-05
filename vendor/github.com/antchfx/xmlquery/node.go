@@ -3,6 +3,7 @@ package xmlquery
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -187,6 +188,20 @@ func parse(r io.Reader) (*Node, error) {
 				level = 1
 				prev = node
 			}
+			// https://www.w3.org/TR/xml-names/#scoping-defaulting
+			for _, att := range tok.Attr {
+				if att.Name.Local == "xmlns" {
+					space2prefix[att.Value] = ""
+				} else if att.Name.Space == "xmlns" {
+					space2prefix[att.Value] = att.Name.Local
+				}
+			}
+
+			if tok.Name.Space != "" {
+				if _, found := space2prefix[tok.Name.Space]; !found {
+					return nil, errors.New("xmlquery: invalid XML document, namespace is missing")
+				}
+			}
 			node := &Node{
 				Type:         ElementNode,
 				Data:         tok.Name.Local,
@@ -194,11 +209,6 @@ func parse(r io.Reader) (*Node, error) {
 				NamespaceURI: tok.Name.Space,
 				Attr:         tok.Attr,
 				level:        level,
-			}
-			for _, att := range tok.Attr {
-				if att.Name.Space == "xmlns" {
-					space2prefix[att.Value] = att.Name.Local
-				}
 			}
 			//fmt.Println(fmt.Sprintf("start > %s : %d", node.Data, level))
 			if level == prev.level {

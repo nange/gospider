@@ -5,48 +5,83 @@ htmlquery
 [![GoDoc](https://godoc.org/github.com/antchfx/htmlquery?status.svg)](https://godoc.org/github.com/antchfx/htmlquery)
 [![Go Report Card](https://goreportcard.com/badge/github.com/antchfx/htmlquery)](https://goreportcard.com/report/github.com/antchfx/htmlquery)
 
-htmlquery, lets you extract data from HTML documents using XPath expression, depend on 
-[html](https://golang.org/x/net/html) and [xpath](https://github.com/antchfx/xpath) packages.
+Overview
+====
+
+htmlquery is an XPath query package for HTML, lets you extract data or evaluate from HTML documents by an XPath expression.
 
 Installation
 ====
 
-    $ go get github.com/antchfx/htmlquery
+> $ go get github.com/antchfx/htmlquery
 
-Examples
+Getting Started
 ====
+
+#### Load HTML document from URL.
+
+```go
+doc, err := htmlquery.LoadURL("http://example.com/")
+```
+
+#### Load HTML document from string.
+
+```go
+s := `<html>....</html>`
+doc, err := htmlquery.Parse(strings.NewReader(s))
+```
+
+#### Find all A elements.
+
+```go
+list := htmlquery.Find(doc, "//a")
+```
+
+#### Find all A elements with href attribute.
+
+```go
+list := range htmlquery.Find(doc, "//a/@href")	
+```
+
+### Find the third A element.
+
+```go
+a := htmlquery.FindOne(doc, "//a[3]")
+```
+
+#### Evaluate the number of all IMG element.
+
+```go
+expr, _ := xpath.Compile("count(//img)")
+v := expr.Evaluate(htmlquery.CreateXPathNavigator(doc)).(float64)
+fmt.Printf("total count is %f", v)
+```
+
+Quick Tutorial
+===
 
 ```go
 func main() {
-	// Load HTML file.
-	f, err := os.Open(`./examples/test.html`)
+	doc, err := htmlquery.LoadURL("https://www.bing.com/search?q=golang")
 	if err != nil {
 		panic(err)
 	}
-	// Parse HTML document
-	doc, err := htmlquery.Parse(f)
-	if err != nil{
-		panic(err)
-	}
-
-	// List all matches nodes with the name `a`.
-	for _, n := range htmlquery.Find(doc, "//a") {
-		fmt.Printf("%s \n", n.Data)
+	// Find all news item.
+	for i, n := range htmlquery.Find(doc, "//ol/li") {
+		a := htmlquery.FindOne(n, "//a")
+		fmt.Printf("%d %s(%s)\n", i, htmlquery.InnerText(a), htmlquery.SelectAttr(a, "href"))
 	}
 }
 ```
 
-### Evaluate an XPath expression
+List of supported XPath query packages
+===
+|Name |Description |
+|--------------------------|----------------|
+|[htmlquery](https://github.com/antchfx/htmlquery) | XPath query package for the HTML document|
+|[xmlquery](https://github.com/antchfx/xmlquery) | XPath query package for the XML document|
+|[jsonquery](https://github.com/antchfx/jsonquery) | XPath query package for the JSON document|
 
-Using `Evaluate()` to evaluates XPath expressions.
-
-```go
-expr := xpath.MustCompile("count(//div[@class='article'])")
-fmt.Printf("%f \n", expr.Evaluate(htmlquery.CreateXPathNavigator(doc)).(float64))
-
-expr = xpath.MustCompile("//a/@href")
-iter := expr.Evaluate(htmlquery.CreateXPathNavigator(doc)).(*xpath.NodeIterator)
-for iter.MoveNext() {
-	fmt.Printf("%s \n", iter.Current().Value())
-}
-```
+Questions
+===
+If you have any questions, create an issue and welcome to contribute.

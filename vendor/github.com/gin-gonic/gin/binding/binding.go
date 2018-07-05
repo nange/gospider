@@ -4,10 +4,9 @@
 
 package binding
 
-import (
-	"net/http"
-)
+import "net/http"
 
+// Content-Type MIME of the most common data formats.
 const (
 	MIMEJSON              = "application/json"
 	MIMEHTML              = "text/html"
@@ -27,6 +26,13 @@ const (
 type Binding interface {
 	Name() string
 	Bind(*http.Request, interface{}) error
+}
+
+// BindingBody adds BindBody method to Binding. BindBody is similar with Bind,
+// but it reads the body from supplied bytes instead of req.Body.
+type BindingBody interface {
+	Binding
+	BindBody([]byte, interface{}) error
 }
 
 // StructValidator is the minimal interface which needs to be implemented in

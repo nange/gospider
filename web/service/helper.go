@@ -70,6 +70,9 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 			},
 		},
 	}
+	if urls := strings.TrimSpace(task.ProxyURLs); len(urls) > 0 {
+		config.ProxyURLs = strings.Split(urls, ",")
+	}
 
 	return spider.NewTask(task.ID, *rule, config), nil
 }

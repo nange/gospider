@@ -10,9 +10,11 @@ XPath is Go package provides selecting nodes from XML, HTML or other documents u
 Implementation
 ===
 
-- [HTMLQuery](https://github.com/antchfx/htmlquery) - Extract data from HTML documents using XPath.
+- [htmlquery](https://github.com/antchfx/htmlquery) - an XPath query package for HTML document
 
-- [XMLQuery](https://github.com/antchfx/xmlquery) - Extract data from XML documents using XPath.
+- [xmlquery](https://github.com/antchfx/xmlquery) - an XPath query package for XML document.
+
+- [jsonquery](https://github.com/antchfx/jsonquery) - an XPath query package for JSON document
 
 Supported Features
 ===
@@ -107,18 +109,19 @@ Supported Features
 
 - `fun(arg1, ..., argn)` : Function calls.
 
-    * position()
-    * last()
-    * count( node-set )
-    * name()
-    * starts-with( string, string )
-    * normalize-space( string )
-    * substring( string , start [, length] )
-    * not( expression )
-    * string-length( [string] )
-    * contains( string, string )
-    * sum( node-set )
-    * concat( string1 , string2 [, stringn]* )
+    * position() float64
+    * last() float64
+    * count( node-set ) float64
+    * name() string
+    * starts-with( string, string ) boolean
+    * ends-with( string, string ) boolean
+    * normalize-space( string ) string
+    * substring( string , start : int [, length : int] ) string
+    * not( expression ) boolean
+    * string-length( [string] ) float64
+    * contains( string, string ) boolean
+    * sum( node-set ) float64
+    * concat( string1 , string2 [, stringn]* ) string
 
 - `a or b` : Boolean `or` operation.
 

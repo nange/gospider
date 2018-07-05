@@ -40,9 +40,14 @@ func axisPredicate(root *axisNode) func(NodeNavigator) bool {
 			typ = allNode
 		}
 	}
+	nametest := root.LocalName != "" || root.Prefix != ""
 	predicate := func(n NodeNavigator) bool {
 		if typ == n.NodeType() || typ == allNode || typ == TextNode {
-			if root.LocalName == "" || (root.LocalName == n.LocalName() && root.Prefix == n.Prefix()) {
+			if nametest {
+				if root.LocalName == n.LocalName() && root.Prefix == n.Prefix() {
+					return true
+				}
+			} else {
 				return true
 			}
 		}
@@ -158,6 +163,16 @@ func (b *builder) processFunctionNode(root *functionNode) (query, error) {
 			return nil, err
 		}
 		qyOutput = &functionQuery{Input: b.firstInput, Func: startwithFunc(arg1, arg2)}
+	case "ends-with":
+		arg1, err := b.processNode(root.Args[0])
+		if err != nil {
+			return nil, err
+		}
+		arg2, err := b.processNode(root.Args[1])
+		if err != nil {
+			return nil, err
+		}
+		qyOutput = &functionQuery{Input: b.firstInput, Func: endwithFunc(arg1, arg2)}
 	case "contains":
 		arg1, err := b.processNode(root.Args[0])
 		if err != nil {
