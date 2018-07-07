@@ -13,9 +13,6 @@ fi
 {
 	if [ ! -d "./node_modules" ]; then
 		echo "not found node_modules; will exec npm install \n"
-		if [ ! -f "./package-lock.json" ]; then
-			unlink ./package-lock.json
-		fi
 		npm install
 	fi
 	npm run build
