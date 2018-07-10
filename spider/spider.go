@@ -1,6 +1,7 @@
 package spider
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/gocolly/colly"
@@ -35,12 +36,14 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 		collectors = append(collectors, nextC)
 	}
 
+	ctxCtl, _ := context.WithCancel(context.Background())
+
 	for i := 0; i < nodesLen; i++ {
 		var ctx *Context
 		if i != nodesLen-1 {
-			ctx = newContext(task, collectors[i], collectors[i+1])
+			ctx = newContext(ctxCtl, task, collectors[i], collectors[i+1])
 		} else {
-			ctx = newContext(task, collectors[i], nil)
+			ctx = newContext(ctxCtl, task, collectors[i], nil)
 		}
 		if task.OutputConfig.Type == common.OutputTypeMySQL {
 			ctx.setOutputDB(db)
@@ -49,7 +52,7 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 		addCallback(ctx, task.Rule.Nodes[i])
 	}
 
-	headCtx := newContext(task, c, collectors[0])
+	headCtx := newContext(ctxCtl, task, c, collectors[0])
 	if err := task.Rule.Head(headCtx); err != nil {
 		logrus.Errorf("exec rule head func err:%#v", err)
 		return errors.WithStack(err)
@@ -71,19 +74,22 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 func addCallback(ctx *Context, node *Node) {
 	if node.OnRequest != nil {
 		ctx.c.OnRequest(func(req *colly.Request) {
-			node.OnRequest(ctx, newRequest(req, ctx))
+			newCtx := ctx.cloneWithReq(req)
+			node.OnRequest(newCtx, newRequest(req, newCtx))
 		})
 	}
 
 	if node.OnError != nil {
 		ctx.c.OnError(func(res *colly.Response, e error) {
-			node.OnError(ctx, newResponse(res, ctx), e)
+			newCtx := ctx.cloneWithReq(res.Request)
+			node.OnError(newCtx, newResponse(res, newCtx), e)
 		})
 	}
 
 	if node.OnResponse != nil {
 		ctx.c.OnResponse(func(res *colly.Response) {
-			node.OnResponse(ctx, newResponse(res, ctx))
+			newCtx := ctx.cloneWithReq(res.Request)
+			node.OnResponse(newCtx, newResponse(res, newCtx))
 		})
 	}
 
@@ -91,7 +97,8 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnHTML {
 			f := fn
 			ctx.c.OnHTML(selector, func(el *colly.HTMLElement) {
-				f(ctx, newHTMLElement(el, ctx))
+				newCtx := ctx.cloneWithReq(el.Request)
+				f(newCtx, newHTMLElement(el, newCtx))
 			})
 		}
 	}
@@ -100,14 +107,16 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnXML {
 			f := fn
 			ctx.c.OnXML(selector, func(el *colly.XMLElement) {
-				f(ctx, newXMLElement(el, ctx))
+				newCtx := ctx.cloneWithReq(el.Request)
+				f(newCtx, newXMLElement(el, newCtx))
 			})
 		}
 	}
 
 	if node.OnScraped != nil {
 		ctx.c.OnScraped(func(res *colly.Response) {
-			node.OnScraped(ctx, newResponse(res, ctx))
+			newCtx := ctx.cloneWithReq(res.Request)
+			node.OnScraped(newCtx, newResponse(res, newCtx))
 		})
 	}
 

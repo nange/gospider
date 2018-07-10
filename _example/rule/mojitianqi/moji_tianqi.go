@@ -26,7 +26,7 @@ var rule = &spider.TaskRule{
 		Nodes: map[int]*spider.Node{
 			0: &spider.Node{ // 第一步: 找到全国各省城市区县的链接
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Infof("Visiting %s", req.URL.String())
+					logrus.Infof("第一步。。。Visiting %s", req.URL.String())
 				},
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
@@ -35,23 +35,44 @@ var rule = &spider.TaskRule{
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
 					`.city a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+						if el.Text == "四川" {
+							return
+						}
 						link := el.Attr("href")
-						el.Request.Visit(link)
-					},
-					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) {
-						link := el.Attr("href")
-						el.Request.VisitForNext(link)
+						ctx.VisitForNext(link)
 					},
 				},
 			},
-			1: &spider.Node{ // 第二步: 爬取各城市区县页面上具体的空气质量数据
+			1: &spider.Node{ // 第一步: 找到全国各省城市区县的链接
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Infof("Visiting %s", req.URL.String())
+					logrus.Infof("第二步。。。Visiting %s", req.URL.String())
 				},
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
 					Retry(res.Request, 3)
+				},
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
+					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+
+						link := el.Attr("href")
+						//el.Request.VisitForNext(link)
+						ctx.VisitForNext(link)
+						//logrus.Infof("准备进入第二步。。。。。。。。。。。。。")
+					},
+				},
+			},
+			2: &spider.Node{ // 第二步: 爬取各城市区县页面上具体的空气质量数据
+				OnRequest: func(ctx *spider.Context, req *spider.Request) {
+					logrus.Infof("第二步。。。Visiting %s", req.URL.String())
+				},
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
+					// 出错时重试三次
+					Retry(res.Request, 3)
+				},
+				OnResponse: func(ctx *spider.Context, res *spider.Response) {
+					logrus.Infof("第二步完成。。。。。。。。。。。。。。。。。。。")
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
 					`body`: func(ctx *spider.Context, body *spider.HTMLElement) {
@@ -78,31 +99,43 @@ var rule = &spider.TaskRule{
 						publishTime = body.ChildText(".aqi_info_time b")
 						publishTime = strings.TrimLeft(publishTime, "发布日期：")
 
-						body.Request.PutReqContextValue("aqi", aqi)
-						body.Request.PutReqContextValue("quality_grade", qualityGrade)
-						body.Request.PutReqContextValue("pm10", pm10)
-						body.Request.PutReqContextValue("pm25", pm25)
-						body.Request.PutReqContextValue("no2", no2)
-						body.Request.PutReqContextValue("so2", so2)
-						body.Request.PutReqContextValue("o3", o3)
-						body.Request.PutReqContextValue("co", co)
-						body.Request.PutReqContextValue("publish_time", publishTime)
+						//body.Request.PutReqContextValue("aqi", aqi)
+						ctx.PutReqContextValue("aqi", aqi)
+						//body.Request.PutReqContextValue("quality_grade", qualityGrade)
+						ctx.PutReqContextValue("quality_grade", qualityGrade)
+						//body.Request.PutReqContextValue("pm10", pm10)
+						ctx.PutReqContextValue("pm10", pm10)
+						//body.Request.PutReqContextValue("pm25", pm25)
+						ctx.PutReqContextValue("pm25", pm25)
+						//body.Request.PutReqContextValue("no2", no2)
+						ctx.PutReqContextValue("no2", no2)
+						//body.Request.PutReqContextValue("so2", so2)
+						ctx.PutReqContextValue("so2", so2)
+						//body.Request.PutReqContextValue("o3", o3)
+						ctx.PutReqContextValue("o3", o3)
+						//body.Request.PutReqContextValue("co", co)
+						ctx.PutReqContextValue("co", co)
+						//body.Request.PutReqContextValue("publish_time", publishTime)
+						ctx.PutReqContextValue("publish_time", publishTime)
 
 						province := body.ChildText(`.crumb li:nth-last-child(2)`)
 						area := body.ChildText(`.crumb li:nth-last-child(1)`)
-						body.Request.PutReqContextValue("province", province)
-						body.Request.PutReqContextValue("area", area)
+						//body.Request.PutReqContextValue("province", province)
+						ctx.PutReqContextValue("province", province)
+						//body.Request.PutReqContextValue("area", area)
+						ctx.PutReqContextValue("area", area)
 
 						internalID := body.ChildAttr(`#internal_id`, "value")
 						if internalID == "" {
 							return
 						}
 						link := fmt.Sprintf("https://tianqi.moji.com/api/getAqi/%s", internalID)
-						body.Request.VisitForNextWithContext(link)
+						//body.Request.VisitForNextWithContext(link)
+						ctx.VisitForNextWithContext(link)
 					},
 				},
 			},
-			2: &spider.Node{ // 第三步: 由于tips字段是另外单独的请求,所以第四步单独获取tips(温馨提示)字段内容
+			3: &spider.Node{ // 第三步: 由于tips字段是另外单独的请求,所以第四步单独获取tips(温馨提示)字段内容
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
@@ -112,6 +145,7 @@ var rule = &spider.TaskRule{
 					Retry(res.Request, 3)
 				},
 				OnResponse: func(ctx *spider.Context, res *spider.Response) {
+					logrus.Infof("第三步完成。。。。。。。。。。。。。。。。。。。")
 					type tip struct {
 						Tips string `json:"tips"`
 					}
@@ -120,17 +154,28 @@ var rule = &spider.TaskRule{
 						logrus.Errorf("Unmarshal tips err:%s, body:%s", err.Error(), string(res.Body))
 					}
 					tips := ret.Tips
-					province := res.Request.GetReqContextValue("province")
-					area := res.Request.GetReqContextValue("area")
-					aqi := res.Request.GetReqContextValue("aqi")
-					qualityGrade := res.Request.GetReqContextValue("quality_grade")
-					pm10 := res.Request.GetReqContextValue("pm10")
-					pm25 := res.Request.GetReqContextValue("pm25")
-					no2 := res.Request.GetReqContextValue("no2")
-					so2 := res.Request.GetReqContextValue("so2")
-					o3 := res.Request.GetReqContextValue("o3")
-					co := res.Request.GetReqContextValue("co")
-					publishTime := res.Request.GetReqContextValue("publish_time")
+					//province := res.Request.GetReqContextValue("province")
+					province := ctx.GetReqContextValue("province")
+					//area := res.Request.GetReqContextValue("area")
+					area := ctx.GetReqContextValue("area")
+					//aqi := res.Request.GetReqContextValue("aqi")
+					aqi := ctx.GetReqContextValue("aqi")
+					//qualityGrade := res.Request.GetReqContextValue("quality_grade")
+					qualityGrade := ctx.GetReqContextValue("quality_grade")
+					//pm10 := res.Request.GetReqContextValue("pm10")
+					pm10 := ctx.GetReqContextValue("pm10")
+					//pm25 := res.Request.GetReqContextValue("pm25")
+					pm25 := ctx.GetReqContextValue("pm25")
+					//no2 := res.Request.GetReqContextValue("no2")
+					no2 := ctx.GetReqContextValue("no2")
+					//so2 := res.Request.GetReqContextValue("so2")
+					so2 := ctx.GetReqContextValue("so2")
+					//o3 := res.Request.GetReqContextValue("o3")
+					o3 := ctx.GetReqContextValue("o3")
+					//co := res.Request.GetReqContextValue("co")
+					co := ctx.GetReqContextValue("co")
+					//publishTime := res.Request.GetReqContextValue("publish_time")
+					publishTime := ctx.GetReqContextValue("publish_time")
 
 					ctx.Output(map[int]interface{}{
 						0:  province,
