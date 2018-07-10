@@ -24,11 +24,11 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Println("Visting", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.menu-list a`: func(ctx *spider.Context, el *spider.HTMLElement) { // 获取所有分类
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.menu-list a`: func(ctx *spider.Context, el *spider.HTMLElement) error { // 获取所有分类
 						category := el.Text
 						if category == "百家号" || category == "个性推荐" {
-							return
+							return nil
 						}
 						if category == "首页" {
 							category = "热点要闻"
@@ -37,7 +37,7 @@ var rule = &spider.TaskRule{
 						el.Request.PutReqContextValue("category", category)
 
 						link := el.Attr("href")
-						el.Request.VisitForNextWithContext(link)
+						return el.Request.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -45,28 +45,28 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Println("Visting", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`#pane-news a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`#pane-news a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						title := el.Text
 						link := el.Attr("href")
 						if title == "" || link == "javascript:void(0);" {
-							return
+							return nil
 						}
 						category := el.Request.GetReqContextValue("category")
-						ctx.Output(map[int]interface{}{
+						return ctx.Output(map[int]interface{}{
 							0: category,
 							1: title,
 							2: link,
 						})
 					},
-					`#col_focus a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+					`#col_focus a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						title := el.Text
 						link := el.Attr("href")
 						if title == "" || link == "javascript:void(0);" {
-							return
+							return nil
 						}
 						category := el.Request.GetReqContextValue("category")
-						ctx.Output(map[int]interface{}{
+						return ctx.Output(map[int]interface{}{
 							0: category,
 							1: title,
 							2: link,

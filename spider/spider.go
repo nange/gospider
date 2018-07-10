@@ -77,13 +77,19 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnError != nil {
 		ctx.c.OnError(func(res *colly.Response, e error) {
-			node.OnError(ctx, newResponse(res, ctx), e)
+			err := node.OnError(ctx, newResponse(res, ctx), e)
+			if err != nil {
+				logrus.Warnf("node.OnError return err:%+v, request url:%s", err, res.Request.URL.String())
+			}
 		})
 	}
 
 	if node.OnResponse != nil {
 		ctx.c.OnResponse(func(res *colly.Response) {
-			node.OnResponse(ctx, newResponse(res, ctx))
+			err := node.OnResponse(ctx, newResponse(res, ctx))
+			if err != nil {
+				logrus.Warnf("node.OnResponse return err:%+v, request url:%s", err, res.Request.URL.String())
+			}
 		})
 	}
 
@@ -91,7 +97,10 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnHTML {
 			f := fn
 			ctx.c.OnHTML(selector, func(el *colly.HTMLElement) {
-				f(ctx, newHTMLElement(el, ctx))
+				err := f(ctx, newHTMLElement(el, ctx))
+				if err != nil {
+					logrus.Warnf("node.OnHTML:%s return err:%+v, request url:%s", selector, err, el.Request.URL.String())
+				}
 			})
 		}
 	}
@@ -100,14 +109,20 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnXML {
 			f := fn
 			ctx.c.OnXML(selector, func(el *colly.XMLElement) {
-				f(ctx, newXMLElement(el, ctx))
+				err := f(ctx, newXMLElement(el, ctx))
+				if err != nil {
+					logrus.Warnf("node.OnXML:%s return err:%+v, request url:%s", selector, err, el.Request.URL.String())
+				}
 			})
 		}
 	}
 
 	if node.OnScraped != nil {
 		ctx.c.OnScraped(func(res *colly.Response) {
-			node.OnScraped(ctx, newResponse(res, ctx))
+			err := node.OnScraped(ctx, newResponse(res, ctx))
+			if err != nil {
+				logrus.Warnf("node.OnScraped return err:%+v, request url:%s", err, res.Request.URL.String())
+			}
 		})
 	}
 

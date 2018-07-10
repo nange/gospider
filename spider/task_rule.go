@@ -46,11 +46,11 @@ type Rule struct {
 
 type Node struct {
 	OnRequest  func(ctx *Context, req *Request)
-	OnError    func(ctx *Context, res *Response, err error)
-	OnResponse func(ctx *Context, res *Response)
-	OnHTML     map[string]func(ctx *Context, el *HTMLElement)
-	OnXML      map[string]func(ctx *Context, el *XMLElement)
-	OnScraped  func(ctx *Context, res *Response)
+	OnError    func(ctx *Context, res *Response, err error) error
+	OnResponse func(ctx *Context, res *Response) error
+	OnHTML     map[string]func(ctx *Context, el *HTMLElement) error
+	OnXML      map[string]func(ctx *Context, el *XMLElement) error
+	OnScraped  func(ctx *Context, res *Response) error
 }
 
 func checkRule(rule *TaskRule) error {

@@ -28,19 +28,19 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.city a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.city_list a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						link := el.Attr("href")
-						el.Request.Visit(link)
+						return el.Request.Visit(link)
 					},
-					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						link := el.Attr("href")
-						el.Request.VisitForNext(link)
+						return el.Request.VisitForNext(link)
 					},
 				},
 			},
@@ -48,13 +48,13 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`body`: func(ctx *spider.Context, body *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`body`: func(ctx *spider.Context, body *spider.HTMLElement) error {
 						var pm10, pm25, no2, so2, o3, co, publishTime string
 						body.ForEach(`#aqi_info li span`, func(i int, element *spider.HTMLElement) {
 							ret := element.Text
@@ -95,10 +95,10 @@ var rule = &spider.TaskRule{
 
 						internalID := body.ChildAttr(`#internal_id`, "value")
 						if internalID == "" {
-							return
+							return nil
 						}
 						link := fmt.Sprintf("https://tianqi.moji.com/api/getAqi/%s", internalID)
-						body.Request.VisitForNextWithContext(link)
+						return body.Request.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -106,12 +106,12 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnResponse: func(ctx *spider.Context, res *spider.Response) {
+				OnResponse: func(ctx *spider.Context, res *spider.Response) error {
 					type tip struct {
 						Tips string `json:"tips"`
 					}
@@ -132,7 +132,7 @@ var rule = &spider.TaskRule{
 					co := res.Request.GetReqContextValue("co")
 					publishTime := res.Request.GetReqContextValue("publish_time")
 
-					ctx.Output(map[int]interface{}{
+					return ctx.Output(map[int]interface{}{
 						0:  province,
 						1:  area,
 						2:  aqi,
