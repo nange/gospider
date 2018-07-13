@@ -2,6 +2,8 @@ package spider
 
 import (
 	"database/sql"
+	"io"
+	"net/http"
 
 	qb "github.com/didi/gendry/builder"
 	"github.com/gocolly/colly"
@@ -49,6 +51,10 @@ func (ctx *Context) PostForNext(URL string, requestData map[string]string) error
 
 func (ctx *Context) PostRawForNext(URL string, requestData []byte) error {
 	return ctx.nextC.PostRaw(URL, requestData)
+}
+
+func (ctx *Context) Request(method, URL string, requestData io.Reader, colleyCtx *colly.Context, hdr http.Header) error {
+	return ctx.nextC.Request(method, URL, requestData, colleyCtx, hdr)
 }
 
 func (ctx *Context) PostMultipartForNext(URL string, requestData map[string][]byte) error {
