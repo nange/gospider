@@ -15,10 +15,11 @@ func init() {
 }
 
 var rule = &spider.TaskRule{
-	Name:         "墨迹天气全国空气质量",
-	Description:  "抓取墨迹天气全国各个城市区县空气质量数据",
-	Namespace:    "moji_tianqi",
-	OutputFields: []string{"province", "area", "aqi", "quality_grade", "pm10", "pm25", "no2", "so2", "o3", "co", "tip", "publish_time"},
+	Name:           "墨迹天气全国空气质量",
+	Description:    "抓取墨迹天气全国各个城市区县空气质量数据",
+	Namespace:      "moji_tianqi",
+	DisableCookies: true,
+	OutputFields:   []string{"province", "area", "aqi", "quality_grade", "pm10", "pm25", "no2", "so2", "o3", "co", "tip", "publish_time"},
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error { // 定义入口
 			return ctx.VisitForNext("https://tianqi.moji.com/aqi/china")
@@ -26,56 +27,35 @@ var rule = &spider.TaskRule{
 		Nodes: map[int]*spider.Node{
 			0: &spider.Node{ // 第一步: 找到全国各省城市区县的链接
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Infof("第一步。。。Visiting %s", req.URL.String())
+					logrus.Infof("第二步。。。Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.city a`: func(ctx *spider.Context, el *spider.HTMLElement) {
-						if el.Text == "四川" {
-							return
-						}
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.city_list a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						link := el.Attr("href")
-						ctx.VisitForNext(link)
+						return ctx.Visit(link)
+					},
+					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
+						link := el.Attr("href")
+						return ctx.VisitForNext(link)
 					},
 				},
 			},
-			1: &spider.Node{ // 第一步: 找到全国各省城市区县的链接
+			1: &spider.Node{ // 第二步: 爬取各城市区县页面上具体的空气质量数据
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("第二步。。。Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.city_hot a`: func(ctx *spider.Context, el *spider.HTMLElement) {
-
-						link := el.Attr("href")
-						//el.Request.VisitForNext(link)
-						ctx.VisitForNext(link)
-						//logrus.Infof("准备进入第二步。。。。。。。。。。。。。")
-					},
-				},
-			},
-			2: &spider.Node{ // 第二步: 爬取各城市区县页面上具体的空气质量数据
-				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Infof("第二步。。。Visiting %s", req.URL.String())
-				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
-					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
-					// 出错时重试三次
-					Retry(res.Request, 3)
-				},
-				OnResponse: func(ctx *spider.Context, res *spider.Response) {
-					logrus.Infof("第二步完成。。。。。。。。。。。。。。。。。。。")
-				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`body`: func(ctx *spider.Context, body *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`body`: func(ctx *spider.Context, body *spider.HTMLElement) error {
 						var pm10, pm25, no2, so2, o3, co, publishTime string
 						body.ForEach(`#aqi_info li span`, func(i int, element *spider.HTMLElement) {
 							ret := element.Text
@@ -127,25 +107,24 @@ var rule = &spider.TaskRule{
 
 						internalID := body.ChildAttr(`#internal_id`, "value")
 						if internalID == "" {
-							return
+							return nil
 						}
 						link := fmt.Sprintf("https://tianqi.moji.com/api/getAqi/%s", internalID)
-						//body.Request.VisitForNextWithContext(link)
-						ctx.VisitForNextWithContext(link)
+
+						return ctx.VisitForNextWithContext(link)
 					},
 				},
 			},
-			3: &spider.Node{ // 第三步: 由于tips字段是另外单独的请求,所以第四步单独获取tips(温馨提示)字段内容
+			2: &spider.Node{ // 第三步: 由于tips字段是另外单独的请求,所以第四步单独获取tips(温馨提示)字段内容
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnResponse: func(ctx *spider.Context, res *spider.Response) {
-					logrus.Infof("第三步完成。。。。。。。。。。。。。。。。。。。")
+				OnResponse: func(ctx *spider.Context, res *spider.Response) error {
 					type tip struct {
 						Tips string `json:"tips"`
 					}
@@ -177,7 +156,7 @@ var rule = &spider.TaskRule{
 					//publishTime := res.Request.GetReqContextValue("publish_time")
 					publishTime := ctx.GetReqContextValue("publish_time")
 
-					ctx.Output(map[int]interface{}{
+					return ctx.Output(map[int]interface{}{
 						0:  province,
 						1:  area,
 						2:  aqi,

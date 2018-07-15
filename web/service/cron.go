@@ -37,6 +37,7 @@ func NewCronTask(task *model.Task, retCh chan<- common.MTS) (*CronTask, error) {
 	return ct, nil
 }
 
+// TODO: 运行任务前需要检查当前任务是否处于完成状态
 func (ct *CronTask) Run() {
 	spiderTask, err := GetSpiderTaskByModel(ct.task)
 	if err != nil {

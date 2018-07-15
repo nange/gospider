@@ -82,14 +82,20 @@ func addCallback(ctx *Context, node *Node) {
 	if node.OnError != nil {
 		ctx.c.OnError(func(res *colly.Response, e error) {
 			newCtx := ctx.cloneWithReq(res.Request)
-			node.OnError(newCtx, newResponse(res, newCtx), e)
+			err := node.OnError(newCtx, newResponse(res, newCtx), e)
+			if err != nil {
+				logrus.Warnf("node.OnError return err:%+v, request url:%s", err, res.Request.URL.String())
+			}
 		})
 	}
 
 	if node.OnResponse != nil {
 		ctx.c.OnResponse(func(res *colly.Response) {
 			newCtx := ctx.cloneWithReq(res.Request)
-			node.OnResponse(newCtx, newResponse(res, newCtx))
+			err := node.OnResponse(newCtx, newResponse(res, newCtx))
+			if err != nil {
+				logrus.Warnf("node.OnResponse return err:%+v, request url:%s", err, res.Request.URL.String())
+			}
 		})
 	}
 
@@ -98,7 +104,10 @@ func addCallback(ctx *Context, node *Node) {
 			f := fn
 			ctx.c.OnHTML(selector, func(el *colly.HTMLElement) {
 				newCtx := ctx.cloneWithReq(el.Request)
-				f(newCtx, newHTMLElement(el, newCtx))
+				err := f(newCtx, newHTMLElement(el, newCtx))
+				if err != nil {
+					logrus.Warnf("node.OnHTML:%s return err:%+v, request url:%s", selector, err, el.Request.URL.String())
+				}
 			})
 		}
 	}
@@ -108,7 +117,10 @@ func addCallback(ctx *Context, node *Node) {
 			f := fn
 			ctx.c.OnXML(selector, func(el *colly.XMLElement) {
 				newCtx := ctx.cloneWithReq(el.Request)
-				f(newCtx, newXMLElement(el, newCtx))
+				err := f(newCtx, newXMLElement(el, newCtx))
+				if err != nil {
+					logrus.Warnf("node.OnXML:%s return err:%+v, request url:%s", selector, err, el.Request.URL.String())
+				}
 			})
 		}
 	}
@@ -116,7 +128,10 @@ func addCallback(ctx *Context, node *Node) {
 	if node.OnScraped != nil {
 		ctx.c.OnScraped(func(res *colly.Response) {
 			newCtx := ctx.cloneWithReq(res.Request)
-			node.OnScraped(newCtx, newResponse(res, newCtx))
+			err := node.OnScraped(newCtx, newResponse(res, newCtx))
+			if err != nil {
+				logrus.Warnf("node.OnScraped return err:%+v, request url:%s", err, res.Request.URL.String())
+			}
 		})
 	}
 

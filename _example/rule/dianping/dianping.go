@@ -30,18 +30,18 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.main-citylist .letter-item a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.main-citylist .letter-item a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						city := el.Text
 
 						el.Request.PutReqContextValue("city", city)
 						link := el.Attr("href")
-						el.Request.VisitForNextWithContext(link)
+						return el.Request.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -49,31 +49,31 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnError: func(ctx *spider.Context, res *spider.Response, err error) {
+				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					Retry(res.Request, 3)
+					return Retry(res.Request, 3)
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.first-cate .first-item .span-container`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.first-cate .first-item .span-container`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						link := el.ChildAttr(".index-item", "href")
 						if link == "" {
-							return
+							return nil
 						}
 						trim := strings.TrimPrefix(link, el.Request.URL.String())
 						items := strings.SplitN(trim, "/", 3)
 						if len(items) < 2 {
-							return
+							return nil
 						}
 						cateID := items[1]
 
 						bigCate := el.ChildText(".index-title")
 						if bigCate != "美食" {
-							return
+							return nil
 						}
 
 						el.Request.PutReqContextValue("big_category", bigCate)
-						el.Request.VisitForNextWithContext(el.Request.URL.String() + "/" + cateID)
+						return el.Request.VisitForNextWithContext(el.Request.URL.String() + "/" + cateID)
 					},
 				},
 			},
@@ -81,16 +81,16 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`#classfy a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`#classfy a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						link := el.Attr("href")
 						if link == "javascript:;" {
-							return
+							return nil
 						}
 						subCate := el.Text
 						el.Request.PutReqContextValue("sub_category", subCate)
 
-						el.Request.VisitForNextWithContext(link)
+						return el.Request.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -98,15 +98,15 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.navigation`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.navigation`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						el.ForEach(`#classfy-sub a`, func(i int, element *spider.HTMLElement) {
 							if i == 0 { // 第一个链接为"不限", 忽略
 								return
 							}
 							el.Request.VisitForNextWithContext(element.Attr("href"))
 						})
-
+						return nil
 					},
 				},
 			},
@@ -114,12 +114,12 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`#region-nav a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`#region-nav a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						adname := el.Text
 						el.Request.PutReqContextValue("adname", adname)
 
-						el.Request.VisitForNextWithContext(el.Attr("href"))
+						return el.Request.VisitForNextWithContext(el.Attr("href"))
 					},
 				},
 			},
@@ -127,17 +127,17 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`.page a:nth-last-child(2)`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`.page a:nth-last-child(2)`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						countTxt := el.Text
 						if countTxt == "" {
-							return
+							return nil
 						}
 
 						count64, err := strconv.ParseInt(countTxt, 10, 64)
 						if err != nil {
 							logrus.Errorf("pase page count err:%s", err.Error())
-							return
+							return nil
 						}
 
 						for i := 2; i <= int(count64); i++ {
@@ -145,12 +145,13 @@ var rule = &spider.TaskRule{
 							logrus.Infof("nextURL:%s", nextURL)
 							el.Request.Visit(nextURL)
 						}
+						return nil
 					},
-					`.shop-list li .pic a`: func(ctx *spider.Context, el *spider.HTMLElement) {
+					`.shop-list li .pic a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						photo := el.ChildAttr(`img`, "src")
 						el.Request.PutReqContextValue("photos", photo)
 
-						el.Request.VisitForNextWithContext(el.Attr("href"))
+						return el.Request.VisitForNextWithContext(el.Attr("href"))
 					},
 				},
 			},
@@ -158,11 +159,11 @@ var rule = &spider.TaskRule{
 				OnRequest: func(ctx *spider.Context, req *spider.Request) {
 					logrus.Infof("Visiting %s", req.URL.String())
 				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement){
-					`#basic-info`: func(ctx *spider.Context, el *spider.HTMLElement) {
+				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+					`#basic-info`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						shopNameNodes := el.DOM.Find(`.shop-name`).Nodes
 						if len(shopNameNodes) == 0 {
-							return
+							return nil
 						}
 						shopName := shopNameNodes[0].FirstChild.Data
 						address := el.ChildText(`.address .item`)
@@ -174,7 +175,7 @@ var rule = &spider.TaskRule{
 						subCate := el.Request.GetReqContextValue("sub_category")
 						photos := el.Request.GetReqContextValue("photos")
 
-						ctx.Output(map[int]interface{}{
+						return ctx.Output(map[int]interface{}{
 							0: city,
 							1: adname,
 							2: bigCate,

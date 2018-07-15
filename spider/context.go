@@ -33,7 +33,6 @@ func newContext(ctx context.Context, task *Task, c *colly.Collector, nextC *coll
 
 func (ctx *Context) cloneWithReq(req *colly.Request) *Context {
 	newctx := context.WithValue(ctx.ctlCtx, "req", req)
-	//newctx2 := context.WithValue(newctx, "colly_context", req.Ctx)
 
 	return &Context{
 		task:     ctx.task,
