@@ -34,6 +34,11 @@
           width="100">
         </el-table-column>
         <el-table-column
+          prop="isCron"
+          label="定时任务"
+          width="100">
+        </el-table-column>
+        <el-table-column
           prop="created_at"
           label="创建时间"
           width="220">
@@ -101,6 +106,12 @@
           size: this.size
         }).then((ret) => {
             this.tableData = ret.data
+            for (let v of this.tableData) {
+              v.isCron = '否'
+              if (v.cron_spec) {
+                v.isCron = '是'
+              }
+            }
             this.total = ret.total
             this.load_data = false
         }).catch(() => {
@@ -110,7 +121,7 @@
       //单个删除
       delete_data(item){
         // TODO: 先直接返回，后面实现
-        return
+        return;
         this.$confirm('此操作将停止该任务, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
