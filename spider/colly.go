@@ -1,7 +1,6 @@
 package spider
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"net/url"
@@ -37,18 +36,6 @@ func newRequest(req *colly.Request, ctx *Context) *Request {
 	}
 }
 
-func (r *Request) PutReqContextValue(key string, value interface{}) {
-	r.reqCtx.Put(key, value)
-}
-
-func (r *Request) GetReqContextValue(key string) string {
-	return r.reqCtx.Get(key)
-}
-
-func (r *Request) GetAnyReqContextValue(key string) interface{} {
-	return r.reqCtx.GetAny(key)
-}
-
 func (r *Request) SetResponseCharacterEncoding(encoding string) {
 	r.req.ResponseCharacterEncoding = encoding
 }
@@ -69,54 +56,6 @@ func (r *Request) reqContextClone() *colly.Context {
 
 func (r *Request) AbsoluteURL(u string) string {
 	return r.req.AbsoluteURL(u)
-}
-
-func (r *Request) Visit(URL string) error {
-	return r.req.Visit(URL)
-}
-
-func (r *Request) VisitForNext(URL string) error {
-	return r.ctx.VisitForNext(r.AbsoluteURL(URL))
-}
-
-func (r *Request) VisitForNextWithContext(URL string) error {
-	return r.ctx.nextC.Request("GET", r.req.AbsoluteURL(URL), nil, r.reqContextClone(), nil)
-}
-
-func (r *Request) Post(URL string, requestData map[string]string) error {
-	return r.req.Post(URL, requestData)
-}
-
-func (r *Request) PostForNext(URL string, requestData map[string]string) error {
-	return r.ctx.PostForNext(r.AbsoluteURL(URL), requestData)
-}
-
-func (r *Request) PostForNextWithContext(URL string, requestData map[string]string) error {
-	return r.ctx.nextC.Request("POST", r.req.AbsoluteURL(URL), createFormReader(requestData), r.reqContextClone(), nil)
-}
-
-func (r *Request) PostRaw(URL string, requestData []byte) error {
-	return r.req.PostRaw(URL, requestData)
-}
-
-func (r *Request) PostRawForNext(URL string, requestData []byte) error {
-	return r.ctx.PostRawForNext(r.AbsoluteURL(URL), requestData)
-}
-
-func (r *Request) PostRawForNextWithContext(URL string, requestData []byte) error {
-	return r.ctx.nextC.Request("POST", r.req.AbsoluteURL(URL), bytes.NewReader(requestData), r.reqContextClone(), nil)
-}
-
-func (r *Request) PostMultipart(URL string, requestData map[string][]byte) error {
-	return r.req.PostMultipart(URL, requestData)
-}
-
-func (r *Request) PostMultipartForNext(URL string, requestData map[string][]byte) error {
-	return r.ctx.PostMultipartForNext(r.AbsoluteURL(URL), requestData)
-}
-
-func (r *Request) Retry() error {
-	return r.req.Retry()
 }
 
 type Response struct {

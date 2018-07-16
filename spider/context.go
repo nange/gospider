@@ -49,12 +49,25 @@ func (ctx *Context) setOutputDB(db *sql.DB) {
 	ctx.outputDB = db
 }
 
+func (ctx *Context) GetRequest() *Request {
+	collyReq := ctx.ctlCtx.Value("req").(*colly.Request)
+	return newRequest(collyReq, ctx)
+}
+
+func (ctx *Context) Retry() error {
+	return ctx.ctlCtx.Value("req").(*colly.Request).Retry()
+}
+
 func (ctx *Context) PutReqContextValue(key string, value interface{}) {
 	ctx.ctlCtx.Value("req").(*colly.Request).Ctx.Put(key, value)
 }
 
 func (ctx *Context) GetReqContextValue(key string) string {
 	return ctx.ctlCtx.Value("req").(*colly.Request).Ctx.Get(key)
+}
+
+func (ctx *Context) GetAnyReqContextValue(key string) interface{} {
+	return ctx.ctlCtx.Value("req").(*colly.Request).Ctx.GetAny(key)
 }
 
 func (ctx *Context) Visit(URL string) error {

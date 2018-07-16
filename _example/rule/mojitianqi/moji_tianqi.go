@@ -32,7 +32,7 @@ var rule = &spider.TaskRule{
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					return Retry(res.Request, 3)
+					return Retry(ctx, 3)
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
 					`.city_list a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
@@ -52,7 +52,7 @@ var rule = &spider.TaskRule{
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					return Retry(res.Request, 3)
+					return Retry(ctx, 3)
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
 					`body`: func(ctx *spider.Context, body *spider.HTMLElement) error {
@@ -111,7 +111,7 @@ var rule = &spider.TaskRule{
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					return Retry(res.Request, 3)
+					return Retry(ctx, 3)
 				},
 				OnResponse: func(ctx *spider.Context, res *spider.Response) error {
 					type tip struct {
@@ -154,11 +154,12 @@ var rule = &spider.TaskRule{
 	},
 }
 
-func Retry(req *spider.Request, count int) error {
+func Retry(ctx *spider.Context, count int) error {
+	req := ctx.GetRequest()
 	key := fmt.Sprintf("err_req_%s", req.URL.String())
 
 	var et int
-	if errCount := req.GetAnyReqContextValue(key); errCount != nil {
+	if errCount := ctx.GetAnyReqContextValue(key); errCount != nil {
 		et = errCount.(int)
 		if et >= count {
 			return fmt.Errorf("exceed %d counts", count)
@@ -166,8 +167,8 @@ func Retry(req *spider.Request, count int) error {
 	}
 	logrus.Infof("errCount:%d, we wil retry url:%s, after 1 second", et+1, req.URL.String())
 	time.Sleep(time.Second)
-	req.PutReqContextValue(key, et+1)
-	req.Retry()
+	ctx.PutReqContextValue(key, et+1)
+	ctx.Retry()
 
 	return nil
 }

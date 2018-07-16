@@ -33,15 +33,15 @@ var rule = &spider.TaskRule{
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					return Retry(res.Request, 3)
+					return Retry(ctx, 3)
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
 					`.main-citylist .letter-item a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						city := el.Text
 
-						el.Request.PutReqContextValue("city", city)
+						ctx.PutReqContextValue("city", city)
 						link := el.Attr("href")
-						return el.Request.VisitForNextWithContext(link)
+						return ctx.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -52,7 +52,7 @@ var rule = &spider.TaskRule{
 				OnError: func(ctx *spider.Context, res *spider.Response, err error) error {
 					logrus.Errorf("Visiting failed! url:%s, err:%s", res.Request.URL.String(), err.Error())
 					// 出错时重试三次
-					return Retry(res.Request, 3)
+					return Retry(ctx, 3)
 				},
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
 					`.first-cate .first-item .span-container`: func(ctx *spider.Context, el *spider.HTMLElement) error {
@@ -72,8 +72,8 @@ var rule = &spider.TaskRule{
 							return nil
 						}
 
-						el.Request.PutReqContextValue("big_category", bigCate)
-						return el.Request.VisitForNextWithContext(el.Request.URL.String() + "/" + cateID)
+						ctx.PutReqContextValue("big_category", bigCate)
+						return ctx.VisitForNextWithContext(el.Request.URL.String() + "/" + cateID)
 					},
 				},
 			},
@@ -88,9 +88,9 @@ var rule = &spider.TaskRule{
 							return nil
 						}
 						subCate := el.Text
-						el.Request.PutReqContextValue("sub_category", subCate)
+						ctx.PutReqContextValue("sub_category", subCate)
 
-						return el.Request.VisitForNextWithContext(link)
+						return ctx.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -104,7 +104,7 @@ var rule = &spider.TaskRule{
 							if i == 0 { // 第一个链接为"不限", 忽略
 								return
 							}
-							el.Request.VisitForNextWithContext(element.Attr("href"))
+							ctx.VisitForNextWithContext(element.Attr("href"))
 						})
 						return nil
 					},
@@ -117,9 +117,9 @@ var rule = &spider.TaskRule{
 				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
 					`#region-nav a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						adname := el.Text
-						el.Request.PutReqContextValue("adname", adname)
+						ctx.PutReqContextValue("adname", adname)
 
-						return el.Request.VisitForNextWithContext(el.Attr("href"))
+						return ctx.VisitForNextWithContext(el.Attr("href"))
 					},
 				},
 			},
@@ -143,15 +143,15 @@ var rule = &spider.TaskRule{
 						for i := 2; i <= int(count64); i++ {
 							nextURL := fmt.Sprintf("%sp%d", el.Request.URL.String(), i)
 							logrus.Infof("nextURL:%s", nextURL)
-							el.Request.Visit(nextURL)
+							ctx.Visit(nextURL)
 						}
 						return nil
 					},
 					`.shop-list li .pic a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
 						photo := el.ChildAttr(`img`, "src")
-						el.Request.PutReqContextValue("photos", photo)
+						ctx.PutReqContextValue("photos", photo)
 
-						return el.Request.VisitForNextWithContext(el.Attr("href"))
+						return ctx.VisitForNextWithContext(el.Attr("href"))
 					},
 				},
 			},
@@ -169,11 +169,11 @@ var rule = &spider.TaskRule{
 						address := el.ChildText(`.address .item`)
 						tel := el.ChildText(`.tel .item`)
 
-						city := el.Request.GetReqContextValue("city")
-						adname := el.Request.GetReqContextValue("adname")
-						bigCate := el.Request.GetReqContextValue("big_category")
-						subCate := el.Request.GetReqContextValue("sub_category")
-						photos := el.Request.GetReqContextValue("photos")
+						city := ctx.GetReqContextValue("city")
+						adname := ctx.GetReqContextValue("adname")
+						bigCate := ctx.GetReqContextValue("big_category")
+						subCate := ctx.GetReqContextValue("sub_category")
+						photos := ctx.GetReqContextValue("photos")
 
 						return ctx.Output(map[int]interface{}{
 							0: city,
@@ -192,11 +192,12 @@ var rule = &spider.TaskRule{
 	},
 }
 
-func Retry(req *spider.Request, count int) error {
+func Retry(ctx *spider.Context, count int) error {
+	req := ctx.GetRequest()
 	key := fmt.Sprintf("err_req_%s", req.URL.String())
 
 	var et int
-	if errCount := req.GetAnyReqContextValue(key); errCount != nil {
+	if errCount := ctx.GetAnyReqContextValue(key); errCount != nil {
 		et = errCount.(int)
 		if et >= count {
 			return fmt.Errorf("exceed %d counts", count)
@@ -204,8 +205,8 @@ func Retry(req *spider.Request, count int) error {
 	}
 	logrus.Infof("errCount:%d, we wil retry url:%s, after 1 second", et+1, req.URL.String())
 	time.Sleep(time.Second)
-	req.PutReqContextValue(key, et+1)
-	req.Retry()
+	ctx.PutReqContextValue(key, et+1)
+	ctx.Retry()
 
 	return nil
 }
