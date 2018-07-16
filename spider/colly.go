@@ -16,6 +16,7 @@ type Request struct {
 	Headers *http.Header
 	Method  string
 	Body    io.Reader
+	ID      uint32
 
 	req    *colly.Request
 	reqCtx *colly.Context
@@ -29,6 +30,7 @@ func newRequest(req *colly.Request, ctx *Context) *Request {
 		Headers: req.Headers,
 		Method:  req.Method,
 		Body:    req.Body,
+		ID:      req.ID,
 		req:     req,
 		reqCtx:  req.Ctx,
 		ctx:     ctx,

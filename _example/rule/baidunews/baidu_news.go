@@ -34,10 +34,10 @@ var rule = &spider.TaskRule{
 							category = "热点要闻"
 						}
 
-						el.Request.PutReqContextValue("category", category)
+						ctx.PutReqContextValue("category", category)
 
 						link := el.Attr("href")
-						return el.Request.VisitForNextWithContext(link)
+						return ctx.VisitForNextWithContext(link)
 					},
 				},
 			},
@@ -52,7 +52,8 @@ var rule = &spider.TaskRule{
 						if title == "" || link == "javascript:void(0);" {
 							return nil
 						}
-						category := el.Request.GetReqContextValue("category")
+
+						category := ctx.GetReqContextValue("category")
 						return ctx.Output(map[int]interface{}{
 							0: category,
 							1: title,
@@ -65,7 +66,8 @@ var rule = &spider.TaskRule{
 						if title == "" || link == "javascript:void(0);" {
 							return nil
 						}
-						category := el.Request.GetReqContextValue("category")
+
+						category := ctx.GetReqContextValue("category")
 						return ctx.Output(map[int]interface{}{
 							0: category,
 							1: title,
