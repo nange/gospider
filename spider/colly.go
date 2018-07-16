@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
@@ -34,28 +33,6 @@ func newRequest(req *colly.Request, ctx *Context) *Request {
 		reqCtx:  req.Ctx,
 		ctx:     ctx,
 	}
-}
-
-func (r *Request) SetResponseCharacterEncoding(encoding string) {
-	r.req.ResponseCharacterEncoding = encoding
-}
-
-func (r *Request) Abort() {
-	r.req.Abort()
-}
-
-func (r *Request) reqContextClone() *colly.Context {
-	newCtx := colly.NewContext()
-	r.reqCtx.ForEach(func(k string, v interface{}) interface{} {
-		newCtx.Put(k, v)
-		return nil
-	})
-
-	return newCtx
-}
-
-func (r *Request) AbsoluteURL(u string) string {
-	return r.req.AbsoluteURL(u)
 }
 
 type Response struct {
@@ -163,12 +140,4 @@ func (x *XMLElement) ChildAttr(xpathQuery, attrName string) string {
 
 func (x *XMLElement) ChildAttrs(xpathQuery, attrName string) []string {
 	return x.el.ChildAttrs(xpathQuery, attrName)
-}
-
-func createFormReader(data map[string]string) io.Reader {
-	form := url.Values{}
-	for k, v := range data {
-		form.Add(k, v)
-	}
-	return strings.NewReader(form.Encode())
 }

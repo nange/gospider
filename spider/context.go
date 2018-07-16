@@ -120,6 +120,18 @@ func (ctx *Context) PostMultipartForNext(URL string, requestData map[string][]by
 	return ctx.nextC.PostMultipart(URL, requestData)
 }
 
+func (ctx *Context) SetResponseCharacterEncoding(encoding string) {
+	ctx.ctlCtx.Value("req").(*colly.Request).ResponseCharacterEncoding = encoding
+}
+
+func (ctx *Context) AbsoluteURL(u string) string {
+	return ctx.ctlCtx.Value("req").(*colly.Request).AbsoluteURL(u)
+}
+
+func (ctx *Context) Abort() {
+	ctx.ctlCtx.Value("req").(*colly.Request).Abort()
+}
+
 func (ctx *Context) Output(row map[int]interface{}) error {
 	if err := ctx.checkOutput(row); err != nil {
 		logrus.Errorf("checkOutput failed! err:%+v, fields:%#v, row:%+v", err, ctx.task.OutputFields, row)
