@@ -1,10 +1,12 @@
 package service
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/spider"
+	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
@@ -18,16 +20,18 @@ var (
 var cronTaskMap = &sync.Map{}
 
 type CronTask struct {
-	task  *model.Task
-	cr    *cron.Cron
-	retCh chan<- common.MTS
+	taskID   uint64
+	cronSpec string
+	cr       *cron.Cron
+	retCh    chan<- common.MTS
 }
 
-func NewCronTask(task *model.Task, retCh chan<- common.MTS) (*CronTask, error) {
+func NewCronTask(taskID uint64, cronSpec string, retCh chan<- common.MTS) (*CronTask, error) {
 	ct := &CronTask{
-		task:  task,
-		cr:    cron.New(),
-		retCh: retCh,
+		taskID:   taskID,
+		cronSpec: cronSpec,
+		cr:       cron.New(),
+		retCh:    retCh,
 	}
 
 	if err := AddCronTask(ct); err != nil {
@@ -37,25 +41,35 @@ func NewCronTask(task *model.Task, retCh chan<- common.MTS) (*CronTask, error) {
 	return ct, nil
 }
 
-// TODO: 运行任务前需要检查当前任务是否处于完成状态
 func (ct *CronTask) Run() {
-	spiderTask, err := GetSpiderTaskByModel(ct.task)
+	task := &model.Task{}
+	err := model.NewTaskQuerySet(core.GetDB()).IDEq(ct.taskID).One(task)
 	if err != nil {
-		logrus.Errorf("cron task run err:%+v", errors.WithStack(err))
+		logrus.Errorf("run cron task failed, query task err:%+v", errors.WithStack(err))
+		return
+	}
+	if task.Status != common.TaskStatusCompleted {
+		logrus.Warnf("run cron task failed, status:%+v", errors.New(task.Status.String()))
+		return
+	}
+
+	spiderTask, err := GetSpiderTaskByModel(task)
+	if err != nil {
+		logrus.Errorf("run cron task failed, err:%+v", errors.WithStack(err))
 		return
 	}
 	if err := spider.Run(spiderTask, ct.retCh); err != nil {
-		logrus.Errorf("cron task run err:%+v", errors.WithStack(err))
-		ct.retCh <- common.MTS{ID: ct.task.ID, Status: common.TaskStatusUnexceptedExited}
+		logrus.Errorf("run cron task failed, err:%+v", errors.WithStack(err))
+		ct.retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusUnexceptedExited}
 		return
 	}
 
-	ct.retCh <- common.MTS{ID: ct.task.ID, Status: common.TaskStatusRunning}
+	ct.retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusRunning}
 }
 
 func (ct *CronTask) Start() error {
-	if err := ct.cr.AddJob(ct.task.CronSpec, ct); err != nil {
-		return errors.Wrapf(err, "cron add job failed, task name:%s", ct.task.TaskName)
+	if err := ct.cr.AddJob(ct.cronSpec, ct); err != nil {
+		return errors.Wrapf(err, "cron add job failed, taskID:%s", ct.taskID)
 	}
 	ct.cr.Start()
 	return nil
@@ -65,13 +79,14 @@ func (ct *CronTask) Stop() error {
 	if ct.cr == nil {
 		return errors.New("CronTask do not started")
 	}
+	cronTaskMap.Delete(ct.taskID)
 
 	ct.cr.Stop()
 	return nil
 }
 
-func GetCronTask(name string) (*CronTask, bool) {
-	ct, ok := cronTaskMap.Load(name)
+func GetCronTask(taskID uint64) (*CronTask, bool) {
+	ct, ok := cronTaskMap.Load(taskID)
 	if !ok {
 		return nil, false
 	}
@@ -79,8 +94,8 @@ func GetCronTask(name string) (*CronTask, bool) {
 }
 
 func AddCronTask(ct *CronTask) error {
-	if _, loaded := cronTaskMap.LoadOrStore(ct.task.TaskName, ct); loaded {
-		return errors.Wrap(ErrCronTaskDuplicated, "add cron task failed, name:"+ct.task.TaskName)
+	if _, loaded := cronTaskMap.LoadOrStore(ct.taskID, ct); loaded {
+		return errors.Wrap(ErrCronTaskDuplicated, fmt.Sprintf("add cron task failed, taskID:%d", ct.taskID))
 	}
 	return nil
 }

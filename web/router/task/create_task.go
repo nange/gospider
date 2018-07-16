@@ -59,7 +59,7 @@ func CreateTask(c *gin.Context) {
 
 	if task.CronSpec != "" {
 		logrus.Infof("starting cron task:%s", task.CronSpec)
-		ct, err := service.NewCronTask(&task, service.GetMTSChan())
+		ct, err := service.NewCronTask(task.ID, task.CronSpec, service.GetMTSChan())
 		if err != nil {
 			logrus.Errorf("new cron task failed! err:%+v", err)
 		} else {

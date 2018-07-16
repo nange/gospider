@@ -49,7 +49,7 @@ func CheckTask() {
 func RestartTask(task model.Task) error {
 	logrus.Infof("restarting task, taskID:%v", task.ID)
 
-	ct, err := NewCronTask(&task, GetMTSChan())
+	ct, err := NewCronTask(task.ID, task.CronSpec, GetMTSChan())
 	if err != nil {
 		logrus.Errorf("new cron task failed! err:%+v", err)
 		return err
