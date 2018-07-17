@@ -1,7 +1,5 @@
 //导入模块
 import axios from 'axios'
-import {port_code} from 'common/port_uri'
-import router from 'src/router'
 import {Message} from 'element-ui'
 import store from 'store'
 import {SET_USER_INFO} from 'store/actions/type'

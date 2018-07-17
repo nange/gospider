@@ -22,15 +22,15 @@ func GetTaskList(c *gin.Context) {
 	var req GetTaskListReq
 	if err := c.BindQuery(&req); err != nil {
 		logrus.Warnf("query param is invalid")
-		c.Data(http.StatusBadRequest, "", nil)
+		c.String(http.StatusBadRequest, "")
 		return
 	}
 	logrus.Infof("get task list req:%+v", req)
 
 	tasks, count, err := model.GetTaskList(req.Size, req.Offset)
 	if err != nil {
-		logrus.Errorf("GetTaskList failed! err:%#v", err)
-		c.Data(http.StatusInternalServerError, "", nil)
+		logrus.Errorf("GetTaskList failed! err:%+v", err)
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 

@@ -13,11 +13,13 @@ func Route(engine *gin.Engine) {
 	{
 		api.GET("/tasks", task.GetTaskList)
 		api.POST("/tasks", task.CreateTask)
+		api.PUT("/tasks/:id/stop", task.StopTask)
 
 		api.GET("/rules", rule.GetRuleList)
 
 		api.GET("/sysdbs", sysdb.GetSysDBs)
 		api.POST("/sysdbs", sysdb.CreateSysDB)
+
 	}
 
 	box := packr.NewBox("../static/dist")

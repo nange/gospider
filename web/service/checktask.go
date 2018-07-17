@@ -8,9 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// 检查任务状态
-// 1. 将TaskStatusRunning标记为TaskStatusUnexceptedExited
-// 2. 将TaskStatusCompleted并且是定时任务的状态重新启动
+// check task status
+// 1. set status to TaskStatusRunning if status is TaskStatusUnexceptedExited
+// 2. restart task if status is TaskStatusCompleted, TaskStatusRunning
 func CheckTask() {
 	logrus.Infof("starting check task goroutine")
 	qs := model.NewTaskQuerySet(core.GetDB())
@@ -36,7 +36,8 @@ func CheckTask() {
 			}
 		}
 
-		if task.Status == common.TaskStatusCompleted && task.CronSpec != "" {
+		if (task.Status == common.TaskStatusCompleted || task.Status == common.TaskStatusRunning) &&
+			task.CronSpec != "" {
 			if err := RestartTask(task); err != nil {
 				logrus.Errorf("restart task err:%+v", err)
 				continue

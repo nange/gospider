@@ -22,7 +22,7 @@ func GetSysDBs(c *gin.Context) {
 	var req GetSysDBListReq
 	if err := c.BindQuery(&req); err != nil {
 		logrus.Warnf("query param is invalid")
-		c.Data(http.StatusBadRequest, "", nil)
+		c.String(http.StatusBadRequest, "")
 		return
 	}
 	logrus.Infof("get sysdb list req:%+v", req)
@@ -30,7 +30,7 @@ func GetSysDBs(c *gin.Context) {
 	tasks, count, err := model.GetSysDBList(req.Size, req.Offset)
 	if err != nil {
 		logrus.Errorf("GetSysDBList failed! err:%+v", err)
-		c.Data(http.StatusInternalServerError, "", nil)
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 

@@ -48,7 +48,7 @@ func (ct *CronTask) Run() {
 		logrus.Errorf("run cron task failed, query task err:%+v", errors.WithStack(err))
 		return
 	}
-	if task.Status != common.TaskStatusCompleted {
+	if task.Status != common.TaskStatusCompleted && task.Status != common.TaskStatusUnexceptedExited {
 		logrus.Warnf("run cron task failed, status:%+v", errors.New(task.Status.String()))
 		return
 	}
@@ -59,7 +59,7 @@ func (ct *CronTask) Run() {
 		return
 	}
 	if err := spider.Run(spiderTask, ct.retCh); err != nil {
-		logrus.Errorf("run cron task failed, err:%+v", errors.WithStack(err))
+		logrus.Errorf("run cron task failed, err:%+v", err)
 		ct.retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusUnexceptedExited}
 		return
 	}
@@ -85,12 +85,12 @@ func (ct *CronTask) Stop() error {
 	return nil
 }
 
-func GetCronTask(taskID uint64) (*CronTask, bool) {
+func GetCronTask(taskID uint64) *CronTask {
 	ct, ok := cronTaskMap.Load(taskID)
 	if !ok {
-		return nil, false
+		return nil
 	}
-	return ct.(*CronTask), true
+	return ct.(*CronTask)
 }
 
 func AddCronTask(ct *CronTask) error {

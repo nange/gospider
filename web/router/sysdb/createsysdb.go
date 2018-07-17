@@ -23,7 +23,7 @@ func CreateSysDB(c *gin.Context) {
 	var req CreateSysDBReq
 	if err := c.BindJSON(&req); err != nil {
 		logrus.Errorf("bind json failed! err:%+v", err)
-		c.Data(http.StatusBadRequest, "", nil)
+		c.String(http.StatusBadRequest, "")
 		return
 	}
 	logrus.Infof("req:%+v", req)

@@ -34,7 +34,10 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 		collectors = append(collectors, nextC)
 	}
 
-	ctxCtl, _ := context.WithCancel(context.Background())
+	ctxCtl, cancel := context.WithCancel(context.Background())
+	if err := addTaskCtrl(task.ID, cancel); err != nil {
+		return errors.Wrapf(err, "addTaskCtrl failed")
+	}
 
 	for i := 0; i < nodesLen; i++ {
 		var ctx *Context
@@ -62,7 +65,10 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 			collectors[i].Wait()
 			logrus.Infof("task:%s %d step completed...", task.Name, i+1)
 		}
-		retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusCompleted}
+
+		if err := CancelTask(task.ID); err == nil {
+			retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusCompleted}
+		}
 		logrus.Infof("task:%s run completed...", task.Name)
 	}()
 

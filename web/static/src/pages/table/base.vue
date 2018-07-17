@@ -50,7 +50,7 @@
             <!-- <router-link :to="{name: 'tableUpdate', params: {id: props.row.id}}" tag="span"> -->
             <el-button type="info" size="small" icon="edit">修改</el-button>
             <!-- </router-link> -->
-            <el-button type="danger" size="small" icon="delete" @click="delete_data(props.row)">停止</el-button>
+            <el-button type="danger" size="small" @click="stop(props.row)">停止</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -100,49 +100,48 @@
       },
       //获取数据
       get_table_data(){
-        this.load_data = true
+        this.load_data = true;
         this.$fetch.api_table.list({
           offset: (this.currentPage-1)*this.size,
           size: this.size
         }).then((ret) => {
-            this.tableData = ret.data
+            this.tableData = ret.data;
             for (let v of this.tableData) {
-              v.isCron = '否'
+              v.isCron = '否';
               if (v.cron_spec) {
                 v.isCron = '是'
               }
             }
-            this.total = ret.total
+
+            this.total = ret.total;
             this.load_data = false
         }).catch(() => {
           this.load_data = false
         })
       },
       //单个删除
-      delete_data(item){
-        // TODO: 先直接返回，后面实现
-        return;
+      stop(item){
         this.$confirm('此操作将停止该任务, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
-          .then(() => {
-            this.load_data = true
-            this.$fetch.api_table.del(item)
-              .then(({msg}) => {
-                this.get_table_data()
-                this.$message.success(msg)
-              })
-              .catch(() => {
-              })
-          })
-          .catch(() => {
-          })
+        .then(() => {
+          this.load_data = true;
+          this.$fetch.api_table.stop(item.id)
+            .then(() => {
+              this.get_table_data();
+              this.$message.success('操作成功!')
+            })
+            .catch((error) => {
+              this.$message.error('停止任务出错!')
+            })
+        })
+
       },
       //页码选择
       handleCurrentChange(val) {
-        this.currentPage = val
+        this.currentPage = val;
         this.get_table_data()
       }
     }

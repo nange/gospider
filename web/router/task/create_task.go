@@ -24,19 +24,18 @@ type CreateTaskResp struct {
 	CreateAt time.Time `json:"create_at"`
 }
 
-// TODO: 定时任务停止功能
 func CreateTask(c *gin.Context) {
 	var req CreateTaskReq
 	if err := c.BindJSON(&req); err != nil {
 		logrus.Errorf("bind json failed! err:%+v", err)
-		c.Data(http.StatusBadRequest, "", nil)
+		c.String(http.StatusBadRequest, "")
 		return
 	}
 	logrus.Infof("req:%+v", req)
 
 	intID, err := strconv.Atoi(req.OutputSysDBID)
 	if err != nil {
-		c.Data(http.StatusBadRequest, "", nil)
+		c.String(http.StatusBadRequest, "")
 		return
 	}
 	req.Task.OutputSysDBID = uint64(intID)
@@ -53,7 +52,7 @@ func CreateTask(c *gin.Context) {
 	err = spider.Run(spiderTask, service.GetMTSChan())
 	if err != nil {
 		logrus.Errorf("spider run task failed! err:%+v", err)
-		c.Data(http.StatusInternalServerError, "", nil)
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 
