@@ -93,7 +93,7 @@
     "proxy",
     "storage"
   ]
-  revision = "f9e277f8f0b371c323de80d2b08cfcc7dadcbcd3"
+  revision = "c4dc277a2f6a75dcb5f2a48f59b0b77cedfc67c7"
 
 [[projects]]
   name = "github.com/golang/protobuf"

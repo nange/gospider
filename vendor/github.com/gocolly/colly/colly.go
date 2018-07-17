@@ -466,7 +466,6 @@ func (c *Collector) UnmarshalRequest(r []byte) (*Request, error) {
 
 func (c *Collector) scrape(u, method string, depth int, requestData io.Reader, ctx *Context, hdr http.Header, checkRevisit bool) error {
 	if err := c.requestCheck(u, method, depth, checkRevisit); err != nil {
-		log.Printf("check hash same: =============================%s", u)
 		return err
 	}
 	parsedURL, err := url.Parse(u)
@@ -629,9 +628,6 @@ func (c *Collector) requestCheck(u, method string, depth int, checkRevisit bool)
 		h := fnv.New64a()
 		h.Write([]byte(u))
 		uHash := h.Sum64()
-		if uHash == 6202852675557848002 || uHash == 17759289245879524381 || uHash == 1000530244807174295 {
-			log.Printf("check hash and url !!!!!!!!!!!!!!!!! hash:%v, url:%v \n\n", uHash, u)
-		}
 		visited, err := c.store.IsVisited(uHash)
 		if err != nil {
 			return err
