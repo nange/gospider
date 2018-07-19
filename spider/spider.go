@@ -78,6 +78,12 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 func addCallback(ctx *Context, node *Node) {
 	if node.OnRequest != nil {
 		ctx.c.OnRequest(func(req *colly.Request) {
+			defer func() {
+				if e := recover(); e != nil {
+					logrus.Errorf("OnRequest unexcepted exited, url:%s, err:%+v", req.URL.String(), e)
+				}
+			}()
+
 			newCtx := ctx.cloneWithReq(req)
 			select {
 			case <-newCtx.ctlCtx.Done():
@@ -86,12 +92,19 @@ func addCallback(ctx *Context, node *Node) {
 				return
 			default:
 			}
+
 			node.OnRequest(newCtx, newRequest(req, newCtx))
 		})
 	}
 
 	if node.OnError != nil {
 		ctx.c.OnError(func(res *colly.Response, e error) {
+			defer func() {
+				if e := recover(); e != nil {
+					logrus.Errorf("OnError unexcepted exited, url:%s, err:%+v", res.Request.URL.String(), e)
+				}
+			}()
+
 			newCtx := ctx.cloneWithReq(res.Request)
 			select {
 			case <-newCtx.ctlCtx.Done():
@@ -99,6 +112,7 @@ func addCallback(ctx *Context, node *Node) {
 				return
 			default:
 			}
+
 			err := node.OnError(newCtx, newResponse(res, newCtx), e)
 			if err != nil {
 				logrus.Warnf("node.OnError return err:%+v, request url:%s", err, res.Request.URL.String())
@@ -108,6 +122,12 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnResponse != nil {
 		ctx.c.OnResponse(func(res *colly.Response) {
+			defer func() {
+				if e := recover(); e != nil {
+					logrus.Errorf("OnResponse unexcepted exited, url:%s, err:%+v", res.Request.URL.String(), e)
+				}
+			}()
+
 			newCtx := ctx.cloneWithReq(res.Request)
 			select {
 			case <-newCtx.ctlCtx.Done():
@@ -115,6 +135,7 @@ func addCallback(ctx *Context, node *Node) {
 				return
 			default:
 			}
+
 			err := node.OnResponse(newCtx, newResponse(res, newCtx))
 			if err != nil {
 				logrus.Warnf("node.OnResponse return err:%+v, request url:%s", err, res.Request.URL.String())
@@ -126,6 +147,13 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnHTML {
 			f := fn
 			ctx.c.OnHTML(selector, func(el *colly.HTMLElement) {
+				defer func() {
+					if e := recover(); e != nil {
+						logrus.Errorf("OnHTML unexcepted exited, selector:%s, url:%s, err:%+v",
+							selector, el.Request.URL.String(), e)
+					}
+				}()
+
 				newCtx := ctx.cloneWithReq(el.Request)
 				select {
 				case <-newCtx.ctlCtx.Done():
@@ -133,6 +161,7 @@ func addCallback(ctx *Context, node *Node) {
 					return
 				default:
 				}
+
 				err := f(newCtx, newHTMLElement(el, newCtx))
 				if err != nil {
 					logrus.Warnf("node.OnHTML:%s return err:%+v, request url:%s", selector, err, el.Request.URL.String())
@@ -145,6 +174,13 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnXML {
 			f := fn
 			ctx.c.OnXML(selector, func(el *colly.XMLElement) {
+				defer func() {
+					if e := recover(); e != nil {
+						logrus.Errorf("OnXML unexcepted exited, selector:%s, url:%s, err:%+v",
+							selector, el.Request.URL.String(), e)
+					}
+				}()
+
 				newCtx := ctx.cloneWithReq(el.Request)
 				select {
 				case <-newCtx.ctlCtx.Done():
@@ -152,6 +188,7 @@ func addCallback(ctx *Context, node *Node) {
 					return
 				default:
 				}
+
 				err := f(newCtx, newXMLElement(el, newCtx))
 				if err != nil {
 					logrus.Warnf("node.OnXML:%s return err:%+v, request url:%s", selector, err, el.Request.URL.String())
@@ -162,6 +199,12 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnScraped != nil {
 		ctx.c.OnScraped(func(res *colly.Response) {
+			defer func() {
+				if e := recover(); e != nil {
+					logrus.Errorf("OnScraped unexcepted exited, url:%s, err:%+v", res.Request.URL.String(), e)
+				}
+			}()
+
 			newCtx := ctx.cloneWithReq(res.Request)
 			select {
 			case <-newCtx.ctlCtx.Done():
@@ -169,6 +212,7 @@ func addCallback(ctx *Context, node *Node) {
 				return
 			default:
 			}
+
 			err := node.OnScraped(newCtx, newResponse(res, newCtx))
 			if err != nil {
 				logrus.Warnf("node.OnScraped return err:%+v, request url:%s", err, res.Request.URL.String())
