@@ -2,6 +2,7 @@ package spider
 
 import (
 	"database/sql"
+	"reflect"
 	"regexp"
 	"time"
 
@@ -12,12 +13,37 @@ import (
 	"github.com/pkg/errors"
 )
 
+var outputModels = make(map[string]TaskOutputModel)
+
 type TaskConfig struct {
 	CronSpec     string
 	Option       Option
 	Limit        Limit
 	ProxyURLs    []string
 	OutputConfig OutputConfig
+}
+
+type TaskOutputModel interface {
+	TableName() string
+}
+
+func RegisterOutputModel(rule *TaskRule, model TaskOutputModel) {
+	rv := reflect.ValueOf(model)
+	if rv.IsNil() {
+		panic("register output model failed, model is nil")
+	}
+
+	if _, ok := outputModels[rule.Name]; ok {
+		panic("register model failed, already have the table name:" + model.TableName())
+	}
+	outputModels[rule.Name] = model
+}
+
+func GetTaskOutputModel(ruleName string) (TaskOutputModel, error) {
+	if model, ok := outputModels[ruleName]; ok {
+		return model, nil
+	}
+	return nil, errors.WithStack(ErrTaskOutputModelNotExist)
 }
 
 type Option struct {

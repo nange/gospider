@@ -10,6 +10,7 @@ var (
 	ErrTaskRuleHeadIsNil       = errors.New("task rule head is nil")
 	ErrTaskRuleNodesLenInvalid = errors.New("task rule nodes len is invalid")
 	ErrTaskRuleNodesKeyInvalid = errors.New("task rule nodes key should start from 0 and monotonically increasing")
+	ErrTaskOutputModelNotExist = errors.New("task output model not exist")
 )
 
 var (
