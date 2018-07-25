@@ -22,6 +22,17 @@ func NewMigSqlString(size int, defaultValue ...string) (sql string) {
 	return
 }
 
+func NewMigSqlStrings(columns []string, size int) (constraints map[string]*OutputConstraint) {
+	constraints = make(map[string]*OutputConstraint)
+	sql := fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", size)
+
+	for _, col := range columns {
+		constraints[col] = &OutputConstraint{Sql: sql}
+	}
+
+	return
+}
+
 func AutoMigrateHack(s *gorm.DB, rule *TaskRule) *gorm.DB {
 	db := s.Unscoped()
 	scope := db.NewScope(nil)
