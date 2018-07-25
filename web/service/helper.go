@@ -5,10 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/spider"
 	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
@@ -37,6 +39,11 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 	query := model.NewSysDBQuerySet(core.GetDB())
 	if err := query.IDEq(task.OutputSysDBID).One(&sdb); err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	err = autoMigrate(task, &sdb, rule)
+	if err != nil {
+		logrus.Error(err)
 	}
 
 	config := spider.TaskConfig{
@@ -75,4 +82,26 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 	}
 
 	return spider.NewTask(task.ID, *rule, config), nil
+}
+
+func autoMigrate(task *model.Task, sdb *model.SysDB, rule *spider.TaskRule) (err error) {
+	if task.OutputType != common.OutputTypeMySQL {
+		err = errors.New("auto migrate unsupported output type:" + task.OutputType)
+		return
+	}
+
+	db, err := common.NewGormDB(common.MySQLConf{
+		Host:     sdb.Host,
+		Port:     sdb.Port,
+		User:     sdb.User,
+		Password: sdb.Password,
+		DBName:   sdb.DBName,
+	})
+
+	if err != nil {
+		return
+	}
+
+	err = spider.AutoMigrateHack(db, rule).Error
+	return
 }

@@ -16,6 +16,8 @@ type TaskRule struct {
 	Description            string
 	Namespace              string
 	OutputFields           []string
+	OutputConstaints       map[string]*OutputConstraint
+	OutputTableOpts        string
 	DisableCookies         bool
 	AllowURLRevisit        bool
 	IgnoreRobotsTxt        bool
