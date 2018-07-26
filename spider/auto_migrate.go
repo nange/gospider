@@ -33,7 +33,7 @@ func NewStringsConstraints(columns []string, size ...int) (constraints map[strin
 	return NewConstraints(columns, s...)
 }
 
-func NewConstraints(columns []string, strSizeOrSqlConstraint ...interface{}) (constraints map[string]*OutputConstraint) {
+func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (constraints map[string]*OutputConstraint) {
 	constraints = make(map[string]*OutputConstraint)
 
 	if len(columns) == 0 {
@@ -41,12 +41,12 @@ func NewConstraints(columns []string, strSizeOrSqlConstraint ...interface{}) (co
 		return
 	}
 
-	switch len(strSizeOrSqlConstraint) {
+	switch len(sizeOrSqlConstraint) {
 	case 0:
-		logrus.Error("invalid parameter strSizeOrSqlConstraint")
+		logrus.Error("invalid parameter sizeOrSqlConstraint")
 		return
 	case 1:
-		switch v := strSizeOrSqlConstraint[0].(type) {
+		switch v := sizeOrSqlConstraint[0].(type) {
 		case int:
 			sql := fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", v)
 
@@ -55,7 +55,7 @@ func NewConstraints(columns []string, strSizeOrSqlConstraint ...interface{}) (co
 			}
 		case string:
 			if len(columns) > 1 {
-				logrus.Error("default strSizeOrSqlConstraint for all columns should be integer")
+				logrus.Error("default sizeOrSqlConstraint for all columns should be integer")
 			} else {
 				constraints[columns[0]] = &OutputConstraint{Sql: v}
 			}
@@ -63,13 +63,13 @@ func NewConstraints(columns []string, strSizeOrSqlConstraint ...interface{}) (co
 			logrus.Error("invalid parameter type")
 		}
 	default:
-		if len(columns) != len(strSizeOrSqlConstraint) {
-			logrus.Error("length of column and strSizeOrSqlConstraint are not match")
+		if len(columns) != len(sizeOrSqlConstraint) {
+			logrus.Error("length of column and sizeOrSqlConstraint are not match")
 			return
 		}
 
 		for idx, col := range columns {
-			switch v := strSizeOrSqlConstraint[idx].(type) {
+			switch v := sizeOrSqlConstraint[idx].(type) {
 			case int:
 				constraints[col] = &OutputConstraint{Sql: fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", v)}
 			case string:
