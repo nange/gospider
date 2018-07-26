@@ -16,7 +16,7 @@ type OutputConstraint struct {
 	UniqueIndex string
 }
 
-func NewMigSqlString(size int, defaultValue ...string) (sql string) {
+func NewSqlString(size int, defaultValue ...string) (sql string) {
 	if len(defaultValue) == 0 {
 		sql = fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", size)
 	} else {
@@ -25,7 +25,15 @@ func NewMigSqlString(size int, defaultValue ...string) (sql string) {
 	return
 }
 
-func NewMigSqlStrings(columns []string, size ...interface{}) (constraints map[string]*OutputConstraint) {
+func NewStringsConstraints(columns []string, size ...int) (constraints map[string]*OutputConstraint) {
+	s := make([]interface{}, len(size))
+	for i, v := range size {
+		s[i] = v
+	}
+	return NewConstraints(columns, s...)
+}
+
+func NewConstraints(columns []string, strSizeOrSqlConstraint ...interface{}) (constraints map[string]*OutputConstraint) {
 	constraints = make(map[string]*OutputConstraint)
 
 	if len(columns) == 0 {
@@ -33,12 +41,12 @@ func NewMigSqlStrings(columns []string, size ...interface{}) (constraints map[st
 		return
 	}
 
-	switch len(size) {
+	switch len(strSizeOrSqlConstraint) {
 	case 0:
-		logrus.Error("invalid parameter size")
+		logrus.Error("invalid parameter strSizeOrSqlConstraint")
 		return
 	case 1:
-		switch v := size[0].(type) {
+		switch v := strSizeOrSqlConstraint[0].(type) {
 		case int:
 			sql := fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", v)
 
@@ -47,7 +55,7 @@ func NewMigSqlStrings(columns []string, size ...interface{}) (constraints map[st
 			}
 		case string:
 			if len(columns) > 1 {
-				logrus.Error("default size for all columns should be integer")
+				logrus.Error("default strSizeOrSqlConstraint for all columns should be integer")
 			} else {
 				constraints[columns[0]] = &OutputConstraint{Sql: v}
 			}
@@ -55,13 +63,13 @@ func NewMigSqlStrings(columns []string, size ...interface{}) (constraints map[st
 			logrus.Error("invalid parameter type")
 		}
 	default:
-		if len(columns) != len(size) {
-			logrus.Error("length of column and size are not match")
+		if len(columns) != len(strSizeOrSqlConstraint) {
+			logrus.Error("length of column and strSizeOrSqlConstraint are not match")
 			return
 		}
 
 		for idx, col := range columns {
-			switch v := size[idx].(type) {
+			switch v := strSizeOrSqlConstraint[idx].(type) {
 			case int:
 				constraints[col] = &OutputConstraint{Sql: fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", v)}
 			case string:
