@@ -9,17 +9,20 @@ func init() {
 	spider.Register(rule)
 }
 
+var outputFields = []string{"category", "title", "link"}
+
 var rule = &spider.TaskRule{
 	Name:         "百度新闻规则",
 	Description:  "抓取百度新闻各个分类的最新焦点新闻",
 	Namespace:    "baidu_news",
-	OutputFields: []string{"category", "title", "link"},
-	OutputConstaints: map[string]*spider.OutputConstraint{
-		"title": {Sql: spider.NewMigSqlString(20), Index: "title_link, title_category"},
-		"link":  {Sql: spider.NewMigSqlString(20), Index: "title_link"},
-	},
-	OutputTableOpts: "CHARSET=utf8 COLLATE=utf8_unicode_ci",
-	AllowURLRevisit: true,
+	OutputFields: outputFields,
+	//OutputConstaints: map[string]*spider.OutputConstraint{
+	//	outputFields[0]: &spider.OutputConstraint{Sql: "varchar(64) not null default ''"},
+	//	outputFields[1]: &spider.OutputConstraint{Sql: "varchar(128) not null default ''"},
+	//	outputFields[2]: &spider.OutputConstraint{Sql: "varchar(256) not null default ''"},
+	//},
+	OutputConstaints: spider.NewStringsConstraints(outputFields, 64, 128, 512), // 上面的简写方式
+	AllowURLRevisit:  true,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error {
 			return ctx.VisitForNext("http://news.baidu.com")
