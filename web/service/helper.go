@@ -101,6 +101,7 @@ func autoMigrate(task *model.Task, sdb *model.SysDB, rule *spider.TaskRule) (err
 	if err != nil {
 		return
 	}
+	defer db.Close()
 
 	err = spider.AutoMigrateHack(db, rule).Error
 	return

@@ -7,6 +7,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// all code copied from gorm, just do some hack to support model defined by []string and map[string]constraints
+
 type OutputConstraint struct {
 	Sql         string
 	Index       string
@@ -34,11 +36,10 @@ func NewMigSqlStrings(columns []string, size int) (constraints map[string]*Outpu
 }
 
 func AutoMigrateHack(s *gorm.DB, rule *TaskRule) *gorm.DB {
-	db := s.Unscoped()
-	scope := db.NewScope(nil)
-	db = autoMigrate(scope, rule).DB()
+	scope := s.NewScope(nil)
+	s = autoMigrate(scope, rule).DB()
 
-	return db
+	return s
 }
 
 func autoMigrate(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
