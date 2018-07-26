@@ -41,9 +41,11 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	err = autoMigrate(task, &sdb, rule)
-	if err != nil {
-		logrus.Error(err)
+	if len(rule.OutputConstaints) > 0 {
+		err = autoMigrate(task, &sdb, rule)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 
 	config := spider.TaskConfig{
@@ -85,11 +87,6 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 }
 
 func autoMigrate(task *model.Task, sdb *model.SysDB, rule *spider.TaskRule) (err error) {
-	if task.OutputType != common.OutputTypeMySQL {
-		err = errors.New("auto migrate unsupported output type:" + task.OutputType)
-		return
-	}
-
 	db, err := common.NewGormDB(common.MySQLConf{
 		Host:     sdb.Host,
 		Port:     sdb.Port,

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 // all code copied from gorm, just do some hack to support model defined by []string and map[string]constraints
@@ -24,12 +25,52 @@ func NewMigSqlString(size int, defaultValue ...string) (sql string) {
 	return
 }
 
-func NewMigSqlStrings(columns []string, size int) (constraints map[string]*OutputConstraint) {
+func NewMigSqlStrings(columns []string, size ...interface{}) (constraints map[string]*OutputConstraint) {
 	constraints = make(map[string]*OutputConstraint)
-	sql := fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", size)
 
-	for _, col := range columns {
-		constraints[col] = &OutputConstraint{Sql: sql}
+	if len(columns) == 0 {
+		logrus.Error("columns should contain at least 1 element")
+		return
+	}
+
+	switch len(size) {
+	case 0:
+		logrus.Error("invalid parameter size")
+		return
+	case 1:
+		switch v := size[0].(type) {
+		case int:
+			sql := fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", v)
+
+			for _, col := range columns {
+				constraints[col] = &OutputConstraint{Sql: sql}
+			}
+		case string:
+			if len(columns) > 1 {
+				logrus.Error("default size for all columns should be integer")
+			} else {
+				constraints[columns[0]] = &OutputConstraint{Sql: v}
+			}
+		default:
+			logrus.Error("invalid parameter type")
+		}
+	default:
+		if len(columns) != len(size) {
+			logrus.Error("length of column and size are not match")
+			return
+		}
+
+		for idx, col := range columns {
+			switch v := size[idx].(type) {
+			case int:
+				constraints[col] = &OutputConstraint{Sql: fmt.Sprintf("VARCHAR(%d) NOT NULL DEFAULT ''", v)}
+			case string:
+				constraints[col] = &OutputConstraint{Sql: v}
+			default:
+				logrus.Error(fmt.Sprintf("parameter form idx<%d>, column<%s> is invalid", idx, col))
+				return
+			}
+		}
 	}
 
 	return
@@ -101,7 +142,7 @@ func createTable(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
 	}
 
 	if !foundId {
-		tags = append(tags, "`id` bigint(64) unsigned NOT NULL AUTO_INCREMENT")
+		tags = append([]string{"`id` bigint(64) unsigned NOT NULL AUTO_INCREMENT"}, tags...)
 		primaryKeys = append(primaryKeys, `id`)
 	}
 	if !foundCreatedAt {
