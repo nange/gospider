@@ -41,7 +41,7 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	if len(rule.OutputConstaints) > 0 {
+	if len(rule.OutputConstaints) > 0 && task.OutputType == common.OutputTypeMySQL {
 		err = autoMigrate(task, &sdb, rule)
 		if err != nil {
 			logrus.Error(err)
