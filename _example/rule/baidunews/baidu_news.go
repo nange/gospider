@@ -10,10 +10,15 @@ func init() {
 }
 
 var rule = &spider.TaskRule{
-	Name:            "百度新闻规则",
-	Description:     "抓取百度新闻各个分类的最新焦点新闻",
-	Namespace:       "baidu_news",
-	OutputFields:    []string{"category", "title", "link"},
+	Name:         "百度新闻规则",
+	Description:  "抓取百度新闻各个分类的最新焦点新闻",
+	Namespace:    "baidu_news",
+	OutputFields: []string{"category", "title", "link"},
+	OutputConstaints: map[string]*spider.OutputConstraint{
+		"title": {Sql: spider.NewMigSqlString(20), Index: "title_link, title_category"},
+		"link":  {Sql: spider.NewMigSqlString(20), Index: "title_link"},
+	},
+	OutputTableOpts: "CHARSET=utf8 COLLATE=utf8_unicode_ci",
 	AllowURLRevisit: true,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error {
