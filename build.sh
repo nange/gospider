@@ -41,7 +41,7 @@ if [ $? != 0 ];then
  	exit
 fi
 
-go build main.go
+go build
 
 if [ $? != 0 ];then
  	echo "exec go build main.go failed\n"
