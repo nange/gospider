@@ -32,6 +32,20 @@ export function stop(id) {
     method: 'put'
   })
 }
+//根据id启动非定时任务
+export function start(id) {
+  return fetch({
+    url: '/api/tasks/' + id + '/start',
+    method: 'put'
+  })
+}
+//根据id重启定时任务
+export function restart(id) {
+  return fetch({
+    url: '/api/tasks/' + id + '/restart',
+    method: 'put'
+  })
+}
 //添加或修改数据
 export function save(data) {
   return fetch({
