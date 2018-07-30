@@ -49,6 +49,11 @@ func CreateTask(c *gin.Context) {
 	}
 
 	spiderTask, err := service.GetSpiderTaskByModel(&task)
+	if err != nil {
+		logrus.Errorf("spider get model task failed! err:%+v", err)
+		c.String(http.StatusInternalServerError, "")
+		return
+	}
 	err = spider.Run(spiderTask, service.GetMTSChan())
 	if err != nil {
 		logrus.Errorf("spider run task failed! err:%+v", err)

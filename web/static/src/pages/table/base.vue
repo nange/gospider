@@ -46,11 +46,13 @@
         <el-table-column
           label="操作">
           <template scope="props">
-            <el-button type="info" size="small">查看详情</el-button>
+            <el-button v-if="props.row.optionbutton & 0b10000" type="info" size="small">详情</el-button>
             <!-- <router-link :to="{name: 'tableUpdate', params: {id: props.row.id}}" tag="span"> -->
-            <el-button type="info" size="small" icon="edit">修改</el-button>
+            <el-button v-if="props.row.optionbutton & 0b01000" type="info" size="small" icon="edit">修改</el-button>
             <!-- </router-link> -->
-            <el-button type="danger" size="small" @click="stop(props.row)">停止</el-button>
+            <el-button v-if="props.row.optionbutton & 0b00100" type="danger" size="small" @click="stop(props.row)">停止</el-button>
+            <el-button v-if="props.row.optionbutton & 0b00010" type="info" size="small" @click="start(props.row)">启动</el-button>
+            <el-button v-if="props.row.optionbutton & 0b00001" type="info" size="small" @click="restart(props.row)">重启</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -109,7 +111,42 @@
             for (let v of this.tableData) {
               v.isCron = '否';
               if (v.cron_spec) {
-                v.isCron = '是'
+                v.isCron = '是';
+              }
+              //操作按钮，用5位2进制数表示，每位控制一个按钮是否显示
+              // ----0----0----0----0----0----
+              // ----|----|----|----|----|----
+              // ---详情--修改-停止--启动-重启---
+              switch(v.status)
+              {
+                case "未知状态":
+                  v.optionbutton = 0b10000;
+                  break;
+                case "运行中":
+                  v.optionbutton = 0b10100;
+                  break;
+                case "暂停":
+                  v.optionbutton = 0b10100;
+                  break;
+                case "停止":
+                  v.optionbutton = 0b11010;
+                  if (v.cron_spec){v.optionbutton = 0b11001;}
+                  break;
+                case "异常退出":
+                  v.optionbutton = 0b11010;
+                  if (v.cron_spec){v.optionbutton = 0b11100;}
+                  break;
+                case "完成":
+                  v.optionbutton = 0b11010;
+                  if (v.cron_spec){v.optionbutton = 0b11100;}
+                  break;
+                case "运行超时":
+                  v.optionbutton = 0b11010;
+                  if (v.cron_spec){v.optionbutton = 0b11100;}
+                  break;
+                default:
+                  v.optionbutton = 0b10000;
+                  break;
               }
             }
 
@@ -137,7 +174,44 @@
               this.$message.error('停止任务出错!')
             })
         })
-
+      },
+      //非定时任务启动
+      start(item){
+        this.$confirm('是否启动该任务?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        .then(() => {
+          this.load_data = true;
+          this.$fetch.api_table.start(item.id)
+            .then(() => {
+              this.get_table_data();
+              this.$message.success('操作成功!')
+            })
+            .catch((error) => {
+              this.$message.error('启动任务出错!')
+            })
+        })
+      },
+      //定时任务重启
+      restart(item){
+        this.$confirm('是否重启该定时任务?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        .then(() => {
+          this.load_data = true;
+          this.$fetch.api_table.restart(item.id)
+            .then(() => {
+              this.get_table_data();
+              this.$message.success('操作成功!')
+            })
+            .catch((error) => {
+              this.$message.error('重启任务出错!')
+            })
+        })
       },
       //页码选择
       handleCurrentChange(val) {
