@@ -37,7 +37,7 @@ func StopTask(c *gin.Context) {
 
 	// cancel spider task
 	if err := spider.CancelTask(taskID); err != nil {
-		logrus.Warnf("spider.CancelTask err:%+v", err)
+		logrus.Warnf("spider.CancelTask err:%v", err)
 	}
 
 	// set task status to TaskStatusStopped
@@ -152,7 +152,7 @@ func RestartTask(c *gin.Context) {
 
 		// cancel spider task
 		if err := spider.CancelTask(taskID); err != nil {
-			logrus.Warnf("spider.CancelTask err:%+v", err)
+			logrus.Warnf("spider.CancelTask err:%v", err)
 		}
 
 		logrus.Errorf("RestartTaskReq update task status err:%+v", errors.WithStack(err))
