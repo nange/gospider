@@ -69,7 +69,7 @@ func (ct *CronTask) Run() {
 
 func (ct *CronTask) Start() error {
 	if err := ct.cr.AddJob(ct.cronSpec, ct); err != nil {
-		return errors.Wrapf(err, "cron add job failed, taskID:%s", ct.taskID)
+		return errors.Wrapf(err, "cron add job failed, taskID:%d", ct.taskID)
 	}
 	ct.cr.Start()
 	return nil

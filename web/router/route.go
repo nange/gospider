@@ -14,6 +14,8 @@ func Route(engine *gin.Engine) {
 		api.GET("/tasks", task.GetTaskList)
 		api.POST("/tasks", task.CreateTask)
 		api.PUT("/tasks/:id/stop", task.StopTask)
+		api.PUT("/tasks/:id/start", task.StartTask)
+		api.PUT("/tasks/:id/restart", task.RestartTask)
 
 		api.GET("/rules", rule.GetRuleList)
 

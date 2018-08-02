@@ -60,7 +60,10 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 	}
 
 	go func() {
-		defer db.Close()
+		if db != nil {
+			defer db.Close()
+		}
+
 		for i := 0; i < nodesLen; i++ {
 			collectors[i].Wait()
 			logrus.Infof("task:%s %d step completed...", task.Name, i+1)
