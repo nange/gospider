@@ -7,26 +7,28 @@ import (
 var taskLock *TaskLock
 
 type TaskLock struct {
-	taskLock   *sync.Map
-	taskMaxLen uint64
+	taskLock map[uint64]bool
+	sync.Mutex
 }
 
 func init() {
 	taskLock = &TaskLock{
-		taskLock:   &sync.Map{},
-		taskMaxLen: uint64(1000),
+		taskLock: make(map[uint64]bool),
 	}
 }
 
-func (tl *TaskLock) IsLock(taskid uint64) bool {
-	value, _ := tl.taskLock.LoadOrStore(taskid%tl.taskMaxLen, false)
-	return value == true
+func (tl *TaskLock) IsRunning(taskid uint64) bool {
+	tl.Lock()
+	defer tl.Unlock()
+	if tl.taskLock[taskid] {
+		return true
+	}
+	tl.taskLock[taskid] = true
+	return false
 }
 
-func (tl *TaskLock) Lock(taskid uint64) {
-	tl.taskLock.Store(taskid%tl.taskMaxLen, true)
-}
-
-func (tl *TaskLock) UnLock(taskid uint64) {
-	tl.taskLock.Store(taskid%tl.taskMaxLen, false)
+func (tl *TaskLock) Complete(taskid uint64) {
+	tl.Lock()
+	defer tl.Unlock()
+	delete(tl.taskLock, taskid)
 }

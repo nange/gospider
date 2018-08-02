@@ -30,15 +30,11 @@ func StartTask(c *gin.Context) {
 	}
 	logrus.Infof("StartTaskReq:%+v", taskID)
 
-	if taskLock.IsLock(taskID) {
+	if taskLock.IsRunning(taskID) {
 		c.String(http.StatusConflict, "任务正在执行")
 		return
 	}
-
-	taskLock.Lock(taskID)
-	defer func() {
-		taskLock.UnLock(taskID)
-	}()
+	defer taskLock.Complete(taskID)
 
 	// query task info from db
 	task := &model.Task{}
