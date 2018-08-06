@@ -59,7 +59,7 @@ func RestartTask(c *gin.Context) {
 	}
 
 	// create crontab task
-	err = service.RestartTask(*task)
+	err = service.CreateCronTask(*task)
 	if err != nil {
 		logrus.Errorf("RestartTaskReq run task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)

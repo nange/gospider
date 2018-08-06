@@ -46,11 +46,20 @@ export function restart(id) {
     method: 'put'
   })
 }
-//添加或修改数据
+//添加数据
 export function save(data) {
   return fetch({
     url: '/api/tasks',
     method: 'post',
+    data
+  })
+}
+
+//修改数据
+export function update(data) {
+  return fetch({
+    url: '/api/tasks',
+    method: 'put',
     data
   })
 }
