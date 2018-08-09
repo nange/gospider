@@ -18,18 +18,20 @@ type Context struct {
 	c     *colly.Collector
 	nextC *colly.Collector
 
-	ctlCtx context.Context
+	ctlCtx    context.Context
+	ctlCancel context.CancelFunc
 
 	// output
 	outputDB *sql.DB
 }
 
-func newContext(ctx context.Context, task *Task, c *colly.Collector, nextC *colly.Collector) *Context {
+func newContext(ctx context.Context, cancel context.CancelFunc, task *Task, c *colly.Collector, nextC *colly.Collector) *Context {
 	return &Context{
-		task:   task,
-		c:      c,
-		nextC:  nextC,
-		ctlCtx: ctx,
+		task:      task,
+		c:         c,
+		nextC:     nextC,
+		ctlCtx:    ctx,
+		ctlCancel: cancel,
 	}
 }
 
@@ -37,11 +39,12 @@ func (ctx *Context) cloneWithReq(req *colly.Request) *Context {
 	newctx := context.WithValue(ctx.ctlCtx, "req", req)
 
 	return &Context{
-		task:     ctx.task,
-		c:        ctx.c,
-		nextC:    ctx.nextC,
-		ctlCtx:   newctx,
-		outputDB: ctx.outputDB,
+		task:      ctx.task,
+		c:         ctx.c,
+		nextC:     ctx.nextC,
+		ctlCtx:    newctx,
+		ctlCancel: ctx.ctlCancel,
+		outputDB:  ctx.outputDB,
 	}
 }
 

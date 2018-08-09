@@ -47,9 +47,9 @@
           label="操作">
           <template scope="props">
             <el-button v-if="props.row.optionbutton & 0b10000" type="info" size="small">详情</el-button>
-            <!-- <router-link :to="{name: 'tableUpdate', params: {id: props.row.id}}" tag="span"> -->
+            <router-link :to="{name: 'tableUpdate', params: {id: props.row.id}}" tag="span">
             <el-button v-if="props.row.optionbutton & 0b01000" type="info" size="small" icon="edit">修改</el-button>
-            <!-- </router-link> -->
+            </router-link>
             <el-button v-if="props.row.optionbutton & 0b00100" type="danger" size="small" @click="stop(props.row)">停止</el-button>
             <el-button v-if="props.row.optionbutton & 0b00010" type="info" size="small" @click="start(props.row)">启动</el-button>
             <el-button v-if="props.row.optionbutton & 0b00001" type="info" size="small" @click="restart(props.row)">重启</el-button>
@@ -123,7 +123,7 @@
                   v.optionbutton = 0b10000;
                   break;
                 case "运行中":
-                  v.optionbutton = 0b10100;
+                  v.optionbutton = 0b11100;
                   break;
                 case "暂停":
                   v.optionbutton = 0b10100;

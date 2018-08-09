@@ -12,7 +12,9 @@ func Route(engine *gin.Engine) {
 	api := engine.Group("/api")
 	{
 		api.GET("/tasks", task.GetTaskList)
+		api.GET("/tasks/:id", task.GetTaskByID)
 		api.POST("/tasks", task.CreateTask)
+		api.PUT("/tasks/:id", task.UpdateTask)
 		api.PUT("/tasks/:id/stop", task.StopTask)
 		api.PUT("/tasks/:id/start", task.StartTask)
 		api.PUT("/tasks/:id/restart", task.RestartTask)

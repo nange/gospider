@@ -31,7 +31,7 @@ func RestartTask(c *gin.Context) {
 	logrus.Infof("RestartTaskReq:%+v", taskID)
 
 	if taskLock.IsRunning(taskID) {
-		c.String(http.StatusConflict, "任务正在执行")
+		c.String(http.StatusConflict, "other operation is running")
 		return
 	}
 	defer taskLock.Complete(taskID)
@@ -59,7 +59,7 @@ func RestartTask(c *gin.Context) {
 	}
 
 	// create crontab task
-	err = service.RestartTask(*task)
+	err = service.CreateCronTask(*task)
 	if err != nil {
 		logrus.Errorf("RestartTaskReq run task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)

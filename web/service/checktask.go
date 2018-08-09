@@ -38,7 +38,7 @@ func CheckTask() {
 
 		if (task.Status == common.TaskStatusCompleted || task.Status == common.TaskStatusRunning ||
 			task.Status == common.TaskStatusUnexceptedExited) && task.CronSpec != "" {
-			if err := RestartTask(task); err != nil {
+			if err := CreateCronTask(task); err != nil {
 				logrus.Errorf("restart task err:%+v", err)
 				continue
 			}
@@ -47,7 +47,7 @@ func CheckTask() {
 
 }
 
-func RestartTask(task model.Task) error {
+func CreateCronTask(task model.Task) error {
 	logrus.Infof("restarting task, taskID:%v", task.ID)
 
 	ct, err := NewCronTask(task.ID, task.CronSpec, GetMTSChan())

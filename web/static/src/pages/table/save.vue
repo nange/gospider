@@ -8,10 +8,10 @@
         <el-col :span="12">
           <el-form ref="form" :model="form" :rules="rules" label-width="120px">
             <el-form-item label="任务名称:" prop="task_name">
-              <el-input v-model="form.task_name" placeholder="请输入内容"></el-input>
+              <el-input v-model="form.task_name" placeholder="请输入内容" :disabled="routeID"></el-input>
             </el-form-item>
             <el-form-item label="任务规则名:" prop="task_rule_name">
-              <el-select v-model="form.task_rule_name" placeholder="请选择">
+              <el-select v-model="form.task_rule_name" placeholder="请选择" :disabled="routeID">
                 <el-option
                   v-for="item in ruleOpts"
                   :key="item"
@@ -50,7 +50,7 @@
                 <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
                 <el-option key="csv" label="CSV" value="csv"></el-option>
               </el-select>
-              <el-select v-model="form.sysdb_id" placeholder="请选择" v-if="showSysDB">
+              <el-select v-model="form.output_sysdb_id" placeholder="请选择" v-if="showSysDB">
                 <el-option
                   v-for="item in sysDBs"
                   :key="item.id"
@@ -122,10 +122,9 @@
       //获取数据
       getTaskRuleList() {
         this.loadData = true
-        this.$fetch.api_table.get({
-          id: this.routeID
-        })
-          .then(({data}) => {
+        this.$fetch.api_table.get(this.routeID
+        )
+          .then((data) => {
             this.form = data
             this.loadData = false
           })
@@ -169,7 +168,19 @@
         this.$refs.form.validate((valid) => {
           if (!valid) return false
           this.on_submit_loading = true
-          this.$fetch.api_table.save(this.form)
+          if (this.routeID) {
+            this.$fetch.api_table.update(this.routeID, this.form)
+            .then((ret) => {
+              this.$message.success('任务修改成功!  任务ID:' + ret.id + '  3秒钟后跳转到任务列表页面!')
+              this.on_submit_loading = false
+              this.submit_disable = true
+              setTimeout(() => this.$router.push({name: 'tableBase'}), 3000)
+            })
+            .catch(() => {
+              this.on_submit_loading = false
+            })
+          } else {
+            this.$fetch.api_table.save(this.form)
             .then((ret) => {
               this.$message.success('任务创建成功!  任务ID:' + ret.id + '  3秒钟后跳转到任务列表页面!')
               this.on_submit_loading = false
@@ -179,6 +190,7 @@
             .catch(() => {
               this.on_submit_loading = false
             })
+          }
         })
       }
     },

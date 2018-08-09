@@ -61,7 +61,7 @@ const routes = [{
   }, {
     path: '/table/update/:id',
     name: 'tableUpdate',
-    component: saveTableComponent,
+    component: {extends: saveTableComponent},
     meta: {
       title: "修改任务",
       auth: true

@@ -10,7 +10,7 @@ import (
 //go:generate goqueryset -in sysdb.go
 // gen:qs
 type SysDB struct {
-	ID        uint64    `json:"id,string" gorm:"column:id;type:bigint unsigned AUTO_INCREMENT;primary_key"`
+	ID        uint64    `json:"id" gorm:"column:id;type:bigint unsigned AUTO_INCREMENT;primary_key"`
 	ShowName  string    `json:"show_name" gorm:"column:show_name;type:varchar(64);not null;unique_index:uk_show_name"`
 	Host      string    `json:"host" gorm:"column:host;type:varchar(128);not null"`
 	Port      int       `json:"port" gorm:"column:port;type:int;not null"`
