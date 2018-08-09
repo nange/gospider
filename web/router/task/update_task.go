@@ -105,7 +105,9 @@ func taskCanBeUpdate(task *model.Task) bool {
 	return task.Status == common.TaskStatusStopped ||
 		task.Status == common.TaskStatusUnexceptedExited ||
 		task.Status == common.TaskStatusCompleted ||
-		task.Status == common.TaskStatusRunningTimeout
+		task.Status == common.TaskStatusRunningTimeout ||
+		task.Status == common.TaskStatusRunning
+
 }
 
 func cronTaskStopAndCreate(taskID uint64, taskStatus common.TaskStatus, oldtask, newtask model.Task) error {

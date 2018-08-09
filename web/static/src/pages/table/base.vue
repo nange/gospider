@@ -123,7 +123,7 @@
                   v.optionbutton = 0b10000;
                   break;
                 case "运行中":
-                  v.optionbutton = 0b10100;
+                  v.optionbutton = 0b11100;
                   break;
                 case "暂停":
                   v.optionbutton = 0b10100;
