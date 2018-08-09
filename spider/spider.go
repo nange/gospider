@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/gocolly/colly"
 	"github.com/nange/gospider/common"
@@ -43,9 +44,9 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 	for i := 0; i < nodesLen; i++ {
 		var ctx *Context
 		if i != nodesLen-1 {
-			ctx = newContext(ctxCtl, task, collectors[i], collectors[i+1])
+			ctx = newContext(ctxCtl, cancel, task, collectors[i], collectors[i+1])
 		} else {
-			ctx = newContext(ctxCtl, task, collectors[i], nil)
+			ctx = newContext(ctxCtl, cancel, task, collectors[i], nil)
 		}
 		if task.OutputConfig.Type == common.OutputTypeMySQL {
 			ctx.setOutputDB(db)
@@ -54,7 +55,7 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 		addCallback(ctx, task.Rule.Nodes[i])
 	}
 
-	headCtx := newContext(ctxCtl, task, c, collectors[0])
+	headCtx := newContext(ctxCtl, cancel, task, c, collectors[0])
 	headWrapper := func(ctx *Context) (err error) {
 		defer func() {
 			if e := recover(); e != nil {
@@ -64,7 +65,7 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 					str := fmt.Sprintf("%v", e)
 					err = errors.New(str)
 				}
-				logrus.Errorf("Head unexcepted exited, err:%+v", e)
+				logrus.Errorf("Head unexcepted exited, err: %+v, stack:\n%s", e, string(debug.Stack()))
 			}
 		}()
 		return task.Rule.Head(ctx)
@@ -93,14 +94,17 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 	return nil
 }
 
+func cbDefer(ctx *Context, info string) {
+	if e := recover(); e != nil {
+		logrus.Error(info + fmt.Sprintf(", err: %+v, stack:\n%s", e, string(debug.Stack())))
+		ctx.ctlCancel()
+	}
+}
+
 func addCallback(ctx *Context, node *Node) {
 	if node.OnRequest != nil {
 		ctx.c.OnRequest(func(req *colly.Request) {
-			defer func() {
-				if e := recover(); e != nil {
-					logrus.Errorf("OnRequest unexcepted exited, url:%s, err:%+v", req.URL.String(), e)
-				}
-			}()
+			defer cbDefer(ctx, fmt.Sprintf("OnRequest unexcepted exited, url:%s", req.URL.String()))
 
 			newCtx := ctx.cloneWithReq(req)
 			select {
@@ -117,11 +121,7 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnError != nil {
 		ctx.c.OnError(func(res *colly.Response, e error) {
-			defer func() {
-				if e := recover(); e != nil {
-					logrus.Errorf("OnError unexcepted exited, url:%s, err:%+v", res.Request.URL.String(), e)
-				}
-			}()
+			defer cbDefer(ctx, fmt.Sprintf("OnError unexcepted exited, url:%s", res.Request.URL.String()))
 
 			newCtx := ctx.cloneWithReq(res.Request)
 			select {
@@ -140,11 +140,7 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnResponse != nil {
 		ctx.c.OnResponse(func(res *colly.Response) {
-			defer func() {
-				if e := recover(); e != nil {
-					logrus.Errorf("OnResponse unexcepted exited, url:%s, err:%+v", res.Request.URL.String(), e)
-				}
-			}()
+			defer cbDefer(ctx, fmt.Sprintf("OnResponse unexcepted exited, url:%s", res.Request.URL.String()))
 
 			newCtx := ctx.cloneWithReq(res.Request)
 			select {
@@ -165,12 +161,7 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnHTML {
 			f := fn
 			ctx.c.OnHTML(selector, func(el *colly.HTMLElement) {
-				defer func() {
-					if e := recover(); e != nil {
-						logrus.Errorf("OnHTML unexcepted exited, selector:%s, url:%s, err:%+v",
-							selector, el.Request.URL.String(), e)
-					}
-				}()
+				defer cbDefer(ctx, fmt.Sprintf("OnHTML unexcepted exited, selector:%s, url:%s", selector, el.Request.URL.String()))
 
 				newCtx := ctx.cloneWithReq(el.Request)
 				select {
@@ -192,12 +183,7 @@ func addCallback(ctx *Context, node *Node) {
 		for selector, fn := range node.OnXML {
 			f := fn
 			ctx.c.OnXML(selector, func(el *colly.XMLElement) {
-				defer func() {
-					if e := recover(); e != nil {
-						logrus.Errorf("OnXML unexcepted exited, selector:%s, url:%s, err:%+v",
-							selector, el.Request.URL.String(), e)
-					}
-				}()
+				defer cbDefer(ctx, fmt.Sprintf("OnXML unexcepted exited, selector:%s, url:%s", selector, el.Request.URL.String()))
 
 				newCtx := ctx.cloneWithReq(el.Request)
 				select {
@@ -217,11 +203,7 @@ func addCallback(ctx *Context, node *Node) {
 
 	if node.OnScraped != nil {
 		ctx.c.OnScraped(func(res *colly.Response) {
-			defer func() {
-				if e := recover(); e != nil {
-					logrus.Errorf("OnScraped unexcepted exited, url:%s, err:%+v", res.Request.URL.String(), e)
-				}
-			}()
+			defer cbDefer(ctx, fmt.Sprintf("OnScraped unexcepted exited, url:%s", res.Request.URL.String()))
 
 			newCtx := ctx.cloneWithReq(res.Request)
 			select {
