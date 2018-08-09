@@ -10,15 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type GetTaskIDReq struct {
-	ID uint64 `json:"id" in:"path" validate:"@uint64[1,]"`
-}
-
-type GetTaskIDResp struct {
-	Total int        `json:"total"`
-	Data  model.Task `json:"data"`
-}
-
 func GetTaskByID(c *gin.Context) {
 	taskIDStr := c.Param("id")
 	if taskIDStr == "" {
@@ -42,9 +33,6 @@ func GetTaskByID(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "")
 		return
 	}
-	resp := &GetTaskIDResp{
-		Total: 1,
-		Data:  *task,
-	}
-	c.JSON(http.StatusOK, resp)
+
+	c.JSON(http.StatusOK, *task)
 }

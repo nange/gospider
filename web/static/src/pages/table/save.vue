@@ -50,7 +50,7 @@
                 <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
                 <el-option key="csv" label="CSV" value="csv"></el-option>
               </el-select>
-              <el-select v-model="form.sysdb_id" placeholder="请选择" v-if="showSysDB">
+              <el-select v-model="form.output_sysdb_id" placeholder="请选择" v-if="showSysDB">
                 <el-option
                   v-for="item in sysDBs"
                   :key="item.id"
@@ -125,12 +125,7 @@
         this.$fetch.api_table.get(this.routeID
         )
           .then((data) => {
-            this.form.id = this.routeID
-            this.form = data.data
-            this.form.status = 0
-            if (this.form.output_type == 'mysql') {
-              this.form.sysdb_id = this.form.output_sysdb_id.toString()
-            }
+            this.form = data
             this.loadData = false
           })
           .catch(() => {
@@ -174,7 +169,7 @@
           if (!valid) return false
           this.on_submit_loading = true
           if (this.routeID) {
-            this.$fetch.api_table.update(this.form)
+            this.$fetch.api_table.update(this.routeID, this.form)
             .then((ret) => {
               this.$message.success('任务修改成功!  任务ID:' + ret.id + '  3秒钟后跳转到任务列表页面!')
               this.on_submit_loading = false

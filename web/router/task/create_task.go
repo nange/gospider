@@ -2,7 +2,6 @@ package task
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +15,6 @@ import (
 
 type CreateTaskReq struct {
 	model.Task
-	OutputSysDBID string `json:"sysdb_id"`
 }
 
 type CreateTaskResp struct {
@@ -32,13 +30,6 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 	logrus.Infof("req:%+v", req)
-
-	intID, err := strconv.Atoi(req.OutputSysDBID)
-	if err != nil {
-		c.String(http.StatusBadRequest, "")
-		return
-	}
-	req.Task.OutputSysDBID = uint64(intID)
 
 	task := req.Task
 	task.Status = common.TaskStatusRunning

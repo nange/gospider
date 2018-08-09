@@ -24,25 +24,32 @@ type UpdateTaskResp struct {
 }
 
 func UpdateTask(c *gin.Context) {
+	taskIDStr := c.Param("id")
+	if taskIDStr == "" {
+		logrus.Warnf("UpdateTaskReq taskID is empty")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	taskID, err := strconv.ParseUint(taskIDStr, 10, 64)
+	if err != nil {
+		logrus.Warnf("UpdateTaskReq taskID format is invalid, taskID: %v", taskIDStr)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
 	var req UpdateTaskReq
 	if err := c.BindJSON(&req); err != nil {
 		logrus.Errorf("UpdateTaskReq bind json failed! err:%+v", err)
 		c.String(http.StatusBadRequest, "")
 		return
 	}
-	logrus.Infof("req:%+v", req)
+	logrus.Infof("UpdateTaskreq:%+v %+v", taskID, req)
+	req.Task.ID = taskID
 
-	intID, err := strconv.Atoi(req.OutputSysDBID)
-	if err != nil {
-		c.String(http.StatusBadRequest, "")
-		return
-	}
-	req.Task.OutputSysDBID = uint64(intID)
 	task := req.Task
 
-	taskID := task.ID
 	if taskLock.IsRunning(taskID) {
-		c.String(http.StatusConflict, "任务正在执行")
+		c.String(http.StatusConflict, "other option is running")
 		return
 	}
 	defer taskLock.Complete(taskID)
@@ -69,21 +76,19 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 	// update db
-	if err := task.Update(core.GetDB(), model.TaskDBSchemaField("id"),
-		model.TaskDBSchemaField("task_desc"), model.TaskDBSchemaField("cron_spec"),
-		model.TaskDBSchemaField("output_type"), model.TaskDBSchemaField("output_sysdb_id"),
-		model.TaskDBSchemaField("opt_user_agent"), model.TaskDBSchemaField("opt_max_depth"),
-		model.TaskDBSchemaField("opt_allowed_domains"), model.TaskDBSchemaField("opt_url_filters"),
-		model.TaskDBSchemaField("opt_max_body_size"), model.TaskDBSchemaField("limit_enable"),
-		model.TaskDBSchemaField("limit_domain_regexp"), model.TaskDBSchemaField("limit_domain_glob"),
-		model.TaskDBSchemaField("limit_delay"), model.TaskDBSchemaField("limit_random_delay"),
-		model.TaskDBSchemaField("limit_parallelism"), model.TaskDBSchemaField("proxy_urls"),
+	if err := task.Update(core.GetDB(),
+		model.TaskDBSchema.TaskDesc, model.TaskDBSchema.CronSpec,
+		model.TaskDBSchema.OutputType, model.TaskDBSchema.OutputSysDBID,
+		model.TaskDBSchema.OptUserAgent, model.TaskDBSchema.OptMaxDepth,
+		model.TaskDBSchema.OptAllowedDomains, model.TaskDBSchema.OptURLFilters,
+		model.TaskDBSchema.OptMaxBodySize, model.TaskDBSchema.LimitEnable,
+		model.TaskDBSchema.LimitDomainRegexp, model.TaskDBSchema.LimitDomainGlob,
+		model.TaskDBSchema.LimitDelay, model.TaskDBSchema.LimitRandomDelay,
+		model.TaskDBSchema.LimitParallelism, model.TaskDBSchema.ProxyURLs,
 	); err != nil {
 		// task roll back
 		if err := cronTaskStopAndCreate(taskID, oldtask.Status, task, *oldtask); err != nil {
 			logrus.Errorf("UpdateTaskReq rollback crontab task fail, taskID: %v , err: %+v", taskID, err)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
 		}
 		logrus.Errorf("UpdateTaskReq update task failed! err:%+v", err)
 		c.String(http.StatusInternalServerError, "")

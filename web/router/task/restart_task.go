@@ -31,7 +31,7 @@ func RestartTask(c *gin.Context) {
 	logrus.Infof("RestartTaskReq:%+v", taskID)
 
 	if taskLock.IsRunning(taskID) {
-		c.String(http.StatusConflict, "任务正在执行")
+		c.String(http.StatusConflict, "other option is running")
 		return
 	}
 	defer taskLock.Complete(taskID)

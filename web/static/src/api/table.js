@@ -56,9 +56,9 @@ export function save(data) {
 }
 
 //修改数据
-export function update(data) {
+export function update(id, data) {
   return fetch({
-    url: '/api/tasks',
+    url: '/api/tasks/' + id,
     method: 'put',
     data
   })
