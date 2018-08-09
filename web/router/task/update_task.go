@@ -49,7 +49,7 @@ func UpdateTask(c *gin.Context) {
 	task := req.Task
 
 	if taskLock.IsRunning(taskID) {
-		c.String(http.StatusConflict, "other option is running")
+		c.String(http.StatusConflict, "other operation is running")
 		return
 	}
 	defer taskLock.Complete(taskID)
