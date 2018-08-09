@@ -3,6 +3,7 @@ package spider
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/gocolly/colly"
 	"github.com/nange/gospider/common"
@@ -54,7 +55,21 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 	}
 
 	headCtx := newContext(ctxCtl, task, c, collectors[0])
-	if err := task.Rule.Head(headCtx); err != nil {
+	headWrapper := func(ctx *Context) (err error) {
+		defer func() {
+			if e := recover(); e != nil {
+				if v, ok := e.(error); ok {
+					err = v
+				} else {
+					str := fmt.Sprintf("%v", e)
+					err = errors.New(str)
+				}
+				logrus.Errorf("Head unexcepted exited, err:%+v", e)
+			}
+		}()
+		return task.Rule.Head(ctx)
+	}
+	if err := headWrapper(headCtx); err != nil {
 		logrus.Errorf("exec rule head func err:%#v", err)
 		return errors.WithStack(err)
 	}

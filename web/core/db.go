@@ -38,7 +38,7 @@ func Register(model Model) {
 
 func AutoMigrate() error {
 	for _, model := range modelList {
-		if err := db.Debug().AutoMigrate(model).Error; err != nil {
+		if err := db.Debug().Set("gorm:table_options", "CHARSET=utf8mb4").AutoMigrate(model).Error; err != nil {
 			return errors.Wrap(err, "db auto migrate failed")
 		}
 	}
