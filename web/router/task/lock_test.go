@@ -16,10 +16,10 @@ func TestLock(t *testing.T) {
 
 func op1(taskID uint64) {
 	if taskLock.IsRunning(taskID) {
-		fmt.Println("任务正在执行")
+		fmt.Println("task is running...")
 		return
 	}
 	defer taskLock.Complete(taskID)
-	fmt.Println("执行任务")
+	fmt.Println("run task")
 	time.Sleep(1 * time.Second)
 }
