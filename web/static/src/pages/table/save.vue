@@ -58,6 +58,7 @@
                   :value="item.id">
                 </el-option>
               </el-select>
+              <el-checkbox v-model="form.auto_migrate" v-if="showSysDB">自动建表</el-checkbox>
             </el-form-item>
 
             <el-form-item label="频率限制:">
@@ -95,6 +96,7 @@
         form: {
           opt_user_agent: navigator.userAgent,
           limit_enable: true,
+          auto_migrate: true,
           limit_parallelism: 1
         },
         showSysDB: false,
