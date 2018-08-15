@@ -11,12 +11,20 @@ func Register(rule *TaskRule) {
 	rules[rule.Name] = rule
 }
 
+type MultipleTablesConf struct {
+	OutputFields      []string
+	OutputConstraints map[string]*OutputConstraint
+	OutputTableOpts   string
+}
+
 type TaskRule struct {
 	Name                   string
 	Description            string
+	OutputToMultipleTables bool
+	MultipleTablesConf     map[string]MultipleTablesConf
 	Namespace              string
 	OutputFields           []string
-	OutputConstaints       map[string]*OutputConstraint
+	OutputConstraints      map[string]*OutputConstraint
 	OutputTableOpts        string
 	DisableCookies         bool
 	AllowURLRevisit        bool
