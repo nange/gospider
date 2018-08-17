@@ -11,18 +11,26 @@ func Register(rule *TaskRule) {
 	rules[rule.Name] = rule
 }
 
+type MultipleNamespacesConf struct {
+	OutputFields      []string
+	OutputConstraints map[string]*OutputConstraint
+	OutputTableOpts   string
+}
+
 type TaskRule struct {
-	Name                   string
-	Description            string
-	Namespace              string
-	OutputFields           []string
-	OutputConstaints       map[string]*OutputConstraint
-	OutputTableOpts        string
-	DisableCookies         bool
-	AllowURLRevisit        bool
-	IgnoreRobotsTxt        bool
-	ParseHTTPErrorResponse bool
-	Rule                   *Rule
+	Name                       string
+	Description                string
+	OutputToMultipleNamespaces bool
+	MultipleNamespacesConf     map[string]*MultipleNamespacesConf
+	Namespace                  string
+	OutputFields               []string
+	OutputConstraints          map[string]*OutputConstraint
+	OutputTableOpts            string
+	DisableCookies             bool
+	AllowURLRevisit            bool
+	IgnoreRobotsTxt            bool
+	ParseHTTPErrorResponse     bool
+	Rule                       *Rule
 }
 
 func GetTaskRule(ruleName string) (*TaskRule, error) {

@@ -91,37 +91,49 @@ func AutoMigrateHack(s *gorm.DB, rule *TaskRule) *gorm.DB {
 	return s
 }
 
-func autoMigrate(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
-	columns := rule.OutputFields
-	constraints := rule.OutputConstaints
+func autoMigrate(scope *gorm.Scope, rule *TaskRule) (s *gorm.Scope) {
+	if rule.OutputToMultipleNamespaces {
+		for key := range rule.MultipleNamespacesConf {
+			s = autoMigrateSingle(scope, rule, key)
+		}
+	} else {
+		s = autoMigrateSingle(scope, rule, rule.Namespace)
+	}
 
-	scope.Search.Table(rule.Namespace)
+	return
+}
+
+func autoMigrateSingle(scope *gorm.Scope, rule *TaskRule, table string) *gorm.Scope {
+	outputFields, constraints, _ := getOutputOpts(rule, table)
+	if len(outputFields) < 1 {
+		return scope
+	}
+
+	scope.Search.Table(table)
 	tableName := scope.TableName()
 	quotedTableName := scope.QuotedTableName()
 
 	if !scope.Dialect().HasTable(tableName) {
-		createTable(scope, rule)
+		createTable(scope, rule, table)
 	} else {
-		for _, field := range columns {
+		for _, field := range outputFields {
 			if !scope.Dialect().HasColumn(tableName, field) {
 				sqlTag := getColumnTag(field, constraints)
 				scope.Raw(fmt.Sprintf("ALTER TABLE %v ADD %v %v;", quotedTableName, scope.Quote(field), sqlTag)).Exec()
 			}
 		}
-		autoIndex(scope, rule)
+		autoIndex(scope, rule, table)
 	}
 	return scope
 }
 
-func createTable(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
+func createTable(scope *gorm.Scope, rule *TaskRule, table string) *gorm.Scope {
 	var tags []string
 	var primaryKeys []string
 
 	foundId := false
 	foundCreatedAt := false
-
-	columns := rule.OutputFields
-	constraints := rule.OutputConstaints
+	columns, constraints, outputTableOpts := getOutputOpts(rule, table)
 
 	for _, field := range columns {
 		isPrimaryKey := false
@@ -162,19 +174,31 @@ func createTable(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
 		primaryKeyStr = fmt.Sprintf(", PRIMARY KEY (%v)", strings.Join(primaryKeys, ","))
 	}
 
-	scope.Raw(fmt.Sprintf("CREATE TABLE %v (%v %v)%s", scope.QuotedTableName(), strings.Join(tags, ","), primaryKeyStr, getTableOptions(rule))).Exec()
+	scope.Raw(fmt.Sprintf("CREATE TABLE %v (%v %v)%s", scope.QuotedTableName(), strings.Join(tags, ","), primaryKeyStr, getTableOptions(outputTableOpts))).Exec()
 
-	autoIndex(scope, rule)
+	autoIndex(scope, rule, table)
 	return scope
 }
 
-func autoIndex(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
+func getOutputOpts(rule *TaskRule, table string) (outputFields []string, outputConstraints map[string]*OutputConstraint, outputTableOpts string) {
+	if rule.OutputToMultipleNamespaces {
+		outputFields = rule.MultipleNamespacesConf[table].OutputFields
+		outputConstraints = rule.MultipleNamespacesConf[table].OutputConstraints
+		outputTableOpts = rule.MultipleNamespacesConf[table].OutputTableOpts
+	} else {
+		outputFields = rule.OutputFields
+		outputConstraints = rule.OutputConstraints
+		outputTableOpts = rule.OutputTableOpts
+	}
+
+	return
+}
+
+func autoIndex(scope *gorm.Scope, rule *TaskRule, table string) *gorm.Scope {
 	var indexes = map[string][]string{}
 	var uniqueIndexes = map[string][]string{}
 
-	cols := rule.OutputFields
-	constraints := rule.OutputConstaints
-
+	cols, constraints, _ := getOutputOpts(rule, table)
 	if constraints == nil {
 		return scope
 	}
@@ -225,12 +249,12 @@ func autoIndex(scope *gorm.Scope, rule *TaskRule) *gorm.Scope {
 	return scope
 }
 
-func getTableOptions(rule *TaskRule) string {
-	if rule.OutputTableOpts == "" {
+func getTableOptions(outputTableOpts string) string {
+	if outputTableOpts == "" {
 		return " CHARSET=utf8mb4"
 	}
 
-	return " " + rule.OutputTableOpts
+	return " " + outputTableOpts
 }
 
 func getColumnTag(column string, constraints map[string]*OutputConstraint) (sqlTag string) {
