@@ -135,20 +135,20 @@ func (ctx *Context) Abort() {
 	ctx.ctlCtx.Value("req").(*colly.Request).Abort()
 }
 
-func (ctx *Context) Output(row map[int]interface{}, table ...string) error {
+func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 	var outputFields []string
-	var tableName string
+	var ns string
 
-	switch len(table) {
+	switch len(namespace) {
 	case 0:
 		outputFields = ctx.task.OutputFields
-		tableName = ctx.task.Namespace
+		ns = ctx.task.Namespace
 	case 1:
-		if !ctx.task.OutputToMultipleTables {
+		if !ctx.task.OutputToMultipleNamespaces {
 			return ErrOutputToMultipleTableDisabled
 		}
-		outputFields = ctx.task.MultipleTablesConf[table[0]].OutputFields
-		tableName = table[0]
+		outputFields = ctx.task.MultipleNamespacesConf[namespace[0]].OutputFields
+		ns = namespace[0]
 	default:
 		return ErrTooManyOutputTables
 	}
@@ -160,7 +160,7 @@ func (ctx *Context) Output(row map[int]interface{}, table ...string) error {
 	logrus.Infof("output row:%+v", row)
 
 	if ctx.task.OutputConfig.Type == common.OutputTypeMySQL {
-		if err := ctx.outputToDB(row, outputFields, tableName); err != nil {
+		if err := ctx.outputToDB(row, outputFields, ns); err != nil {
 			return err
 		}
 	}

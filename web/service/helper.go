@@ -87,9 +87,9 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 }
 
 func hasOutputConstraints(rule *spider.TaskRule) (b bool) {
-	if rule.OutputToMultipleTables {
-		for k := range rule.MultipleTablesConf {
-			if len(rule.MultipleTablesConf[k].OutputConstraints) > 0 {
+	if rule.OutputToMultipleNamespaces {
+		for k := range rule.MultipleNamespacesConf {
+			if len(rule.MultipleNamespacesConf[k].OutputConstraints) > 0 {
 				b = true
 				return
 			}

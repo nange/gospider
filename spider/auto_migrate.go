@@ -92,8 +92,8 @@ func AutoMigrateHack(s *gorm.DB, rule *TaskRule) *gorm.DB {
 }
 
 func autoMigrate(scope *gorm.Scope, rule *TaskRule) (s *gorm.Scope) {
-	if rule.OutputToMultipleTables {
-		for key := range rule.MultipleTablesConf {
+	if rule.OutputToMultipleNamespaces {
+		for key := range rule.MultipleNamespacesConf {
 			s = autoMigrateSingle(scope, rule, key)
 		}
 	} else {
@@ -181,10 +181,10 @@ func createTable(scope *gorm.Scope, rule *TaskRule, table string) *gorm.Scope {
 }
 
 func getOutputOpts(rule *TaskRule, table string) (outputFields []string, outputConstraints map[string]*OutputConstraint, outputTableOpts string) {
-	if rule.OutputToMultipleTables {
-		outputFields = rule.MultipleTablesConf[table].OutputFields
-		outputConstraints = rule.MultipleTablesConf[table].OutputConstraints
-		outputTableOpts = rule.MultipleTablesConf[table].OutputTableOpts
+	if rule.OutputToMultipleNamespaces {
+		outputFields = rule.MultipleNamespacesConf[table].OutputFields
+		outputConstraints = rule.MultipleNamespacesConf[table].OutputConstraints
+		outputTableOpts = rule.MultipleNamespacesConf[table].OutputTableOpts
 	} else {
 		outputFields = rule.OutputFields
 		outputConstraints = rule.OutputConstraints
