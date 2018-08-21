@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
 
 	qb "github.com/didi/gendry/builder"
 	"github.com/gocolly/colly"
@@ -194,8 +196,14 @@ func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, t
 		return errors.WithStack(err)
 	}
 
-	if _, err := ctx.outputDB.Exec(cond, vals...); err != nil {
-		logrus.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), cond, vals)
+	quotedCond, err := quoteQuery(cond)
+	if err != nil {
+		logrus.Error(err)
+		return errors.WithStack(err)
+	}
+
+	if _, err := ctx.outputDB.Exec(quotedCond, vals...); err != nil {
+		logrus.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), quotedCond, vals)
 		return errors.WithStack(err)
 	}
 
@@ -204,4 +212,16 @@ func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, t
 
 func (ctx *Context) outputToCVS(row map[int]interface{}) error {
 	return nil
+}
+
+func quoteQuery(sql string) (s string, err error) {
+	reg := regexp.MustCompile(`(?sU)(INSERT INTO .+ \(\s*)(.+)(\s*\) VALUES.+\))`)
+	matches := reg.FindStringSubmatch(sql)
+	if len(matches) != 4 {
+		err = errors.New("quote sql regexp not match")
+		return
+	}
+	fields := strings.Replace(matches[2], ",", "`,`", -1)
+	s = matches[1] + "`" + fields + "`" + matches[3]
+	return
 }
