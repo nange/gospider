@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
 
 	qb "github.com/didi/gendry/builder"
 	"github.com/gocolly/colly"
@@ -135,15 +137,32 @@ func (ctx *Context) Abort() {
 	ctx.ctlCtx.Value("req").(*colly.Request).Abort()
 }
 
-func (ctx *Context) Output(row map[int]interface{}) error {
-	if err := ctx.checkOutput(row); err != nil {
-		logrus.Errorf("checkOutput failed! err:%+v, fields:%#v, row:%+v", err, ctx.task.OutputFields, row)
+func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
+	var outputFields []string
+	var ns string
+
+	switch len(namespace) {
+	case 0:
+		outputFields = ctx.task.OutputFields
+		ns = ctx.task.Namespace
+	case 1:
+		if !ctx.task.OutputToMultipleNamespaces {
+			return ErrOutputToMultipleTableDisabled
+		}
+		outputFields = ctx.task.MultipleNamespacesConf[namespace[0]].OutputFields
+		ns = namespace[0]
+	default:
+		return ErrTooManyOutputTables
+	}
+
+	if err := ctx.checkOutput(row, outputFields); err != nil {
+		logrus.Errorf("checkOutput failed! err:%+v, fields:%#v, row:%+v", err, outputFields, row)
 		return err
 	}
 	logrus.Infof("output row:%+v", row)
 
 	if ctx.task.OutputConfig.Type == common.OutputTypeMySQL {
-		if err := ctx.outputToDB(row); err != nil {
+		if err := ctx.outputToDB(row, outputFields, ns); err != nil {
 			return err
 		}
 	}
@@ -151,12 +170,12 @@ func (ctx *Context) Output(row map[int]interface{}) error {
 	return nil
 }
 
-func (ctx *Context) checkOutput(row map[int]interface{}) error {
-	if len(ctx.task.OutputFields) != len(row) {
+func (ctx *Context) checkOutput(row map[int]interface{}, outputFields []string) error {
+	if len(outputFields) != len(row) {
 		return ErrOutputFieldsNotMatchOutputRow
 	}
 
-	for i := 0; i < len(ctx.task.OutputFields); i++ {
+	for i := 0; i < len(outputFields); i++ {
 		if _, ok := row[i]; !ok {
 			return ErrOutputFieldsNotMatchOutputRow
 		}
@@ -165,20 +184,26 @@ func (ctx *Context) checkOutput(row map[int]interface{}) error {
 	return nil
 }
 
-func (ctx *Context) outputToDB(row map[int]interface{}) error {
+func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, table string) error {
 	data := make(map[string]interface{})
-	for i, field := range ctx.task.OutputFields {
+	for i, field := range outputFields {
 		data[field] = row[i]
 	}
 
-	cond, vals, err := qb.BuildInsert(ctx.task.Namespace, []map[string]interface{}{data})
+	cond, vals, err := qb.BuildInsert(table, []map[string]interface{}{data})
 	if err != nil {
-		logrus.Errorf("build insert sql failed! err:%s, namespace:%s, row:%+v", err.Error(), ctx.task.Namespace, row)
+		logrus.Errorf("build insert sql failed! err:%s, namespace:%s, row:%+v", err.Error(), table, row)
 		return errors.WithStack(err)
 	}
 
-	if _, err := ctx.outputDB.Exec(cond, vals...); err != nil {
-		logrus.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), cond, vals)
+	quotedCond, err := quoteQuery(cond)
+	if err != nil {
+		logrus.Error(err)
+		return errors.WithStack(err)
+	}
+
+	if _, err := ctx.outputDB.Exec(quotedCond, vals...); err != nil {
+		logrus.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), quotedCond, vals)
 		return errors.WithStack(err)
 	}
 
@@ -187,4 +212,16 @@ func (ctx *Context) outputToDB(row map[int]interface{}) error {
 
 func (ctx *Context) outputToCVS(row map[int]interface{}) error {
 	return nil
+}
+
+func quoteQuery(sql string) (s string, err error) {
+	reg := regexp.MustCompile(`(?sU)(INSERT INTO .+ \(\s*)(.+)(\s*\) VALUES.+\))`)
+	matches := reg.FindStringSubmatch(sql)
+	if len(matches) != 4 {
+		err = errors.New("quote sql regexp not match")
+		return
+	}
+	fields := strings.Replace(matches[2], ",", "`,`", -1)
+	s = matches[1] + "`" + fields + "`" + matches[3]
+	return
 }

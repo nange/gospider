@@ -41,7 +41,7 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	if len(rule.OutputConstaints) > 0 && task.OutputType == common.OutputTypeMySQL && task.AutoMigrate {
+	if hasOutputConstraints(rule) && task.OutputType == common.OutputTypeMySQL && task.AutoMigrate {
 		err = autoMigrate(task, &sdb, rule)
 		if err != nil {
 			logrus.Error(err)
@@ -84,6 +84,21 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 	}
 
 	return spider.NewTask(task.ID, *rule, config), nil
+}
+
+func hasOutputConstraints(rule *spider.TaskRule) (b bool) {
+	if rule.OutputToMultipleNamespaces {
+		for k := range rule.MultipleNamespacesConf {
+			if len(rule.MultipleNamespacesConf[k].OutputConstraints) > 0 {
+				b = true
+				return
+			}
+		}
+	} else {
+		b = len(rule.OutputConstraints) > 0
+	}
+
+	return
 }
 
 func autoMigrate(task *model.Task, sdb *model.SysDB, rule *spider.TaskRule) (err error) {
