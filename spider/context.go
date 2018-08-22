@@ -121,6 +121,10 @@ func (ctx *Context) RequestForNext(method, URL string, requestData io.Reader, hd
 	return ctx.nextC.Request(method, URL, requestData, nil, hdr)
 }
 
+func (ctx *Context) RequestForNextWithContext(method, URL string, requestData io.Reader, hdr http.Header) error {
+	return ctx.nextC.Request(method, URL, requestData, ctx.reqContextClone(), hdr)
+}
+
 func (ctx *Context) PostMultipartForNext(URL string, requestData map[string][]byte) error {
 	return ctx.nextC.PostMultipart(URL, requestData)
 }
