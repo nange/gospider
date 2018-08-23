@@ -1,0 +1,80 @@
+export default {
+  route: {
+    dashboard: '首页',
+    icons: '图标',
+    errorPages: '错误页面',
+    page401: '401',
+    page404: '404',
+    errorLog: '错误日志',
+    theme: '换肤',
+    i18n: '国际化',
+    taskManage: '任务管理',
+    createTask: '创建任务',
+    editTask: '修改任务',
+    taskList: '任务列表',
+    dbManage: '数据库管理',
+    addExpDb: '添加导出数据库',
+    expDbList: '导出数据库列表'
+  },
+  task: {
+    name: '任务名称',
+    rule: '任务规则名',
+    desc: '任务描述',
+    cron: '定时执行',
+    proxy: '代理列表',
+    agent: '用户代理',
+    maxDepth: '爬虫最大深度',
+    allowDomains: '允许访问的域名',
+    urlFilter: 'URL过滤',
+    maxBody: '最大body值',
+    outType: '导出类型',
+    autoMigrate: '自动建表',
+    limitEn: '频率限制',
+    limitDomainGlob: '域名glob匹配',
+    limitDelay: '延迟',
+    limitRandomDelay: '随机延迟',
+    limitPara: '请求并发度',
+    add: '创建任务',
+    id: '序号',
+    status: '状态',
+    counts: '运行次数',
+    iscron: '定时任务',
+    create_at: '创建时间',
+    actions: '操作',
+    info: '详情',
+    edit: '修改',
+    stop: '停止',
+    start: '启动',
+    restart: '重启'
+  },
+  exportdb: {
+    add: '新建数据库',
+    id: '序号',
+    showname: '显示名称',
+    host: '主机地址',
+    port: '端口',
+    user: '用户名',
+    password: '密码',
+    dbname: '数据库名',
+    actions: '操作',
+    edit: '修改',
+    delete: '删除'
+  },
+  navbar: {
+    logOut: '退出登录',
+    dashboard: '首页',
+    screenfull: '全屏',
+    theme: '换肤'
+  },
+  login: {
+    title: '系统登录',
+    logIn: '登录',
+    username: '账号',
+    password: '密码'
+  },
+  tagsView: {
+    close: '关闭',
+    closeOthers: '关闭其它',
+    closeAll: '关闭所有'
+  }
+}

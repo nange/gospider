@@ -1,136 +1,129 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-import store from 'store'
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
+import Router from 'vue-router'
 
-//import components
-//view page warp component
-import viewPageComponent from 'pages/App'
+Vue.use(Router)
 
-//home
-import homeComponent from 'pages/home'
-//404
-import noPageComponent from 'pages/error/404'
-//login
-import loginComponent from 'pages/user/login'
-//base table
-import baseTableComponent from 'pages/table/base'
-//save table
-import saveTableComponent from 'pages/table/save'
-// sysmgt database
-import sysmgtDatabase from 'pages/sysmgt/database'
-import sysmgtDBAdd from 'pages/sysmgt/sysdbadd'
+/* Layout */
+import Layout from '@/views/layout/Layout'
 
+/** note: submenu only apppear when children.length>=1
+ *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
+ **/
 
-Vue.use(VueRouter)
-
-//使用AMD方式加载
-// component: resolve => require(['pages/home'], resolve),
-const routes = [{
-  path: '/404',
-  name: 'notPage',
-  component: noPageComponent
-}, {
-  path: '*',
-  redirect: '/404'
-}, {
-  path: '/user/login',
-  name: 'login',
-  component: loginComponent
-}, {
-  path: '/',
-  redirect: '/home',
-  component: viewPageComponent,
-  children: [{
-    path: '/home',
-    name: 'home',
-    component: homeComponent,
-    meta: {
-      title: "主页",
-      auth: true
-    }
-  }, {
-    path: '/table/base',
-    name: 'tableBase',
-    component: baseTableComponent,
-    meta: {
-      title: "任务列表",
-      auth: true
-    }
-  }, {
-    path: '/table/update/:id',
-    name: 'tableUpdate',
-    component: {extends: saveTableComponent},
-    meta: {
-      title: "修改任务",
-      auth: true
-    }
-  }, {
-    path: '/table/add',
-    name: 'tableAdd',
-    component: saveTableComponent,
-    meta: {
-      title: "添加任务",
-      auth: true
-    }
-  }, {
-    path: '/sysmgt/database',
-    name: 'sysDBMgt',
-    component: sysmgtDatabase,
-    meta: {
-      title: "导出数据库管理",
-      auth: true
-    }
-  }, {
-    path: '/sysmgt/sysdb/add',
-    name: 'sysDBAdd',
-    component: sysmgtDBAdd,
-    meta: {
-      title: "添加导出数据库",
-      auth: true
-    }
-  }]
-}]
-
-const router = new VueRouter({
-  routes,
-  mode: 'hash', //default: hash ,history
-  scrollBehavior (to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition
-    } else {
-      return {x: 0, y: 0}
-    }
+/**
+* hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
+* alwaysShow: true               if set true, will always show the root menu, whatever its child routes length
+*                                if not set alwaysShow, only more than one route under the children
+*                                it will becomes nested mode, otherwise not show the root menu
+* redirect: noredirect           if `redirect:noredirect` will no redirct in the breadcrumb
+* name:'router-name'             the name is used by <keep-alive> (must set!!!)
+* meta : {
+    roles: ['admin','editor']     will control the page roles (you can set multiple roles)
+    title: 'title'               the name show in submenu and breadcrumb (recommend set)
+    icon: 'svg-name'             the icon show in the sidebar,
+    noCache: true                if true ,the page will no be cached(default is false)
   }
-})
-
-//全局路由配置
-//路由开始之前的操作
-router.beforeEach((to, from, next) => {
-  NProgress.done().start()
-  let toName = to.name
-  // let fromName = from.name
-  let is_login = store.state.user_info.login
-
-  if (!is_login && toName !== 'login') {
-    next({
-      name: 'login'
-    })
-  } else {
-    if (is_login && toName === 'login') {
-      next({
-        path: '/'
-      })
-    } else {
-      next()
-    }
+**/
+export const constantRouterMap = [
+  {
+    path: '/login',
+    component: () => import('@/views/login/index'),
+    hidden: true
+  },
+  {
+    path: '/authredirect',
+    component: () => import('@/views/login/authredirect'),
+    hidden: true
+  },
+  {
+    path: '/404',
+    component: () => import('@/views/errorPage/404'),
+    hidden: true
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/errorPage/401'),
+    hidden: true
+  },
+  {
+    path: '',
+    component: Layout,
+    redirect: 'dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index'),
+        name: 'dashboard',
+        meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+      }
+    ]
   }
+]
+
+export default new Router({
+  // mode: 'history', // require service support
+  scrollBehavior: () => ({ y: 0 }),
+  routes: constantRouterMap
 })
 
-//路由完成之后的操作
-router.afterEach(route => {
-  NProgress.done()
-})
+export const asyncRouterMap = [
+  {
+    path: '/taskManage',
+    component: Layout,
+    redirect: '/taskManage/list',
+    name: 'taskManage',
+    meta: {
+      title: 'taskManage',
+      icon: 'form'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/task/list'),
+        name: 'taskList',
+        meta: { title: 'taskList', icon: 'list' }
+      },
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/task/create'),
+        name: 'editTask',
+        meta: { title: 'editTask', noCache: true },
+        hidden: true
+      },
+      {
+        path: 'create',
+        component: () => import('@/views/task/create'),
+        name: 'createTask',
+        meta: { title: 'createTask', icon: 'edit' }
+      }
+    ]
+  },
 
-export default router
+  {
+    path: '/dbManage',
+    component: Layout,
+    redirect: '/dbManage/list',
+    name: 'dbManage',
+    meta: {
+      title: 'dbManage',
+      icon: 'nested'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/exportdb/list'),
+        name: 'expDbList',
+        meta: { title: 'expDbList', icon: 'list' }
+      },
+      {
+        path: 'add',
+        component: () => import('@/views/exportdb/add'),
+        name: 'addExpDb',
+        meta: { title: 'addExpDb', noCache: true },
+        hidden: true
+      }
+    ]
+  },
+
+  { path: '*', redirect: '/404', hidden: true }
+]

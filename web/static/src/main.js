@@ -1,47 +1,40 @@
-/**
- *
- * 主程序入口
- *
- */
-
-//导入样式
-import 'normalize.css'
-import 'font-awesome/scss/font-awesome.scss'
-import 'element-ui/lib/theme-default/index.css'
-//导入Vue框架
 import Vue from 'vue'
-//导入element组件
-import ElementUI from 'element-ui'
-//导入组件
-import router from './router'
-//导入状态管理器
-import store from 'store'
-//导入请求框架
-import api from './api'
-//导入自定义插件
-import Plugins from 'plugins'
-//导入主视图文件
+
+import 'normalize.css/normalize.css' // A modern alternative to CSS resets
+
+import Element from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+
+import '@/styles/index.scss' // global css
+
 import App from './App'
-//导入mock数据
-// import './mock'
+import router from './router'
+import store from './store'
 
-//使用element-ui
-Vue.use(ElementUI)
+import i18n from './lang' // Internationalization
+import './icons' // icon
+import './errorLog' // error log
+import './permission' // permission control
+import './mock' // simulation data
 
-//使用自定义插件
-Vue.use(Plugins)
+import * as filters from './filters' // global filters
 
-//使用api
-Vue.use(api)
+Vue.use(Element, {
+  size: 'medium', // set element-ui default size
+  i18n: (key, value) => i18n.t(key, value)
+})
 
-//发布后是否显示提示
+// register global utility filters.
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
+})
+
 Vue.config.productionTip = false
 
-//是否开启工具调试
-Vue.config.devtools = process.env.NODE_ENV === 'development'
-
 new Vue({
+  el: '#app',
   router,
   store,
-  ...App
-}).$mount('mainbody')
+  i18n,
+  render: h => h(App)
+})
