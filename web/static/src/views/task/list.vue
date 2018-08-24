@@ -74,8 +74,9 @@
         fetchTaskList({
           offset: (this.currentPage - 1) * this.size,
           size: this.size
-        }).then((ret) => {
-          this.tableData = ret.data
+        }).then((response) => {
+          const data = response.data
+          this.tableData = data.data
           for (const v of this.tableData) {
             v.isCron = '否'
             if (v.cron_spec) {
@@ -117,7 +118,7 @@
             }
           }
 
-          this.total = ret.total
+          this.total = data.total
           this.load_data = false
         }).catch(() => {
           this.load_data = false

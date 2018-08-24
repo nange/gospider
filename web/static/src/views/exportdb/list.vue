@@ -70,9 +70,10 @@
         fetchExportDbList({
           offset: (this.currentPage - 1) * this.size,
           size: this.size
-        }).then((ret) => {
-          this.dbData = ret.data
-          this.total = ret.total
+        }).then((response) => {
+          const data = response.data
+          this.dbData = data.data
+          this.total = data.total
           this.load_data = false
         }).catch(() => {
           this.load_data = false

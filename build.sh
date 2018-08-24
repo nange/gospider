@@ -15,7 +15,7 @@ fi
 		echo "not found node_modules; will exec npm install \n"
 		npm install
 	fi
-	npm run build
+	npm run build:prod
 } || {
 	echo "exec npm run build failed\n"
 }
