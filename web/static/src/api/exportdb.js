@@ -1,8 +1,8 @@
-import fetch from '@/utils/fetch'
+import request from '@/utils/request'
 
 // 数据列表
 export function fetchExportDbList(params) {
-  return fetch({
+  return request({
     url: '/api/sysdbs',
     method: 'get',
     params
@@ -11,7 +11,7 @@ export function fetchExportDbList(params) {
 
 // 创建导出数据库记录
 export function createExportDb(data) {
-  return fetch({
+  return request({
     url: '/api/sysdbs',
     method: 'post',
     data

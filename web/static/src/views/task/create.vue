@@ -123,9 +123,10 @@ export default {
     getTaskRuleList() {
       this.loadData = true
       getTask(this.routeID).then(response => {
-        this.form = response
+        const data = response.data
+        this.form = data
         this.loadData = false
-        this.outputTypeChange(response.output_type)
+        this.outputTypeChange(data.output_type)
         setTimeout(() => {
           this.loadData = false
         }, 1.5 * 1000)
@@ -138,7 +139,8 @@ export default {
         offset: 0,
         size: -1
       }).then(response => {
-        this.sysDBs = response.data
+        const data = response.data
+        this.sysDBs = data.data
         setTimeout(() => {
         }, 1.5 * 1000)
       })
@@ -148,7 +150,8 @@ export default {
     // 获取所有rules
     getRules() {
       getRules().then(response => {
-        this.ruleOpts = response.data
+        const data = response.data
+        this.ruleOpts = data.data
         setTimeout(() => {
         }, 1.5 * 1000)
       })
@@ -168,8 +171,9 @@ export default {
         if (!valid) return false
         this.on_submit_loading = true
         if (this.routeID) {
-          updateTask(this.routeID, this.form).then((ret) => {
-            this.$message.success('任务修改成功!  任务ID:' + ret.id + '  3秒钟后跳转到任务列表页面!')
+          updateTask(this.routeID, this.form).then((response) => {
+            const data = response.data
+            this.$message.success('任务修改成功!  任务ID:' + data.id + '  3秒钟后跳转到任务列表页面!')
             this.on_submit_loading = false
             this.submit_disable = true
             setTimeout(() => this.$router.push({ name: 'taskList' }), 3000)
@@ -177,8 +181,9 @@ export default {
             this.on_submit_loading = false
           })
         } else {
-          saveTask(this.form).then((ret) => {
-            this.$message.success('任务创建成功!  任务ID:' + ret.id + '  3秒钟后跳转到任务列表页面!')
+          saveTask(this.form).then((response) => {
+            const data = response.data
+            this.$message.success('任务创建成功!  任务ID:' + data.id + '  3秒钟后跳转到任务列表页面!')
             this.on_submit_loading = false
             this.submit_disable = true
             setTimeout(() => this.$router.push({ name: 'taskList' }), 3000)

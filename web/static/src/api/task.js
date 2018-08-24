@@ -1,8 +1,8 @@
-import fetch from '@/utils/fetch'
+import request from '@/utils/request'
 
 // 数据列表
 export function fetchTaskList(params) {
-  return fetch({
+  return request({
     url: '/api/tasks',
     method: 'get',
     params
@@ -11,7 +11,7 @@ export function fetchTaskList(params) {
 
 // 根据id查询数据
 export function getTask(id) {
-  return fetch({
+  return request({
     url: '/api/tasks/' + id,
     method: 'get'
   })
@@ -19,7 +19,7 @@ export function getTask(id) {
 
 // 查询所有rules
 export function getRules() {
-  return fetch({
+  return request({
     url: '/api/rules',
     method: 'get'
   })
@@ -27,28 +27,28 @@ export function getRules() {
 
 // 根据id停止任务
 export function stopTask(id) {
-  return fetch({
+  return request({
     url: '/api/tasks/' + id + '/stop',
     method: 'put'
   })
 }
 // 根据id启动非定时任务
 export function startTask(id) {
-  return fetch({
+  return request({
     url: '/api/tasks/' + id + '/start',
     method: 'put'
   })
 }
 // 根据id重启定时任务
 export function restartTask(id) {
-  return fetch({
+  return request({
     url: '/api/tasks/' + id + '/restart',
     method: 'put'
   })
 }
 // 添加数据
 export function saveTask(data) {
-  return fetch({
+  return request({
     url: '/api/tasks',
     method: 'post',
     data
@@ -57,7 +57,7 @@ export function saveTask(data) {
 
 // 修改数据
 export function updateTask(id, data) {
-  return fetch({
+  return request({
     url: '/api/tasks/' + id,
     method: 'put',
     data

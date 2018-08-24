@@ -56,8 +56,9 @@
         this.$refs.form.validate((valid) => {
           if (!valid) return false
           this.submitLoading = true
-          createExportDb(this.form).then((ret) => {
-            this.$message.success('导出数据库记录创建成功!  ID:' + ret.id + '  3秒钟后跳转到数据库管理页面!')
+          createExportDb(this.form).then((response) => {
+            const data = response.data
+            this.$message.success('导出数据库记录创建成功!  ID:' + data.id + '  3秒钟后跳转到数据库管理页面!')
             this.submitLoading = false
             this.submitDisable = true
             setTimeout(() => this.$router.push({ name: 'expDbList' }), 3000)
