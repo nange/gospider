@@ -16,13 +16,13 @@ var rule = &spider.TaskRule{
 	Description:  "抓取百度新闻各个分类的最新焦点新闻",
 	Namespace:    "baidu_news",
 	OutputFields: outputFields,
-	//OutputConstaints: map[string]*spider.OutputConstraint{
+	//OutputConstraints: map[string]*spider.OutputConstraint{
 	//	outputFields[0]: &spider.OutputConstraint{Sql: "varchar(64) not null default ''"},
 	//	outputFields[1]: &spider.OutputConstraint{Sql: "varchar(128) not null default ''"},
 	//	outputFields[2]: &spider.OutputConstraint{Sql: "varchar(256) not null default ''"},
 	//},
-	OutputConstaints: spider.NewStringsConstraints(outputFields, 64, 128, 512), // 上面的简写方式
-	AllowURLRevisit:  true,
+	OutputConstraints: spider.NewStringsConstraints(outputFields, 64, 128, 512), // 上面的简写方式
+	AllowURLRevisit:   true,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error {
 			return ctx.VisitForNext("http://news.baidu.com")
