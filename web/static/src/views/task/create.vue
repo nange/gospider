@@ -101,7 +101,7 @@ export default {
         limit_enable: true,
         auto_migrate: true,
         limit_parallelism: 1,
-        request_timeout: 10
+        opt_request_timeout: 10
       },
       showSysDB: false,
       ruleOpts: [],
