@@ -27,6 +27,7 @@ export default {
     allowDomains: '允许访问的域名',
     urlFilter: 'URL过滤',
     maxBody: '最大body值',
+    requestTimeout: '请求超时时间',
     outType: '导出类型',
     autoMigrate: '自动建表',
     limitEn: '频率限制',

@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row v-loading="loadData" border fit highlight-current-row>
       <el-col :span="12">
-        <el-form ref="form" :model="form" :rules="rules" label-position="left" label-width="120px">
+        <el-form ref="form" :model="form" :rules="rules" label-position="left" label-width="150px">
           <el-form-item :label="$t('task.name')" prop="task_name">
             <el-input v-model="form.task_name" placeholder="请输入内容" :disabled="routeID"></el-input>
           </el-form-item>
@@ -40,6 +40,9 @@
           </el-form-item>
           <el-form-item :label="$t('task.maxBody')">
             <el-input-number v-model="form.opt_max_body_size" :controls="false" class="fl"></el-input-number>
+          </el-form-item>
+          <el-form-item :label="$t('task.requestTimeout')">
+            <el-input-number v-model="form.opt_request_timeout" :controls="false" class="fl"></el-input-number>
           </el-form-item>
           <el-form-item :label="$t('task.outType')" prop="output_type">
             <el-select v-model="form.output_type" placeholder="请选择" @change="outputTypeChange">
@@ -97,7 +100,8 @@ export default {
         opt_user_agent: navigator.userAgent,
         limit_enable: true,
         auto_migrate: true,
-        limit_parallelism: 1
+        limit_parallelism: 1,
+        request_timeout: 10
       },
       showSysDB: false,
       ruleOpts: [],

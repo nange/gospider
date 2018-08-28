@@ -27,6 +27,7 @@ export default {
     allowDomains: 'Allow Domains',
     urlFilter: 'URL Filters',
     maxBody: 'Max Body Size',
+    requestTimeout: 'Request Timeout',
     outType: 'Output Type',
     autoMigrate: 'Auto Migrate',
     limitEn: 'Limit Enable',
