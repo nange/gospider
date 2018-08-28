@@ -30,6 +30,7 @@ type Option struct {
 	IgnoreRobotsTxt        bool
 	ParseHTTPErrorResponse bool
 	DisableCookies         bool
+	RequestTimeout         time.Duration
 }
 
 type Limit struct {
@@ -128,6 +129,10 @@ func newCollector(config TaskConfig) (*colly.Collector, error) {
 		}
 
 		c.Limit(&limit)
+	}
+
+	if config.Option.RequestTimeout > 0 {
+		c.SetRequestTimeout(config.Option.RequestTimeout)
 	}
 
 	return c, nil

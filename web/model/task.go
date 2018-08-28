@@ -26,8 +26,10 @@ type Task struct {
 	OptAllowedDomains string `json:"opt_allowed_domains" gorm:"column:opt_allowed_domains;type:varchar(512);not null;default:''"`
 	OptURLFilters     string `json:"opt_url_filters" gorm:"column:opt_url_filters;type:varchar(512);not null;default:''"`
 	OptMaxBodySize    int    `json:"opt_max_body_size" gorm:"column:opt_max_body_size;type:int;not null;default:'0'"`
+	OptRequestTimeout int    `json:"opt_request_timeout" gorm:"column:opt_request_timeout;type:int;not null;default:'10'"`
 	// auto migrate
 	AutoMigrate bool `json:"auto_migrate" gorm:"column:auto_migrate;type:tinyint;not null;default:'0'"`
+
 	// 频率限制
 	LimitEnable       bool      `json:"limit_enable" gorm:"column:limit_enable;type:tinyint;not null;default:'0'"`
 	LimitDomainRegexp string    `json:"limit_domain_regexp" gorm:"column:limit_domain_regexp;type:varchar(128);not null;default:''"`
