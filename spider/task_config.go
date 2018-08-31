@@ -1,7 +1,9 @@
 package spider
 
 import (
+	"crypto/tls"
 	"database/sql"
+	"net/http"
 	"regexp"
 	"time"
 
@@ -28,6 +30,7 @@ type Option struct {
 	AllowURLRevisit        bool
 	MaxBodySize            int
 	IgnoreRobotsTxt        bool
+	InsecureSkipVerify     bool
 	ParseHTTPErrorResponse bool
 	DisableCookies         bool
 	RequestTimeout         time.Duration
@@ -133,6 +136,13 @@ func newCollector(config TaskConfig) (*colly.Collector, error) {
 
 	if config.Option.RequestTimeout > 0 {
 		c.SetRequestTimeout(config.Option.RequestTimeout)
+	}
+
+	if config.Option.InsecureSkipVerify {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		c.WithTransport(tr)
 	}
 
 	return c, nil

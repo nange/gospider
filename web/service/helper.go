@@ -58,6 +58,7 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 			AllowURLRevisit:        rule.AllowURLRevisit,
 			MaxBodySize:            task.OptMaxBodySize,
 			IgnoreRobotsTxt:        rule.IgnoreRobotsTxt,
+			InsecureSkipVerify:     rule.InsecureSkipVerify,
 			ParseHTTPErrorResponse: rule.ParseHTTPErrorResponse,
 			DisableCookies:         rule.DisableCookies,
 		},
