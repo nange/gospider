@@ -22,7 +22,7 @@
       </el-table-column>
       <el-table-column :label="$t('task.actions')">
         <template scope="props">
-          <el-button v-if="props.row.optionbutton & 0b10000" type="info" size="small">{{$t('task.info')}}</el-button>
+          <el-button v-if="props.row.optionbutton & 0b10000" type="info" size="small" @click="showDesc(props.row)">{{$t('task.info')}}</el-button>
           <router-link :to="{name: 'editTask', params: {id: props.row.id}}" tag="span">
           <el-button v-if="props.row.optionbutton & 0b01000" type="warning" size="small" icon="edit">{{$t('task.edit')}}</el-button>
           </router-link>
@@ -36,14 +36,20 @@
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10,20,30, 50]" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
+    <task-desc ref="taskDesc"></task-desc>
   </div>
 </template>
 <script>
   import { fetchTaskList, stopTask, startTask, restartTask } from '@/api/task'
   import waves from '@/directive/waves' // 水波纹指令
+  import taskDesc from '@/components/TaskDesc'
+
   export default {
     directives: {
       waves
+    },
+    components: {
+      taskDesc: taskDesc
     },
     data() {
       return {
@@ -124,7 +130,9 @@
           this.load_data = false
         })
       },
-      // 单个删除
+      showDesc(row) {
+        this.$refs.taskDesc.showTaskDesc()
+      },
       stop(item) {
         this.$confirm('此操作将停止该任务, 是否继续?', '提示', {
           confirmButtonText: '确定',
