@@ -29,6 +29,7 @@ type TaskRule struct {
 	DisableCookies             bool
 	AllowURLRevisit            bool
 	IgnoreRobotsTxt            bool
+	InsecureSkipVerify         bool
 	ParseHTTPErrorResponse     bool
 	Rule                       *Rule
 }
