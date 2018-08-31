@@ -2,8 +2,10 @@ package spider
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/gocolly/colly"
@@ -27,6 +29,13 @@ func Run(task *Task, retCh chan<- common.MTS) error {
 	if err != nil {
 		logrus.Errorf("new collector err:%+v", err)
 		return err
+	}
+
+	if task.InsecureSkipVerify {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		c.WithTransport(tr)
 	}
 
 	nodesLen := len(task.Rule.Nodes)
