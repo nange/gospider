@@ -131,7 +131,7 @@
         })
       },
       showDesc(row) {
-        this.$refs.taskDesc.showTaskDesc()
+        this.$refs.taskDesc.showTaskDesc(row)
       },
       stop(item) {
         this.$confirm('此操作将停止该任务, 是否继续?', '提示', {
