@@ -123,6 +123,7 @@ func newXMLElement(el *colly.XMLElement, ctx *Context) *XMLElement {
 		Request:  newRequest(el.Request, ctx),
 		Response: newResponse(el.Response, ctx),
 		DOM:      el.DOM,
+		el:       el,
 	}
 }
 
