@@ -80,6 +80,9 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 			},
 		},
 	}
+	if task.OptRequestTimeout > 0 {
+		config.Option.RequestTimeout = time.Duration(task.OptRequestTimeout) * time.Second
+	}
 	if urls := strings.TrimSpace(task.ProxyURLs); len(urls) > 0 {
 		config.ProxyURLs = strings.Split(urls, ",")
 	}
