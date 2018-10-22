@@ -1,10 +1,12 @@
 package spider
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -113,8 +115,16 @@ func (ctx *Context) PostForNext(URL string, requestData map[string]string) error
 	return ctx.nextC.Post(URL, requestData)
 }
 
+func (ctx *Context) PostForNextWithContext(URL string, requestData map[string]string) error {
+	return ctx.nextC.Request("POST", ctx.AbsoluteURL(URL), createFormReader(requestData), ctx.reqContextClone(), nil)
+}
+
 func (ctx *Context) PostRawForNext(URL string, requestData []byte) error {
 	return ctx.nextC.PostRaw(URL, requestData)
+}
+
+func (ctx *Context) PostRawForNextWithContext(URL string, requestData []byte) error {
+	return ctx.nextC.Request("POST", ctx.AbsoluteURL(URL), bytes.NewReader(requestData), ctx.reqContextClone(), nil)
 }
 
 func (ctx *Context) Request(method, URL string, requestData io.Reader, hdr http.Header) error {
@@ -236,4 +246,12 @@ func quoteQuery(sql string) (s string, err error) {
 	fields := strings.Replace(matches[2], ",", "`,`", -1)
 	s = matches[1] + "`" + fields + "`" + matches[3]
 	return
+}
+
+func createFormReader(data map[string]string) io.Reader {
+	form := url.Values{}
+	for k, v := range data {
+		form.Add(k, v)
+	}
+	return strings.NewReader(form.Encode())
 }
