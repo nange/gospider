@@ -78,17 +78,11 @@ func (ctx *Context) GetAnyReqContextValue(key string) interface{} {
 }
 
 func (ctx *Context) Visit(URL string) error {
-	if req, ok := ctx.ctlCtx.Value("req").(*colly.Request); ok {
-		return ctx.c.Visit(req.AbsoluteURL(URL))
-	}
-	return ctx.c.Visit(URL)
+	return ctx.c.Visit(ctx.AbsoluteURL(URL))
 }
 
 func (ctx *Context) VisitForNext(URL string) error {
-	if req, ok := ctx.ctlCtx.Value("req").(*colly.Request); ok {
-		return ctx.nextC.Visit(req.AbsoluteURL(URL))
-	}
-	return ctx.nextC.Visit(URL)
+	return ctx.nextC.Visit(ctx.AbsoluteURL(URL))
 }
 
 func (ctx *Context) reqContextClone() *colly.Context {
@@ -103,16 +97,15 @@ func (ctx *Context) reqContextClone() *colly.Context {
 }
 
 func (ctx *Context) VisitForNextWithContext(URL string) error {
-	req := ctx.ctlCtx.Value("req").(*colly.Request)
-	return ctx.nextC.Request("GET", req.AbsoluteURL(URL), nil, ctx.reqContextClone(), nil)
+	return ctx.nextC.Request("GET", ctx.AbsoluteURL(URL), nil, ctx.reqContextClone(), nil)
 }
 
 func (ctx *Context) Post(URL string, requestData map[string]string) error {
-	return ctx.c.Post(URL, requestData)
+	return ctx.c.Post(ctx.AbsoluteURL(URL), requestData)
 }
 
 func (ctx *Context) PostForNext(URL string, requestData map[string]string) error {
-	return ctx.nextC.Post(URL, requestData)
+	return ctx.nextC.Post(ctx.AbsoluteURL(URL), requestData)
 }
 
 func (ctx *Context) PostForNextWithContext(URL string, requestData map[string]string) error {
@@ -120,7 +113,7 @@ func (ctx *Context) PostForNextWithContext(URL string, requestData map[string]st
 }
 
 func (ctx *Context) PostRawForNext(URL string, requestData []byte) error {
-	return ctx.nextC.PostRaw(URL, requestData)
+	return ctx.nextC.PostRaw(ctx.AbsoluteURL(URL), requestData)
 }
 
 func (ctx *Context) PostRawForNextWithContext(URL string, requestData []byte) error {
@@ -152,7 +145,10 @@ func (ctx *Context) SetResponseCharacterEncoding(encoding string) {
 }
 
 func (ctx *Context) AbsoluteURL(u string) string {
-	return ctx.ctlCtx.Value("req").(*colly.Request).AbsoluteURL(u)
+	if req, ok := ctx.ctlCtx.Value("req").(*colly.Request); ok {
+		return req.AbsoluteURL(u)
+	}
+	return u
 }
 
 func (ctx *Context) Abort() {
