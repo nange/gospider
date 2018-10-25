@@ -85,14 +85,22 @@ func (ctx *Context) PutReqContextValue(key string, value interface{}) {
 
 func (ctx *Context) GetReqContextValue(key string) string {
 	if ctx.collyContext == nil {
-		return ""
+		if req, ok := ctx.ctlCtx.Value("req").(*colly.Request); ok {
+			ctx.collyContext = req.Ctx
+		} else {
+			return ""
+		}
 	}
 	return ctx.collyContext.Get(key)
 }
 
 func (ctx *Context) GetAnyReqContextValue(key string) interface{} {
 	if ctx.collyContext == nil {
-		return nil
+		if req, ok := ctx.ctlCtx.Value("req").(*colly.Request); ok {
+			ctx.collyContext = req.Ctx
+		} else {
+			return nil
+		}
 	}
 	return ctx.collyContext.GetAny(key)
 }
