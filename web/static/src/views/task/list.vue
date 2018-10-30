@@ -36,20 +36,98 @@
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10,20,30, 50]" :page-size="size" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
-    <task-desc ref="taskDesc"></task-desc>
+
+    <el-dialog title="任务详情" :visible.sync="showDetails" width="60%" center>
+      <el-row border fit highlight-current-row>
+        <el-form label-position="right" label-width="150px" label-suffix=":" class="task-desc-form">
+          <el-col :span="24">
+            <el-form-item :label="$t('task.id')">
+              <span>{{details.id}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.name')">
+              <span>{{details.task_name}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.rule')">
+              <span>{{details.task_rule_name}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.desc')">
+              <span>{{details.task_desc}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.iscron')">
+              <span>{{details.cron_spec ? '是' : '否'}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.cron')">
+              <span>{{details.cron_spec}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.proxy')">
+              <span>{{details.proxy_urls}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.agent')">
+              <span>{{details.opt_user_agent}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.maxDepth')">
+              <span>{{details.opt_max_depth}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.allowDomains')">
+              <span>{{details.opt_allowed_domains}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.urlFilter')">
+              <span>{{details.opt_url_filters}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.maxBody')">
+              <span>{{details.opt_max_body_size}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.requestTimeout')">
+              <span>{{details.opt_request_timeout}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.outType')">
+              <span>{{details.output_type}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.autoMigrate')">
+              <span>{{details.auto_migrate}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.limitEn')">
+              <span>{{details.limit_enable}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.limitDomainGlob')">
+              <span>{{details.limit_domain_glob}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.limitDelay')">
+              <span>{{details.limit_delay}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.limitRandomDelay')">
+              <span>{{details.limit_random_delay}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.limitPara')">
+              <span>{{details.limit_parallelism}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.status')">
+              <span>{{details.status}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.counts')">
+              <span>{{details.counts}}</span>
+            </el-form-item>
+            <el-form-item :label="$t('task.create_at')">
+              <span>{{details.created_at}}</span>
+            </el-form-item>
+          </el-col>
+
+        </el-form>
+      </el-row>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showDetails = false">关 闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
   import { fetchTaskList, stopTask, startTask, restartTask } from '@/api/task'
   import waves from '@/directive/waves' // 水波纹指令
-  import taskDesc from '@/components/TaskDesc'
 
   export default {
     directives: {
       waves
-    },
-    components: {
-      taskDesc: taskDesc
     },
     data() {
       return {
@@ -63,7 +141,10 @@
         // 请求时的loading效果
         load_data: true,
         // 批量选择数组
-        batch_select: []
+        batch_select: [],
+        // 详情
+        details: {},
+        showDetails: false
       }
     },
     created() {
@@ -131,7 +212,8 @@
         })
       },
       showDesc(row) {
-        this.$refs.taskDesc.showTaskDesc(row)
+        this.showDetails = true
+        this.details = row
       },
       stop(item) {
         this.$confirm('此操作将停止该任务, 是否继续?', '提示', {
@@ -192,3 +274,9 @@
     }
   }
 </script>
+
+<style scoped>
+  .task-desc-form .el-form-item {
+    margin-bottom: 0;
+  }
+</style>
