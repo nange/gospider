@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row v-loading="loadData" border fit highlight-current-row>
       <el-col :span="12">
-        <el-form ref="form" :model="form" :rules="rules" label-position="left" label-width="150px">
+        <el-form ref="form" :model="form" :rules="rules" label-position="right" label-width="150px">
           <el-form-item :label="$t('task.name')" prop="task_name">
             <el-input v-model="form.task_name" placeholder="请输入内容" :disabled="routeID"></el-input>
           </el-form-item>
