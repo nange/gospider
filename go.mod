@@ -17,7 +17,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/gobuffalo/packr v1.11.1
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gocolly/colly v1.1.0
+	github.com/gocolly/colly v1.2.0
 	github.com/golang/protobuf v1.1.0 // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
