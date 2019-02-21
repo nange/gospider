@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/nange/gospider/web/core"
 	"github.com/pkg/errors"
 )
@@ -29,8 +30,7 @@ func init() {
 	core.Register(&SysDB{})
 }
 
-func GetSysDBList(size, offset int) ([]SysDB, int, error) {
-	db := core.GetDB()
+func GetSysDBList(db *gorm.DB, size, offset int) ([]SysDB, int, error) {
 	queryset := NewSysDBQuerySet(db)
 	count, err := queryset.Count()
 	if err != nil {

@@ -31,9 +31,9 @@ func init() {
 	core.Register(&User{})
 }
 
-func IsValidUser(username, password string) (bool, *User, error) {
+func IsValidUser(db *gorm.DB, username, password string) (bool, *User, error) {
 	user := &User{}
-	query := NewUserQuerySet(core.GetDB())
+	query := NewUserQuerySet(db)
 	if err := query.UserNameEq(username).One(user); err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false, nil, nil
@@ -55,4 +55,29 @@ func GenUserHashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hash), nil
+}
+
+func InitAdminUserIfNeeded(db *gorm.DB) error {
+	user := &User{}
+	query := NewUserQuerySet(db)
+	err := query.UserNameEq("admin").One(user)
+	if err == nil {
+		return nil
+	}
+	if err == gorm.ErrRecordNotFound {
+		user.UserName = "admin"
+		pw, err := GenUserHashPassword("admin")
+		if err != nil {
+			return err
+		}
+		user.Password = pw
+		user.Avatar = "/admin/gopher.png"
+		user.Introduction = "admin user"
+		user.Roles = "admin"
+		if err := user.Create(db); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

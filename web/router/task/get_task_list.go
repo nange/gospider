@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/sirupsen/logrus"
 )
@@ -27,7 +28,7 @@ func GetTaskList(c *gin.Context) {
 	}
 	logrus.Infof("get task list req:%+v", req)
 
-	tasks, count, err := model.GetTaskList(req.Size, req.Offset)
+	tasks, count, err := model.GetTaskList(core.GetDB(), req.Size, req.Offset)
 	if err != nil {
 		logrus.Errorf("GetTaskList failed! err:%+v", err)
 		c.String(http.StatusInternalServerError, "")

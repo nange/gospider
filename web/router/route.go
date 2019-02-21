@@ -6,6 +6,7 @@ import (
 	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr"
+	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/nange/gospider/web/router/rule"
 	"github.com/nange/gospider/web/router/sysdb"
@@ -68,7 +69,7 @@ func JwtAuth() (*jwt.GinJWTMiddleware, error) {
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
-			valid, user, err := model.IsValidUser(loginVals.Username, loginVals.Password)
+			valid, user, err := model.IsValidUser(core.GetDB(), loginVals.Username, loginVals.Password)
 			if err != nil {
 				return nil, err
 			}

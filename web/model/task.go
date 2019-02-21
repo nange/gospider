@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/web/core"
 	"github.com/pkg/errors"
@@ -50,8 +51,7 @@ func init() {
 	core.Register(&Task{})
 }
 
-func GetTaskList(size, offset int) ([]Task, int, error) {
-	db := core.GetDB()
+func GetTaskList(db *gorm.DB, size, offset int) ([]Task, int, error) {
 	queryset := NewTaskQuerySet(db)
 	count, err := queryset.Count()
 	if err != nil {
