@@ -120,7 +120,7 @@ export default {
         margin-top: 5px;
         position: relative;
         .user-avatar {
-          width: 40px;
+          width: 34px;
           height: 40px;
           border-radius: 10px;
         }
