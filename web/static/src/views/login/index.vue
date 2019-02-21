@@ -35,10 +35,9 @@
 <script>
 import { isvalidUsername } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
-import SocialSign from './socialsignin'
 
 export default {
-  components: { LangSelect, SocialSign },
+  components: { LangSelect },
   name: 'login',
   data() {
     const validateUsername = (rule, value, callback) => {
@@ -49,8 +48,8 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+      if (value.length < 4) {
+        callback(new Error('The password can not be less than 4 digits'))
       } else {
         callback()
       }
@@ -92,24 +91,6 @@ export default {
           return false
         }
       })
-    },
-    afterQRScan() {
-      // const hash = window.location.hash.slice(1)
-      // const hashObj = getQueryObject(hash)
-      // const originUrl = window.location.origin
-      // history.replaceState({}, '', originUrl)
-      // const codeMap = {
-      //   wechat: 'code',
-      //   tencent: 'code'
-      // }
-      // const codeName = hashObj[codeMap[this.auth_type]]
-      // if (!codeName) {
-      //   alert('第三方登录失败')
-      // } else {
-      //   this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
-      //     this.$router.push({ path: '/' })
-      //   })
-      // }
     }
   },
   created() {
@@ -148,7 +129,7 @@ export default {
         background: transparent;
         border: 0px;
         -webkit-appearance: none;
-        border-radius: 0px;
+        border-radius: 0;
         padding: 12px 5px 12px 15px;
         color: $light_gray;
         height: 47px;
