@@ -49,15 +49,15 @@
               <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
               <el-option key="csv" label="CSV" value="csv"></el-option>
             </el-select>
-            <el-select v-model="form.output_sysdb_id" placeholder="请选择" v-if="showSysDB">
+            <el-select v-model="form.output_exportdb_id" placeholder="请选择" v-if="showExportDB">
               <el-option
-                v-for="item in sysDBs"
+                v-for="item in exportDBList"
                 :key="item.id"
                 :label="item.show_name"
                 :value="item.id">
               </el-option>
             </el-select>
-            <el-checkbox v-model="form.auto_migrate" v-if="showSysDB">{{$t('task.autoMigrate')}}</el-checkbox>
+            <el-checkbox v-model="form.auto_migrate" v-if="showExportDB">{{$t('task.autoMigrate')}}</el-checkbox>
           </el-form-item>
 
           <el-form-item :label="$t('task.limitEn')">
@@ -77,7 +77,7 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="on_submit_form" :loading="on_submit_loading" :disabled="submit_disable">{{$t('task.add')}}</el-button>
+            <el-button type="primary" @click="on_submit_form" :loading="on_submit_loading" :disabled="submit_disable">{{routeID ? $t('task.update') : $t('task.add')}}</el-button>
           </el-form-item>
         </el-form>
       </el-col>
@@ -87,7 +87,7 @@
 
 <script>
 import { getTask, getRules, updateTask, saveTask } from '@/api/task'
-import { fetchExportDbList } from '@/api/exportdb'
+import { fetchExportDBList } from '@/api/exportdb'
 import waves from '@/directive/waves'
 export default {
   name: 'taskCreate',
@@ -103,9 +103,9 @@ export default {
         limit_parallelism: 1,
         opt_request_timeout: 10
       },
-      showSysDB: false,
+      showExportDB: false,
       ruleOpts: [],
-      sysDBs: [],
+      exportDBList: [],
       routeID: this.$route.params.id,
       loadData: false,
       on_submit_loading: false,
@@ -120,7 +120,7 @@ export default {
   created() {
     this.getRules()
     this.routeID && this.getTaskRuleList()
-    this.getSysDBList()
+    this.getExportDBList()
   },
   methods: {
     // 获取数据
@@ -137,14 +137,14 @@ export default {
       })
     },
     // 获取导出数据库列表
-    getSysDBList() {
+    getExportDBList() {
       this.loadData = true
-      fetchExportDbList({
+      fetchExportDBList({
         offset: 0,
         size: -1
       }).then(response => {
         const data = response.data
-        this.sysDBs = data.data
+        this.exportDBList = data.data
         setTimeout(() => {
         }, 1.5 * 1000)
       })
@@ -164,9 +164,9 @@ export default {
     // 改变output type
     outputTypeChange(output) {
       if (output === 'mysql') {
-        this.showSysDB = true
+        this.showExportDB = true
       } else {
-        this.showSysDB = false
+        this.showExportDB = false
       }
     },
     // 提交

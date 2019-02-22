@@ -1,4 +1,4 @@
-package sysdb
+package exportdb
 
 import (
 	"net/http"
@@ -10,17 +10,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type CreateSysDBReq struct {
-	model.SysDB
+type CreateExportDBReq struct {
+	model.ExportDB
 }
 
-type CreateSysDBResp struct {
+type CreateExportDBResp struct {
 	ID       uint64    `json:"id"`
 	CreateAt time.Time `json:"create_at"`
 }
 
-func CreateSysDB(c *gin.Context) {
-	var req CreateSysDBReq
+func CreateExportDB(c *gin.Context) {
+	var req CreateExportDBReq
 	if err := c.BindJSON(&req); err != nil {
 		logrus.Errorf("bind json failed! err:%+v", err)
 		c.String(http.StatusBadRequest, "")
@@ -45,7 +45,7 @@ func CreateSysDB(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &CreateSysDBResp{
+	c.JSON(http.StatusOK, &CreateExportDBResp{
 		ID:       req.ID,
 		CreateAt: req.CreatedAt,
 	})

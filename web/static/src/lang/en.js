@@ -13,8 +13,8 @@ export default {
     editTask: 'Edit Task',
     taskList: 'Task List',
     dbManage: 'Database Manage',
-    addExpDb: 'Add Export Db',
-    expDbList: 'Export Db List'
+    addExpDb: 'Add Export DB',
+    expDbList: 'Export DB List'
   },
   task: {
     name: 'Task Alias',
@@ -36,6 +36,7 @@ export default {
     limitRandomDelay: 'Limit Random Delay',
     limitPara: 'Limit Parallelism',
     add: 'Create Task',
+    update: 'Update Task',
     id: 'ID',
     status: 'Status',
     counts: 'Run Counts',

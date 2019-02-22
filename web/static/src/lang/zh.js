@@ -36,6 +36,7 @@ export default {
     limitRandomDelay: '随机延迟',
     limitPara: '请求并发度',
     add: '创建任务',
+    update: '更新任务',
     id: '序号',
     status: '状态',
     counts: '运行次数',

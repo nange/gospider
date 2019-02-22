@@ -31,7 +31,7 @@
   </div>
 </template>
 <script type="text/javascript">
-  import { createExportDb } from '@/api/exportdb'
+  import { createExportDB } from '@/api/exportdb'
   import waves from '@/directive/waves' // 水波纹指令
   export default{
     directives: {
@@ -56,7 +56,7 @@
         this.$refs.form.validate((valid) => {
           if (!valid) return false
           this.submitLoading = true
-          createExportDb(this.form).then((response) => {
+          createExportDB(this.form).then((response) => {
             const data = response.data
             this.$message.success('导出数据库记录创建成功!  ID:' + data.id + '  3秒钟后跳转到数据库管理页面!')
             this.submitLoading = false

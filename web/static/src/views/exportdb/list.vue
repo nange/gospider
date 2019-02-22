@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  import { fetchExportDbList } from '@/api/exportdb'
+  import { fetchExportDBList, deleteExportDB } from '@/api/exportdb'
   import waves from '@/directive/waves' // 水波纹指令
   export default{
     directives: {
@@ -57,17 +57,17 @@
       }
     },
     created() {
-      this.getSysDBData()
+      this.getExportDBData()
     },
     methods: {
       // 刷新
       refresh() {
-        this.getSysDBData()
+        this.getExportDBData()
       },
       // 获取数据
-      getSysDBData() {
+      getExportDBData() {
         this.load_data = true
-        fetchExportDbList({
+        fetchExportDBList({
           offset: (this.currentPage - 1) * this.size,
           size: this.size
         }).then((response) => {
@@ -86,16 +86,24 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
+          deleteExportDB({
+            id: item.id
+          }).then(() => {
+            this.$message.success('delete export db success!')
+            this.refresh()
+          }).catch(() => {
+            this.$message.error('delete export db failed!')
+          })
         })
       },
       handleSizeChange(val) {
         this.size = val
-        this.getSysDBData()
+        this.getExportDBData()
       },
       // 页码选择
       handleCurrentChange(val) {
         this.currentPage = val
-        this.getSysDBData()
+        this.getExportDBData()
       }
 
     }

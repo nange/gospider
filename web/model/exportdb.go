@@ -8,9 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate goqueryset -in sysdb.go
+//go:generate goqueryset -in exportdb.go
 // gen:qs
-type SysDB struct {
+type ExportDB struct {
 	ID        uint64    `json:"id" gorm:"column:id;type:bigint unsigned AUTO_INCREMENT;primary_key"`
 	ShowName  string    `json:"show_name" gorm:"column:show_name;type:varchar(64);not null;unique_index:uk_show_name"`
 	Host      string    `json:"host" gorm:"column:host;type:varchar(128);not null"`
@@ -22,23 +22,23 @@ type SysDB struct {
 	UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 }
 
-func (o *SysDB) TableName() string {
-	return "gospider_sysdb"
+func (o *ExportDB) TableName() string {
+	return "gospider_exportdb"
 }
 
 func init() {
-	core.Register(&SysDB{})
+	core.Register(&ExportDB{})
 }
 
-func GetSysDBList(db *gorm.DB, size, offset int) ([]SysDB, int, error) {
-	queryset := NewSysDBQuerySet(db)
+func GetExportDBList(db *gorm.DB, size, offset int) ([]ExportDB, int, error) {
+	queryset := NewExportDBQuerySet(db)
 	count, err := queryset.Count()
 	if err != nil {
 		return nil, 0, errors.WithStack(err)
 	}
 
-	queryset = NewSysDBQuerySet(db.Limit(size).Offset(offset))
-	ret := make([]SysDB, 0)
+	queryset = NewExportDBQuerySet(db.Limit(size).Offset(offset))
+	ret := make([]ExportDB, 0)
 	if err := queryset.OrderDescByCreatedAt().All(&ret); err != nil {
 		return nil, 0, errors.WithStack(err)
 	}

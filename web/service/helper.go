@@ -35,10 +35,10 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		}
 	}
 
-	sdb := model.SysDB{}
-	query := model.NewSysDBQuerySet(core.GetDB())
-	if err := query.IDEq(task.OutputSysDBID).One(&sdb); err != nil {
-		return nil, errors.WithStack(err)
+	sdb := model.ExportDB{}
+	query := model.NewExportDBQuerySet(core.GetDB())
+	if err := query.IDEq(task.OutputExportDBID).One(&sdb); err != nil {
+		return nil, errors.Wrapf(err, "task.OutputExportDBID [%v]", task.OutputExportDBID)
 	}
 
 	if hasOutputConstraints(rule) && task.OutputType == common.OutputTypeMySQL && task.AutoMigrate {
@@ -105,7 +105,7 @@ func hasOutputConstraints(rule *spider.TaskRule) (b bool) {
 	return
 }
 
-func autoMigrate(task *model.Task, sdb *model.SysDB, rule *spider.TaskRule) (err error) {
+func autoMigrate(task *model.Task, sdb *model.ExportDB, rule *spider.TaskRule) (err error) {
 	db, err := common.NewGormDB(common.MySQLConf{
 		Host:     sdb.Host,
 		Port:     sdb.Port,

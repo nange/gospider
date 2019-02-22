@@ -8,8 +8,8 @@ import (
 	"github.com/gobuffalo/packr"
 	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
+	"github.com/nange/gospider/web/router/exportdb"
 	"github.com/nange/gospider/web/router/rule"
-	"github.com/nange/gospider/web/router/sysdb"
 	"github.com/nange/gospider/web/router/task"
 	"github.com/nange/gospider/web/router/user"
 	log "github.com/sirupsen/logrus"
@@ -35,8 +35,10 @@ func Route(engine *gin.Engine) {
 
 		api.GET("/rules", rule.GetRuleList)
 
-		api.GET("/sysdbs", sysdb.GetSysDBs)
-		api.POST("/sysdbs", sysdb.CreateSysDB)
+		api.GET("/exportdb", exportdb.GetExportDBList)
+		api.POST("/exportdb", exportdb.CreateExportDB)
+		api.DELETE("/exportdb/:id", exportdb.DeleteExportDB)
+
 		api.GET("/user/info", user.GetUserInfo)
 
 	}

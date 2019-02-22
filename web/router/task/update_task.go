@@ -78,7 +78,7 @@ func UpdateTask(c *gin.Context) {
 	// update db
 	if err := task.Update(core.GetDB(),
 		model.TaskDBSchema.TaskDesc, model.TaskDBSchema.CronSpec,
-		model.TaskDBSchema.OutputType, model.TaskDBSchema.OutputSysDBID,
+		model.TaskDBSchema.OutputType, model.TaskDBSchema.OutputExportDBID,
 		model.TaskDBSchema.OptUserAgent, model.TaskDBSchema.OptMaxDepth,
 		model.TaskDBSchema.OptAllowedDomains, model.TaskDBSchema.OptURLFilters,
 		model.TaskDBSchema.OptMaxBodySize, model.TaskDBSchema.LimitEnable,
