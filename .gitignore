@@ -18,5 +18,6 @@
 node_modules/
 _example/_example
 main
+csv_output/
 
 package-lock.json
