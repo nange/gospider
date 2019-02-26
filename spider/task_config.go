@@ -58,7 +58,6 @@ type OutputConfig struct {
 
 type CSVConf struct {
 	CSVFilePath string
-	CSVFileName string
 }
 
 type MySQLConf struct {

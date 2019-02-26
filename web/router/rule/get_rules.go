@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nange/gospider/spider"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type GetRuleListResp struct {
@@ -16,7 +16,7 @@ type GetRuleListResp struct {
 func GetRuleList(c *gin.Context) {
 	keys := spider.GetTaskRuleKeys()
 	if len(keys) == 0 {
-		logrus.Warnf("task rule is empty")
+		log.Warnf("task rule is empty")
 	}
 
 	c.JSON(http.StatusOK, &GetRuleListResp{

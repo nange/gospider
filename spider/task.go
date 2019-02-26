@@ -39,16 +39,16 @@ func addTaskCtrl(taskID uint64, cancelFunc context.CancelFunc) error {
 	return nil
 }
 
-func CancelTask(taskID uint64) error {
+func CancelTask(taskID uint64) bool {
 	ctlMu.Lock()
 	defer ctlMu.Unlock()
 
 	cancel, ok := ctlMap[taskID]
 	if !ok {
-		return errors.WithStack(fmt.Errorf("taskID:%d not found", taskID))
+		return false
 	}
 	cancel()
 	delete(ctlMap, taskID)
 
-	return nil
+	return true
 }

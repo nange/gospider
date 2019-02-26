@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type CreateExportDBReq struct {
@@ -22,11 +22,11 @@ type CreateExportDBResp struct {
 func CreateExportDB(c *gin.Context) {
 	var req CreateExportDBReq
 	if err := c.BindJSON(&req); err != nil {
-		logrus.Errorf("bind json failed! err:%+v", err)
+		log.Errorf("bind json failed! err:%+v", err)
 		c.String(http.StatusBadRequest, "")
 		return
 	}
-	logrus.Infof("req:%+v", req)
+	log.Infof("req:%+v", req)
 
 	if req.Host == "" {
 		req.Host = "127.0.0.1"
@@ -40,7 +40,7 @@ func CreateExportDB(c *gin.Context) {
 
 	db := core.GetDB()
 	if err := req.Create(db); err != nil {
-		logrus.Errorf("create sysdb err: %+v", err)
+		log.Errorf("create sysdb err: %+v", err)
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

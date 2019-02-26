@@ -20,4 +20,5 @@ var (
 	ErrOutputFieldsNotMatchOutputRow = errors.New("output fields not match out put row")
 	ErrTooManyOutputTables           = errors.New("too many output tables")
 	ErrOutputToMultipleTableDisabled = errors.New("output to multiple tables disabled")
+	ErrOutputTypeNotSupported        = errors.New("output type not supported")
 )

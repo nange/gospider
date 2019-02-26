@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // all code copied from gorm, just do some hack to support model defined by []string and map[string]constraints
@@ -37,13 +37,13 @@ func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (const
 	constraints = make(map[string]*OutputConstraint)
 
 	if len(columns) == 0 {
-		logrus.Error("columns should contain at least 1 element")
+		log.Error("columns should contain at least 1 element")
 		return
 	}
 
 	switch len(sizeOrSqlConstraint) {
 	case 0:
-		logrus.Error("invalid parameter sizeOrSqlConstraint")
+		log.Error("invalid parameter sizeOrSqlConstraint")
 		return
 	case 1:
 		switch v := sizeOrSqlConstraint[0].(type) {
@@ -55,16 +55,16 @@ func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (const
 			}
 		case string:
 			if len(columns) > 1 {
-				logrus.Error("default sizeOrSqlConstraint for all columns should be integer")
+				log.Error("default sizeOrSqlConstraint for all columns should be integer")
 			} else {
 				constraints[columns[0]] = &OutputConstraint{Sql: v}
 			}
 		default:
-			logrus.Error("invalid parameter type")
+			log.Error("invalid parameter type")
 		}
 	default:
 		if len(columns) != len(sizeOrSqlConstraint) {
-			logrus.Error("length of column and sizeOrSqlConstraint are not match")
+			log.Error("length of column and sizeOrSqlConstraint are not match")
 			return
 		}
 
@@ -75,7 +75,7 @@ func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (const
 			case string:
 				constraints[col] = &OutputConstraint{Sql: v}
 			default:
-				logrus.Error(fmt.Sprintf("parameter form idx<%d>, column<%s> is invalid", idx, col))
+				log.Error(fmt.Sprintf("parameter form idx<%d>, column<%s> is invalid", idx, col))
 				return
 			}
 		}

@@ -11,24 +11,24 @@ import (
 	"github.com/nange/gospider/web/model"
 	"github.com/nange/gospider/web/service"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // 根据任务id重启定时任务
 func RestartTask(c *gin.Context) {
 	taskIDStr := c.Param("id")
 	if taskIDStr == "" {
-		logrus.Warnf("RestartTaskReq taskID is empty")
+		log.Warnf("RestartTaskReq taskID is empty")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	taskID, err := strconv.ParseUint(taskIDStr, 10, 64)
 	if err != nil {
-		logrus.Warnf("RestartTaskReq taskID format is invalid, taskID:%v", taskIDStr)
+		log.Warnf("RestartTaskReq taskID format is invalid, taskID:%v", taskIDStr)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	logrus.Infof("RestartTaskReq:%+v", taskID)
+	log.Infof("RestartTaskReq:%+v", taskID)
 
 	if taskLock.IsRunning(taskID) {
 		c.String(http.StatusConflict, "other operation is running")
@@ -40,20 +40,20 @@ func RestartTask(c *gin.Context) {
 	task := &model.Task{}
 	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).One(task)
 	if err != nil {
-		logrus.Errorf("RestartTaskReq query model task fail, taskID: %v , err: %+v", taskIDStr, err)
+		log.Errorf("RestartTaskReq query model task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	// only allow crontab task
 	if task.CronSpec == "" {
-		logrus.Warnf("RestartTaskReq taskID is not crontab task, taskID: %v", taskIDStr)
+		log.Warnf("RestartTaskReq taskID is not crontab task, taskID: %v", taskIDStr)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
 	// check task status
 	if !taskCanBeRestart(task) {
-		logrus.Warnf("StartTaskReq taskID status is non-conformance , taskID: %v", taskIDStr)
+		log.Warnf("StartTaskReq taskID status is non-conformance , taskID: %v", taskIDStr)
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -61,7 +61,7 @@ func RestartTask(c *gin.Context) {
 	// create crontab task
 	err = service.CreateCronTask(*task)
 	if err != nil {
-		logrus.Errorf("RestartTaskReq run task fail, taskID: %v , err: %+v", taskIDStr, err)
+		log.Errorf("RestartTaskReq run task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -74,11 +74,9 @@ func RestartTask(c *gin.Context) {
 		}
 
 		// cancel spider task
-		if err := spider.CancelTask(taskID); err != nil {
-			logrus.Warnf("spider.CancelTask err:%v", err)
-		}
+		spider.CancelTask(taskID)
 
-		logrus.Errorf("RestartTaskReq update task status err:%+v", errors.WithStack(err))
+		log.Errorf("RestartTaskReq update task status err:%+v", errors.WithStack(err))
 		c.String(http.StatusInternalServerError, "")
 		return
 	}

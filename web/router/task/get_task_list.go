@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type GetTaskListReq struct {
@@ -22,15 +22,15 @@ type GetTaskListResp struct {
 func GetTaskList(c *gin.Context) {
 	var req GetTaskListReq
 	if err := c.BindQuery(&req); err != nil {
-		logrus.Warnf("query param is invalid")
+		log.Warnf("query param is invalid")
 		c.String(http.StatusBadRequest, "")
 		return
 	}
-	logrus.Infof("get task list req:%+v", req)
+	log.Infof("get task list req:%+v", req)
 
 	tasks, count, err := model.GetTaskList(core.GetDB(), req.Size, req.Offset)
 	if err != nil {
-		logrus.Errorf("GetTaskList failed! err:%+v", err)
+		log.Errorf("GetTaskList failed! err:%+v", err)
 		c.String(http.StatusInternalServerError, "")
 		return
 	}

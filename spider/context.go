@@ -7,14 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strings"
 
-	qb "github.com/didi/gendry/builder"
 	"github.com/gocolly/colly"
 	"github.com/nange/gospider/common"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type Context struct {
@@ -27,29 +23,38 @@ type Context struct {
 
 	collyContext *colly.Context
 	// output
-	outputDB *sql.DB
+	outputDB   *sql.DB
+	outputChan chan *outputRecord
 }
 
 func newContext(ctx context.Context, cancel context.CancelFunc, task *Task, c *colly.Collector, nextC *colly.Collector) *Context {
-	return &Context{
-		task:      task,
-		c:         c,
-		nextC:     nextC,
-		ctlCtx:    ctx,
-		ctlCancel: cancel,
+	gsCtx := &Context{
+		task:       task,
+		c:          c,
+		nextC:      nextC,
+		ctlCtx:     ctx,
+		ctlCancel:  cancel,
+		outputChan: make(chan *outputRecord, 64),
 	}
+
+	if task.OutputConfig.Type == common.OutputTypeCSV {
+		go gsCtx.asyncWriteCSVFile()
+	}
+
+	return gsCtx
 }
 
 func (ctx *Context) cloneWithReq(req *colly.Request) *Context {
 	newctx := context.WithValue(ctx.ctlCtx, "req", req)
 
 	return &Context{
-		task:      ctx.task,
-		c:         ctx.c,
-		nextC:     ctx.nextC,
-		ctlCtx:    newctx,
-		ctlCancel: ctx.ctlCancel,
-		outputDB:  ctx.outputDB,
+		task:       ctx.task,
+		c:          ctx.c,
+		nextC:      ctx.nextC,
+		ctlCtx:     newctx,
+		ctlCancel:  ctx.ctlCancel,
+		outputDB:   ctx.outputDB,
+		outputChan: ctx.outputChan,
 	}
 }
 
@@ -188,95 +193,6 @@ func (ctx *Context) Abort() {
 	if req, ok := ctx.ctlCtx.Value("req").(*colly.Request); ok {
 		req.Abort()
 	}
-}
-
-func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
-	var outputFields []string
-	var ns string
-
-	switch len(namespace) {
-	case 0:
-		outputFields = ctx.task.OutputFields
-		ns = ctx.task.Namespace
-	case 1:
-		if !ctx.task.OutputToMultipleNamespaces {
-			return ErrOutputToMultipleTableDisabled
-		}
-		outputFields = ctx.task.MultipleNamespacesConf[namespace[0]].OutputFields
-		ns = namespace[0]
-	default:
-		return ErrTooManyOutputTables
-	}
-
-	if err := ctx.checkOutput(row, outputFields); err != nil {
-		logrus.Errorf("checkOutput failed! err:%+v, fields:%#v, row:%+v", err, outputFields, row)
-		return err
-	}
-	logrus.Infof("output row:%+v", row)
-
-	if ctx.task.OutputConfig.Type == common.OutputTypeMySQL {
-		if err := ctx.outputToDB(row, outputFields, ns); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (ctx *Context) checkOutput(row map[int]interface{}, outputFields []string) error {
-	if len(outputFields) != len(row) {
-		return ErrOutputFieldsNotMatchOutputRow
-	}
-
-	for i := 0; i < len(outputFields); i++ {
-		if _, ok := row[i]; !ok {
-			return ErrOutputFieldsNotMatchOutputRow
-		}
-	}
-
-	return nil
-}
-
-func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, table string) error {
-	data := make(map[string]interface{})
-	for i, field := range outputFields {
-		data[field] = row[i]
-	}
-
-	cond, vals, err := qb.BuildInsert(table, []map[string]interface{}{data})
-	if err != nil {
-		logrus.Errorf("build insert sql failed! err:%s, namespace:%s, row:%+v", err.Error(), table, row)
-		return errors.WithStack(err)
-	}
-
-	quotedCond, err := quoteQuery(cond)
-	if err != nil {
-		logrus.Error(err)
-		return errors.WithStack(err)
-	}
-
-	if _, err := ctx.outputDB.Exec(quotedCond, vals...); err != nil {
-		logrus.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), quotedCond, vals)
-		return errors.WithStack(err)
-	}
-
-	return nil
-}
-
-func (ctx *Context) outputToCVS(row map[int]interface{}) error {
-	return nil
-}
-
-func quoteQuery(sql string) (s string, err error) {
-	reg := regexp.MustCompile(`(?sU)(INSERT INTO .+ \(\s*)(.+)(\s*\) VALUES.+\))`)
-	matches := reg.FindStringSubmatch(sql)
-	if len(matches) != 4 {
-		err = errors.New("quote sql regexp not match")
-		return
-	}
-	fields := strings.Replace(matches[2], ",", "`,`", -1)
-	s = matches[1] + "`" + fields + "`" + matches[3]
-	return
 }
 
 func createFormReader(data map[string]string) io.Reader {

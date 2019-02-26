@@ -5,12 +5,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nange/gospider/web/core"
+
 	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/spider"
-	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
@@ -35,16 +36,15 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		}
 	}
 
-	sdb := model.ExportDB{}
-	query := model.NewExportDBQuerySet(core.GetDB())
-	if err := query.IDEq(task.OutputExportDBID).One(&sdb); err != nil {
-		return nil, errors.Wrapf(err, "task.OutputExportDBID [%v]", task.OutputExportDBID)
-	}
-
+	edb := model.ExportDB{}
 	if hasOutputConstraints(rule) && task.OutputType == common.OutputTypeMySQL && task.AutoMigrate {
-		err = autoMigrate(task, &sdb, rule)
+		query := model.NewExportDBQuerySet(core.GetDB())
+		if err := query.IDEq(task.OutputExportDBID).One(&edb); err != nil {
+			return nil, errors.Wrapf(err, "task.OutputExportDBID [%v]", task.OutputExportDBID)
+		}
+		err = autoMigrate(&edb, rule)
 		if err != nil {
-			logrus.Error(err)
+			log.Errorf("autoMigrate err [%+v]", errors.WithStack(err))
 		}
 	}
 
@@ -71,15 +71,22 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		},
 		OutputConfig: spider.OutputConfig{
 			Type: task.OutputType,
-			MySQLConf: spider.MySQLConf{
-				Host:     sdb.Host,
-				Port:     sdb.Port,
-				User:     sdb.User,
-				Password: sdb.Password,
-				DBName:   sdb.DBName,
-			},
 		},
 	}
+	if task.OutputType == common.OutputTypeMySQL {
+		config.OutputConfig.MySQLConf = spider.MySQLConf{
+			Host:     edb.Host,
+			Port:     edb.Port,
+			User:     edb.User,
+			Password: edb.Password,
+			DBName:   edb.DBName,
+		}
+	} else if task.OutputType == common.OutputTypeCSV {
+		config.OutputConfig.CSVConf = spider.CSVConf{
+			CSVFilePath: "./csv_output",
+		}
+	}
+
 	if task.OptRequestTimeout > 0 {
 		config.Option.RequestTimeout = time.Duration(task.OptRequestTimeout) * time.Second
 	}
@@ -105,7 +112,7 @@ func hasOutputConstraints(rule *spider.TaskRule) (b bool) {
 	return
 }
 
-func autoMigrate(task *model.Task, sdb *model.ExportDB, rule *spider.TaskRule) (err error) {
+func autoMigrate(sdb *model.ExportDB, rule *spider.TaskRule) (err error) {
 	db, err := common.NewGormDB(common.MySQLConf{
 		Host:     sdb.Host,
 		Port:     sdb.Port,
