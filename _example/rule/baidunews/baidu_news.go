@@ -2,88 +2,91 @@ package baidunews
 
 import (
 	"github.com/nange/gospider/spider"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
 	spider.Register(rule)
 }
 
-var outputFields = []string{"category", "title", "link"}
+var (
+	outputFields  = []string{"category", "title", "link"}
+	outputFields2 = []string{"category", "category_link"}
 
+	namespace1 = "baidu_news"
+	namespace2 = "baidu_category"
+)
+var multNamespaceConf = map[string]*spider.MultipleNamespaceConf{
+	namespace1: {
+		OutputFields:      outputFields,
+		OutputConstraints: spider.NewStringsConstraints(outputFields, 64, 128, 512),
+	},
+	namespace2: {
+		OutputFields:      outputFields2,
+		OutputConstraints: spider.NewStringsConstraints(outputFields2, 64, 256),
+	},
+}
+
+// 演示如何在一条规则里面，同时需要导出数据到两张表
 var rule = &spider.TaskRule{
-	Name:         "百度新闻规则",
-	Description:  "抓取百度新闻各个分类的最新焦点新闻",
-	Namespace:    "baidu_news",
-	OutputFields: outputFields,
-	//OutputConstraints: map[string]*spider.OutputConstraint{
-	//	outputFields[0]: &spider.OutputConstraint{Sql: "varchar(64) not null default ''"},
-	//	outputFields[1]: &spider.OutputConstraint{Sql: "varchar(128) not null default ''"},
-	//	outputFields[2]: &spider.OutputConstraint{Sql: "varchar(256) not null default ''"},
-	//},
-	OutputConstraints: spider.NewStringsConstraints(outputFields, 64, 128, 512), // 上面的简写方式
-	AllowURLRevisit:   true,
+	Name:                      "百度新闻规则",
+	Description:               "抓取百度新闻各个分类的最新焦点新闻以及最新的新闻分类和链接",
+	OutputToMultipleNamespace: true,
+	MultipleNamespaceConf:     multNamespaceConf,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error {
 			return ctx.VisitForNext("http://news.baidu.com")
 		},
 		Nodes: map[int]*spider.Node{
-			0: &spider.Node{ // 第一步: 获取所有分类
-				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Println("Visting", req.URL.String())
-				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
-					`.menu-list a`: func(ctx *spider.Context, el *spider.HTMLElement) error { // 获取所有分类
-						category := el.Text
-						if category == "百家号" || category == "个性推荐" {
-							return nil
-						}
-						if category == "首页" {
-							category = "热点要闻"
-						}
+			0: step1, // 第一步: 获取所有分类
+			1: step2, // 第二步: 获取每个分类的新闻标题链接
+		},
+	},
+}
 
-						ctx.PutReqContextValue("category", category)
+var step1 = &spider.Node{
+	OnRequest: func(ctx *spider.Context, req *spider.Request) {
+		log.Println("Visting", req.URL.String())
+	},
+	OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+		`#channel-all .menu-list a`: func(ctx *spider.Context, el *spider.HTMLElement) error { // 获取所有分类
+			category := el.Text
+			ctx.PutReqContextValue("category", category)
+			link := el.Attr("href")
 
-						link := el.Attr("href")
-						return ctx.VisitForNextWithContext(link)
-					},
-				},
-			},
-			1: &spider.Node{ // 第二步: 获取每个分类的新闻标题链接
-				OnRequest: func(ctx *spider.Context, req *spider.Request) {
-					logrus.Println("Visting", req.URL.String())
-				},
-				OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
-					`#pane-news a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
-						title := el.Text
-						link := el.Attr("href")
-						if title == "" || link == "javascript:void(0);" {
-							return nil
-						}
+			if category != "首页" {
+				err := ctx.Output(map[int]interface{}{
+					0: category,
+					1: ctx.AbsoluteURL(link),
+				}, namespace2)
+				if err != nil {
+					return err
+				}
+			}
 
-						category := ctx.GetReqContextValue("category")
-						return ctx.Output(map[int]interface{}{
-							0: category,
-							1: title,
-							2: link,
-						})
-					},
-					`#col_focus a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
-						title := el.Text
-						link := el.Attr("href")
-						if title == "" || link == "javascript:void(0);" {
-							return nil
-						}
+			return ctx.VisitForNextWithContext(link)
+		},
+	},
+}
 
-						category := ctx.GetReqContextValue("category")
-						return ctx.Output(map[int]interface{}{
-							0: category,
-							1: title,
-							2: link,
-						})
-					},
-				},
-			},
+var step2 = &spider.Node{
+	OnRequest: func(ctx *spider.Context, req *spider.Request) {
+		log.Println("Visting", req.URL.String())
+	},
+	OnHTML: map[string]func(*spider.Context, *spider.HTMLElement) error{
+		`#col_focus a, .focal-news a, .auto-col-focus a, .l-common .fn-c a`: func(ctx *spider.Context, el *spider.HTMLElement) error {
+			title := el.Text
+			link := el.Attr("href")
+			if title == "" || link == "javascript:void(0);" {
+				return nil
+			}
+
+			category := ctx.GetReqContextValue("category")
+			return ctx.Output(map[int]interface{}{
+				0: category,
+				1: title,
+				2: link,
+			}, namespace1)
 		},
 	},
 }

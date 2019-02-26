@@ -98,9 +98,9 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 }
 
 func hasOutputConstraints(rule *spider.TaskRule) (b bool) {
-	if rule.OutputToMultipleNamespaces {
-		for k := range rule.MultipleNamespacesConf {
-			if len(rule.MultipleNamespacesConf[k].OutputConstraints) > 0 {
+	if rule.OutputToMultipleNamespace {
+		for k := range rule.MultipleNamespaceConf {
+			if len(rule.MultipleNamespaceConf[k].OutputConstraints) > 0 {
 				b = true
 				return
 			}

@@ -10,6 +10,7 @@ import (
 
 func init() {
 	log.SetFormatter(&log.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05.000"})
+	log.SetLevel(log.DebugLevel)
 }
 
 func main() {

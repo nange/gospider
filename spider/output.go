@@ -30,10 +30,10 @@ func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 		outputFields = ctx.task.OutputFields
 		ns = ctx.task.Namespace
 	case 1:
-		if !ctx.task.OutputToMultipleNamespaces {
+		if !ctx.task.OutputToMultipleNamespace {
 			return ErrOutputToMultipleTableDisabled
 		}
-		outputFields = ctx.task.MultipleNamespacesConf[namespace[0]].OutputFields
+		outputFields = ctx.task.MultipleNamespaceConf[namespace[0]].OutputFields
 		ns = namespace[0]
 	default:
 		return ErrTooManyOutputTables
