@@ -4,22 +4,22 @@
       <el-col :span="12">
         <el-form ref="form" :model="form" :rules="rules" label-width="120px">
           <el-form-item :label="$t('exportdb.showname')" prop="show_name">
-            <el-input v-model="form.show_name" placeholder="请输入内容"></el-input>
+            <el-input v-model="form.show_name" placeholder="please enter the content"></el-input>
           </el-form-item>
           <el-form-item :label="$t('exportdb.host')" prop="host">
-            <el-input v-model="form.host" placeholder="请输入内容, 默认127.0.0.1"></el-input>
+            <el-input v-model="form.host" placeholder="please enter the content, default 127.0.0.1"></el-input>
           </el-form-item>
           <el-form-item :label="$t('exportdb.port')" prop="port">
             <el-input-number v-model="form.port" :controls="false"></el-input-number>
           </el-form-item>
           <el-form-item :label="$t('exportdb.user')" prop="user">
-            <el-input v-model="form.user" placeholder="请输入内容, 默认root"></el-input>
+            <el-input v-model="form.user" placeholder="please enter the content, default root"></el-input>
           </el-form-item>
           <el-form-item :label="$t('exportdb.password')" prop="password">
-            <el-input type="password" v-model="form.password" placeholder="请输入内容"></el-input>
+            <el-input type="password" v-model="form.password" placeholder="please enter the content"></el-input>
           </el-form-item>
           <el-form-item :label="$t('exportdb.dbname')" prop="db_name">
-            <el-input v-model="form.db_name" placeholder="请输入内容"></el-input>
+            <el-input v-model="form.db_name" placeholder="please enter the content"></el-input>
           </el-form-item>
 
           <el-form-item>
@@ -46,8 +46,8 @@
         submitLoading: false,
         submitDisable: false,
         rules: {
-          show_name: [{ required: true, message: '显示名不能为空', trigger: 'blur' }],
-          db_name: [{ required: true, message: '数据库名不能为空', trigger: 'blur' }]
+          show_name: [{ required: true, message: 'show name should not be empty!', trigger: 'blur' }],
+          db_name: [{ required: true, message: 'database name should not be empty!', trigger: 'blur' }]
         }
       }
     },
@@ -58,10 +58,10 @@
           this.submitLoading = true
           createExportDB(this.form).then((response) => {
             const data = response.data
-            this.$message.success('导出数据库记录创建成功!  ID:' + data.id + '  3秒钟后跳转到数据库管理页面!')
+            this.$message.success('create exportdb record success! ID:' + data.id + '  2s redirect to exportdb management page!')
             this.submitLoading = false
             this.submitDisable = true
-            setTimeout(() => this.$router.push({ name: 'expDbList' }), 3000)
+            setTimeout(() => this.$router.push({ name: 'expDbList' }), 2000)
           }).catch(() => {
             this.submitLoading = false
           })

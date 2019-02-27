@@ -4,10 +4,10 @@
       <el-col :span="12">
         <el-form ref="form" :model="form" :rules="rules" label-position="right" label-width="150px">
           <el-form-item :label="$t('task.name')" prop="task_name">
-            <el-input v-model="form.task_name" placeholder="请输入内容" :disabled="routeID"></el-input>
+            <el-input v-model="form.task_name" placeholder="please enter the content" :disabled="routeID"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.rule')" prop="task_rule_name">
-            <el-select v-model="form.task_rule_name" placeholder="请选择" :disabled="routeID">
+            <el-select v-model="form.task_rule_name" placeholder="please select" :disabled="routeID">
               <el-option
                 v-for="item in ruleOpts"
                 :key="item"
@@ -17,26 +17,26 @@
             </el-select>
           </el-form-item>
           <el-form-item :label="$t('task.desc')">
-            <el-input type="textarea" placeholder="请输入内容" :rows="2" v-model="form.task_desc">
+            <el-input type="textarea" placeholder="please enter the content" :rows="2" v-model="form.task_desc">
             </el-input>
           </el-form-item>
           <el-form-item :label="$t('task.cron')">
-            <el-input v-model="form.cron_spec" placeholder="兼容crontab语法"></el-input>
+            <el-input v-model="form.cron_spec" placeholder="compatible with crontab"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.proxy')">
-            <el-input v-model="form.proxy_urls" placeholder="兼容socks5,http,https代理,列表以逗号分割"></el-input>
+            <el-input v-model="form.proxy_urls" placeholder="compatible with socks5,http,https; separated by commas"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.agent')">
-            <el-input v-model="form.opt_user_agent" placeholder="User Agent"></el-input>
+            <el-input v-model="form.opt_user_agent" placeholder="user agent"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.maxDepth')">
             <el-input-number v-model="form.opt_max_depth" :controls="false"></el-input-number>
           </el-form-item>
           <el-form-item :label="$t('task.allowDomains')">
-            <el-input placeholder="默认空,不限制" v-model="form.opt_allowed_domains"></el-input>
+            <el-input placeholder="default empty, not limited" v-model="form.opt_allowed_domains"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.urlFilter')">
-            <el-input placeholder="默认空,不限制,可指定正则表达式" v-model="form.opt_url_filters"></el-input>
+            <el-input placeholder="default empty, not limited, support regex" v-model="form.opt_url_filters"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.maxBody')">
             <el-input-number v-model="form.opt_max_body_size" :controls="false" class="fl"></el-input-number>
@@ -45,11 +45,11 @@
             <el-input-number v-model="form.opt_request_timeout" :controls="false" class="fl"></el-input-number>
           </el-form-item>
           <el-form-item :label="$t('task.outType')" prop="output_type">
-            <el-select v-model="form.output_type" placeholder="请选择" @change="outputTypeChange">
+            <el-select v-model="form.output_type" placeholder="please select" @change="outputTypeChange">
               <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
               <el-option key="csv" label="CSV" value="csv"></el-option>
             </el-select>
-            <el-select v-model="form.output_exportdb_id" placeholder="请选择" v-if="showExportDB">
+            <el-select v-model="form.output_exportdb_id" placeholder="please select" v-if="showExportDB">
               <el-option
                 v-for="item in exportDBList"
                 :key="item.id"
@@ -64,7 +64,7 @@
             <el-checkbox v-model="form.limit_enable"></el-checkbox>
           </el-form-item>
           <el-form-item :label="$t('task.limitDomainGlob')">
-            <el-input v-model="form.limit_domain_glob" placeholder="默认*,匹配所有域名"></el-input>
+            <el-input v-model="form.limit_domain_glob" placeholder="default *"></el-input>
           </el-form-item>
           <el-form-item :label="$t('task.limitDelay')">
             <el-input-number v-model="form.limit_delay" :controls="false"></el-input-number>
@@ -111,9 +111,9 @@ export default {
       on_submit_loading: false,
       submit_disable: false,
       rules: {
-        task_name: [{ required: true, message: '任务名不能为空', trigger: 'blur' }],
-        task_rule_name: [{ required: true, message: '请选择规则名称', trigger: 'change' }],
-        output_type: [{ required: true, message: '请选择规导出类型', trigger: 'change' }]
+        task_name: [{ required: true, message: 'task name should not be empty', trigger: 'blur' }],
+        task_rule_name: [{ required: true, message: 'please select rule name', trigger: 'change' }],
+        output_type: [{ required: true, message: 'please select export type', trigger: 'change' }]
       }
     }
   },
@@ -177,17 +177,17 @@ export default {
         if (this.routeID) {
           updateTask(this.routeID, this.form).then((response) => {
             const data = response.data
-            this.$message.success('任务修改成功!  任务ID:' + data.id + '  3秒钟后跳转到任务列表页面!')
+            this.$message.success('task update success!  taskID:' + data.id + '  2s redirect to task list page!')
             this.on_submit_loading = false
             this.submit_disable = true
-            setTimeout(() => this.$router.push({ name: 'taskList' }), 3000)
+            setTimeout(() => this.$router.push({ name: 'taskList' }), 2000)
           }).catch(() => {
             this.on_submit_loading = false
           })
         } else {
           saveTask(this.form).then((response) => {
             const data = response.data
-            this.$message.success('任务创建成功!  任务ID:' + data.id + '  3秒钟后跳转到任务列表页面!')
+            this.$message.success('task create success!  taskID:' + data.id + '  2s redirect to task list page!')
             this.on_submit_loading = false
             this.submit_disable = true
             setTimeout(() => this.$router.push({ name: 'taskList' }), 3000)

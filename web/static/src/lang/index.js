@@ -22,9 +22,14 @@ const messages = {
 const i18n = new VueI18n({
   // set locale
   // options: en or zh
-  locale: Cookies.get('language') || 'en',
+  locale: Cookies.get('language') || getBrowserLanguage(),
   // set locale messages
   messages
 })
+
+export function getBrowserLanguage() {
+  const lang = navigator.language || navigator.browserLanguage || navigator.userLanguage
+  return lang.substr(0, 2)
+}
 
 export default i18n

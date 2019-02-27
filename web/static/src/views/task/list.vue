@@ -37,7 +37,7 @@
       </el-pagination>
     </div>
 
-    <el-dialog title="任务详情" :visible.sync="showDetails" width="60%" center>
+    <el-dialog title="Task Detail" :visible.sync="showDetails" width="60%" center>
       <el-row border fit highlight-current-row>
         <el-form label-position="right" label-width="150px" label-suffix=":" class="task-desc-form">
           <el-col :span="24">
@@ -54,7 +54,7 @@
               <span>{{details.task_desc}}</span>
             </el-form-item>
             <el-form-item :label="$t('task.iscron')">
-              <span>{{details.cron_spec ? '是' : '否'}}</span>
+              <span>{{details.cron_spec ? 'Yes' : 'No'}}</span>
             </el-form-item>
             <el-form-item :label="$t('task.cron')">
               <span>{{details.cron_spec}}</span>
@@ -116,7 +116,7 @@
       </el-row>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="showDetails = false">关 闭</el-button>
+        <el-button @click="showDetails = false">Close</el-button>
       </span>
     </el-dialog>
   </div>
@@ -165,9 +165,9 @@
           const data = response.data
           this.tableData = data.data
           for (const v of this.tableData) {
-            v.isCron = '否'
+            v.isCron = 'No'
             if (v.cron_spec) {
-              v.isCron = '是'
+              v.isCron = 'Yes'
             }
             // 操作按钮，用5位2进制数表示，每位控制一个按钮是否显示
             // ----0----0----0----0----0----
@@ -216,49 +216,49 @@
         this.details = row
       },
       stop(item) {
-        this.$confirm('此操作将停止该任务, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        this.$confirm('The operating will stop this task, contine?', 'NOTICE', {
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
           this.load_data = true
           stopTask(item.id).then(() => {
             this.get_table_data()
-            this.$message.success('操作成功!')
+            this.$message.success('Success!')
           }).catch(() => {
-            this.$message.error('停止任务出错!')
+            this.$message.error('Some error!')
           })
         })
       },
       // 非定时任务启动
       start(item) {
-        this.$confirm('是否启动该任务?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        this.$confirm('start the task?', 'NOTICE', {
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
           this.load_data = true
           startTask(item.id).then(() => {
             this.get_table_data()
-            this.$message.success('操作成功!')
+            this.$message.success('Success!')
           }).catch(() => {
-            this.$message.error('启动任务出错!')
+            this.$message.error('Some error!')
           })
         })
       },
       // 定时任务重启
       restart(item) {
-        this.$confirm('是否重启该定时任务?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        this.$confirm('restart timed task?', 'NOTICE', {
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
           this.load_data = true
           restartTask(item.id).then(() => {
             this.get_table_data()
-            this.$message.success('操作成功!')
+            this.$message.success('Success!')
           }).catch(() => {
-            this.$message.error('重启任务出错!')
+            this.$message.error('Some error!')
           })
         })
       },

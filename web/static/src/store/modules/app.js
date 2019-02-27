@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import { getBrowserLanguage } from '../../lang'
 
 const app = {
   state: {
@@ -7,7 +8,7 @@ const app = {
       withoutAnimation: false
     },
     device: 'desktop',
-    language: Cookies.get('language') || 'en'
+    language: Cookies.get('language') || getBrowserLanguage()
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {

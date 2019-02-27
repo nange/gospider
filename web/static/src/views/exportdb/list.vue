@@ -81,9 +81,9 @@
       },
       // 单个删除
       deletedb(item) {
-        this.$confirm('此操作将删除该数据库, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+        this.$confirm('The operating will delete this record, continue?', 'NOTICE', {
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'Cancel',
           type: 'warning'
         }).then(() => {
           deleteExportDB({
