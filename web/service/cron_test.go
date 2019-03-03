@@ -3,7 +3,6 @@ package service
 import (
 	"log"
 	"testing"
-	"time"
 
 	"github.com/robfig/cron"
 )
@@ -21,5 +20,4 @@ func TestCron(t *testing.T) {
 	c.AddJob("0 */1 * * * *", testJob{c: c})
 	c.Start()
 
-	time.Sleep(5 * time.Minute)
 }
