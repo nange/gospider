@@ -42,7 +42,7 @@ func (s *testOutputSuite) TestDBOutputNormal() {
 	gsCtx := newContext(ctx, cancel, &task, nil, nil)
 	gsCtx.setOutputDB(db)
 
-	mock.ExpectExec("(?i)insert into test_table (.+) values").
+	mock.ExpectExec("(?i)insert into `test_table` (.+) values").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	row := map[int]interface{}{
@@ -74,9 +74,9 @@ func (s *testOutputSuite) TestDBOutputMult() {
 	gsCtx := newContext(ctx, cancel, &task, nil, nil)
 	gsCtx.setOutputDB(db)
 
-	mock.ExpectExec("(?i)insert into test_mult_1 (.+) values").
+	mock.ExpectExec("(?i)insert into `test_mult_1` (.+) values").
 		WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectExec("(?i)insert into test_mult_2 (.+) values").
+	mock.ExpectExec("(?i)insert into `test_mult_2` (.+) values").
 		WillReturnResult(sqlmock.NewResult(2, 1))
 	row := map[int]interface{}{
 		0: "field_value1",

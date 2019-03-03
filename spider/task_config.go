@@ -3,11 +3,11 @@ package spider
 import (
 	"crypto/tls"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"regexp"
 	"time"
 
-	"github.com/didi/gendry/manager"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
@@ -148,17 +148,16 @@ func newCollector(config TaskConfig) (*colly.Collector, error) {
 }
 
 func newDB(conf MySQLConf) (*sql.DB, error) {
-	db, err := manager.New(conf.DBName, conf.User, conf.Password, conf.Host).
-		Port(conf.Port).
-		Set(
-			manager.SetCharset("utf8"),
-			manager.SetParseTime(true),
-			manager.SetLoc("Local"),
-		).Open(true)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%t&loc=%s",
+		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName, "utf8mb4", true, "Local")
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	db.SetMaxIdleConns(5)
+
+	db.SetConnMaxLifetime(time.Hour)
+	db.SetMaxIdleConns(2)
 	db.SetMaxOpenConns(10)
+
 	return db, nil
 }

@@ -11,11 +11,11 @@ require (
 	github.com/appleboy/gin-jwt v0.0.0-20190216100112-ca1084e5d5a2
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20180824013952-8fac8b954edb // indirect
-	github.com/didi/gendry v0.0.0-20180627030925-8be9c3b4654a
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gin-gonic/gin v1.3.0
 	github.com/go-sql-driver/mysql v1.4.0
+	github.com/go-xorm/builder v0.3.4
 	github.com/gobuffalo/packr v1.11.1
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0
@@ -38,7 +38,7 @@ require (
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/sirupsen/logrus v1.0.5
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/testify v1.3.0
 	github.com/temoto/robotstxt v0.0.0-20170603013557-9e4646fa7053 // indirect
 	github.com/ugorji/go v1.1.1 // indirect
 	golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
@@ -46,7 +46,6 @@ require (
 	golang.org/x/sys v0.0.0-20180704094941-151529c776cd // indirect
 	golang.org/x/text v0.3.0 // indirect
 	google.golang.org/appengine v1.1.0 // indirect
-	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect

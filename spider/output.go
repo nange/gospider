@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 
-	qb "github.com/didi/gendry/builder"
+	"github.com/go-xorm/builder"
+
 	"github.com/nange/gospider/common"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -96,23 +96,23 @@ func (ctx *Context) checkOutput(row map[int]interface{}, outputFields []string) 
 func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, table string) error {
 	data := make(map[string]interface{})
 	for i, field := range outputFields {
+		if !strings.HasPrefix(field, "`") {
+			field = fmt.Sprintf("`%s`", field)
+		}
 		data[field] = row[i]
 	}
 
-	cond, vals, err := qb.BuildInsert(table, []map[string]interface{}{data})
+	if !strings.HasPrefix(table, "`") {
+		table = fmt.Sprintf("`%s`", table)
+	}
+	cond, vals, err := builder.Insert(builder.Eq(data)).Into(table).ToSQL()
 	if err != nil {
-		log.Errorf("build insert sql failed! err:%s, namespace:%s, row:%+v", err.Error(), table, row)
+		log.Errorf("build insert sql failed! err [%s], namespace [%s], row [%+v]", err.Error(), table, row)
 		return errors.WithStack(err)
 	}
 
-	quotedCond, err := quoteQuery(cond)
-	if err != nil {
-		log.Error(err)
-		return errors.WithStack(err)
-	}
-
-	if _, err := ctx.outputDB.Exec(quotedCond, vals...); err != nil {
-		log.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), quotedCond, vals)
+	if _, err := ctx.outputDB.Exec(cond, vals...); err != nil {
+		log.Errorf("exec insert sql failed! err:%s, cond:%s, vals:%+v", err.Error(), cond, vals)
 		return errors.WithStack(err)
 	}
 
@@ -168,18 +168,6 @@ func (ctx *Context) asyncWriteCSVFile() {
 			}
 		}
 	}
-}
-
-func quoteQuery(sql string) (s string, err error) {
-	reg := regexp.MustCompile(`(?sU)(INSERT INTO .+ \(\s*)(.+)(\s*\) VALUES.+\))`)
-	matches := reg.FindStringSubmatch(sql)
-	if len(matches) != 4 {
-		err = errors.New("quote sql regexp not match")
-		return
-	}
-	fields := strings.Replace(matches[2], ",", "`,`", -1)
-	s = matches[1] + "`" + fields + "`" + matches[3]
-	return
 }
 
 func createCSVFileIfNeeded(csvdir, csvfile string, outputFields []string) error {
