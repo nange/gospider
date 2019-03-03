@@ -18,7 +18,8 @@ var (
 
 var (
 	ErrOutputFieldsNotMatchOutputRow = errors.New("output fields not match out put row")
-	ErrTooManyOutputTables           = errors.New("too many output tables")
+	ErrTooManyOutputNamespace        = errors.New("too many output namespace")
 	ErrOutputToMultipleTableDisabled = errors.New("output to multiple tables disabled")
 	ErrOutputTypeNotSupported        = errors.New("output type not supported")
+	ErrMultConfNamespaceNotFound     = errors.New("mult conf namespace not found")
 )

@@ -33,10 +33,14 @@ func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 		if !ctx.task.OutputToMultipleNamespace {
 			return ErrOutputToMultipleTableDisabled
 		}
-		outputFields = ctx.task.MultipleNamespaceConf[namespace[0]].OutputFields
+		multConf, ok := ctx.task.MultipleNamespaceConf[namespace[0]]
+		if !ok {
+			return ErrMultConfNamespaceNotFound
+		}
+		outputFields = multConf.OutputFields
 		ns = namespace[0]
 	default:
-		return ErrTooManyOutputTables
+		return ErrTooManyOutputNamespace
 	}
 
 	if err := ctx.checkOutput(row, outputFields); err != nil {

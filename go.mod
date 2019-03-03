@@ -2,6 +2,7 @@ module github.com/nange/gospider
 
 require (
 	cloud.google.com/go v0.26.0 // indirect
+	github.com/DATA-DOG/go-sqlmock v1.3.2
 	github.com/PuerkitoBio/goquery v1.4.1
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/antchfx/htmlquery v0.0.0-20180524052033-b4407197cfe8 // indirect
