@@ -91,7 +91,6 @@ func (s *Spider) Run() error {
 		return errors.Wrapf(err, "addTaskCtrl failed")
 	}
 
-	//TODO: 目前的db需要关闭，需要改进为不需要关闭的模式，提取到core目录中
 	go func() {
 		for i := 0; i < nodesLen; i++ {
 			collectors[i].Wait()
