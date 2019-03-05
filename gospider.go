@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/nange/gospider/web/core"
+
 	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/web"
 	"github.com/pkg/errors"
@@ -42,7 +44,7 @@ func (gs *GoSpider) Run() error {
 	if err != nil {
 		return errors.Wrap(err, "new gorm db failed")
 	}
-	gs.web.SetGromDB(db)
+	core.SetGormDB(db)
 
 	return errors.Wrap(gs.web.Run(), "web run failed")
 }

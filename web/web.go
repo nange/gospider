@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/nange/gospider/web/core"
 	"github.com/nange/gospider/web/model"
 	"github.com/nange/gospider/web/router"
@@ -15,20 +14,13 @@ import (
 type Server struct {
 	IP   string
 	Port int
-	db   *gorm.DB
-}
-
-func (s *Server) SetGromDB(gdb *gorm.DB) {
-	s.db = gdb
-	s.db.LogMode(true)
 }
 
 func (s *Server) Run() error {
-	core.SetGormDB(s.db)
 	if err := core.AutoMigrate(); err != nil {
 		return errors.Wrap(err, "model auto migrate failed")
 	}
-	if err := model.InitAdminUserIfNeeded(s.db); err != nil {
+	if err := model.InitAdminUserIfNeeded(core.GetGormDB()); err != nil {
 		return errors.Wrap(err, "init admin user failed")
 	}
 
