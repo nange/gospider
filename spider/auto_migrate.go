@@ -2,10 +2,10 @@ package spider
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	log "github.com/sirupsen/logrus"
 )
 
 // all code copied from gorm, just do some hack to support model defined by []string and map[string]constraints
@@ -37,14 +37,12 @@ func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (const
 	constraints = make(map[string]*OutputConstraint)
 
 	if len(columns) == 0 {
-		log.Error("columns should contain at least 1 element")
-		return
+		panic("columns should contain at least 1 element")
 	}
 
 	switch len(sizeOrSqlConstraint) {
 	case 0:
-		log.Error("invalid parameter sizeOrSqlConstraint")
-		return
+		panic("invalid parameter sizeOrSqlConstraint")
 	case 1:
 		switch v := sizeOrSqlConstraint[0].(type) {
 		case int:
@@ -55,17 +53,16 @@ func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (const
 			}
 		case string:
 			if len(columns) > 1 {
-				log.Error("default sizeOrSqlConstraint for all columns should be integer")
+				panic("default sizeOrSqlConstraint for all columns should be integer")
 			} else {
 				constraints[columns[0]] = &OutputConstraint{Sql: v}
 			}
 		default:
-			log.Error("invalid parameter type")
+			panic("invalid parameter type")
 		}
 	default:
 		if len(columns) != len(sizeOrSqlConstraint) {
-			log.Error("length of column and sizeOrSqlConstraint are not match")
-			return
+			panic("length of column and sizeOrSqlConstraint are not match")
 		}
 
 		for idx, col := range columns {
@@ -75,8 +72,7 @@ func NewConstraints(columns []string, sizeOrSqlConstraint ...interface{}) (const
 			case string:
 				constraints[col] = &OutputConstraint{Sql: v}
 			default:
-				log.Error(fmt.Sprintf("parameter form idx<%d>, column<%s> is invalid", idx, col))
-				return
+				panic(fmt.Sprintf("parameter form idx<%d>, column<%s> is invalid", idx, col))
 			}
 		}
 	}
@@ -93,7 +89,12 @@ func AutoMigrateHack(s *gorm.DB, rule *TaskRule) *gorm.DB {
 
 func autoMigrate(scope *gorm.Scope, rule *TaskRule) (s *gorm.Scope) {
 	if rule.OutputToMultipleNamespace {
+		keys := make([]string, 0, len(rule.MultipleNamespaceConf))
 		for key := range rule.MultipleNamespaceConf {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
 			s = autoMigrateSingle(scope, rule, key)
 		}
 	} else {
