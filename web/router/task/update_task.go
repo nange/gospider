@@ -56,7 +56,7 @@ func UpdateTask(c *gin.Context) {
 
 	//get current task infp
 	oldtask := &model.Task{}
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).One(oldtask)
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).One(oldtask)
 	if err != nil {
 		log.Errorf("UpdateTaskReq query model task fail, taskID: %v , err: %+v", taskID, err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -76,7 +76,7 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 	// update db
-	if err := task.Update(core.GetDB(),
+	if err := task.Update(core.GetGormDB(),
 		model.TaskDBSchema.TaskDesc, model.TaskDBSchema.CronSpec,
 		model.TaskDBSchema.OutputType, model.TaskDBSchema.OutputExportDBID,
 		model.TaskDBSchema.OptUserAgent, model.TaskDBSchema.OptMaxDepth,

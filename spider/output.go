@@ -14,13 +14,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type outputRecord struct {
-	Namespace    string
-	OutputType   string
-	OutputFields []string
-	OutputItems  []interface{}
-}
-
 func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 	var outputFields []string
 	var ns string
@@ -55,22 +48,8 @@ func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 			return err
 		}
 	case common.OutputTypeCSV:
-		od := &outputRecord{
-			Namespace:    ns,
-			OutputType:   common.OutputTypeCSV,
-			OutputFields: outputFields,
-		}
-		outputItems := make([]interface{}, 0, len(outputFields))
-		for i := 0; i < len(outputFields); i++ {
-			outputItems = append(outputItems, row[i])
-		}
-		od.OutputItems = outputItems
-		select {
-		case ctx.outputChan <- od:
-			log.Debugf("write csv row to memory success")
-		default:
-			log.Errorf("write csv row [%+v] to chan failed", row)
-			return errors.New("write csv row to chan failed")
+		if err := ctx.outputToCSV(row, outputFields, ns); err != nil {
+			return err
 		}
 	default:
 		return ErrOutputTypeNotSupported
@@ -119,55 +98,16 @@ func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, t
 	return nil
 }
 
-func (ctx *Context) asyncWriteCSVFile() {
-	var csvfile *os.File
-	var csvWriter *csv.Writer
+func (ctx *Context) outputToCSV(row map[int]interface{}, outputFields []string, ns string) error {
+	w := ctx.outputCSVFiles[ns]
+	cw := csv.NewWriter(w)
 
-	defer func() {
-		if csvfile != nil {
-			csvfile.Close()
-		}
-	}()
-
-	for {
-		select {
-		case <-ctx.ctlCtx.Done():
-			log.Debugf("task context done, taskID [%v]", ctx.task.ID)
-			if csvWriter != nil {
-				csvWriter.Flush()
-			}
-			return
-		case record := <-ctx.outputChan:
-			if csvfile == nil {
-				csvConf := ctx.task.OutputConfig.CSVConf
-				csvname := fmt.Sprintf("%s.csv", record.Namespace)
-				err := createCSVFileIfNeeded(csvConf.CSVFilePath, csvname, record.OutputFields)
-				if err != nil {
-					log.Errorf("createCSVFileIfNeeded err [%+v], csvname [%v], we should cancel the task", err, csvname)
-					CancelTask(ctx.task.ID)
-					return
-				}
-				outputPath := path.Join(csvConf.CSVFilePath, csvname)
-				csvfile, err = os.OpenFile(outputPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
-				if err != nil {
-					log.Errorf("open csv file [%s] err [%+v], we should cancel the task",
-						outputPath, errors.WithStack(err))
-					CancelTask(ctx.task.ID)
-					return
-				}
-				csvWriter = csv.NewWriter(csvfile)
-			}
-
-			strItems := make([]string, 0, len(record.OutputItems))
-			for _, item := range record.OutputItems {
-				strItems = append(strItems, fmt.Sprintf("%v", item))
-			}
-			if err := csvWriter.Write(strItems); err != nil {
-				log.Errorf("write csv record err [%+v]", errors.WithStack(err))
-				break
-			}
-		}
+	record := make([]string, 0, len(outputFields))
+	for i := 0; i < len(outputFields); i++ {
+		record = append(record, fmt.Sprintf("%v", row[i]))
 	}
+
+	return errors.WithStack(cw.Write(record))
 }
 
 func createCSVFileIfNeeded(csvdir, csvfile string, outputFields []string) error {

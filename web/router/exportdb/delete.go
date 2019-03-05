@@ -19,7 +19,7 @@ func DeleteExportDB(c *gin.Context) {
 		return
 	}
 	edb := &model.ExportDB{ID: id}
-	if err := edb.Delete(core.GetDB()); err != nil {
+	if err := edb.Delete(core.GetGormDB()); err != nil {
 		log.Errorf("delete export db err [%+v]", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

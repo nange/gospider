@@ -38,7 +38,7 @@ func StartTask(c *gin.Context) {
 
 	// query task info from db
 	task := &model.Task{}
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).One(task)
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).One(task)
 	if err != nil {
 		log.Errorf("StartTaskReq query model task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -66,14 +66,17 @@ func StartTask(c *gin.Context) {
 		return
 	}
 	// run Task Model
-	err = spider.Run(spiderTask, service.GetMTSChan())
-	if err != nil {
+	s := spider.New(spiderTask, service.GetMTSChan())
+	if spiderTask.OutputConfig.Type == common.OutputTypeMySQL {
+		s.SetDB(core.GetDB())
+	}
+	if err := s.Run(); err != nil {
 		log.Errorf("StartTaskReq run task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	// update task status
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).GetUpdater().SetStatus(common.TaskStatusRunning).Update()
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).GetUpdater().SetStatus(common.TaskStatusRunning).Update()
 	if err != nil {
 		spider.CancelTask(taskID)
 		log.Errorf("StartTaskReq update task status err:%+v", errors.WithStack(err))

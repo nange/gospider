@@ -38,7 +38,7 @@ func CreateExportDB(c *gin.Context) {
 		req.User = "root"
 	}
 
-	db := core.GetDB()
+	db := core.GetGormDB()
 	if err := req.Create(db); err != nil {
 		log.Errorf("create sysdb err: %+v", err)
 		c.AbortWithError(http.StatusInternalServerError, err)

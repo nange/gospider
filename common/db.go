@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -16,10 +17,11 @@ type MySQLConf struct {
 	DBName       string
 	MaxIdleConns int
 	MaxOpenConns int
+	MaxLifetime  time.Duration
 }
 
 func NewGormDB(conf MySQLConf) (*gorm.DB, error) {
-	args := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+	args := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName)
 	db, err := gorm.Open("mysql", args)
 	if err != nil {
@@ -30,6 +32,9 @@ func NewGormDB(conf MySQLConf) (*gorm.DB, error) {
 	}
 	if conf.MaxOpenConns == 0 {
 		db.DB().SetMaxOpenConns(5)
+	}
+	if conf.MaxLifetime == 0 {
+		db.DB().SetConnMaxLifetime(time.Hour)
 	}
 
 	return db, nil

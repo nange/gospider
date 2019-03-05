@@ -71,7 +71,7 @@ func JwtAuth() (*jwt.GinJWTMiddleware, error) {
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
-			valid, user, err := model.IsValidUser(core.GetDB(), loginVals.Username, loginVals.Password)
+			valid, user, err := model.IsValidUser(core.GetGormDB(), loginVals.Username, loginVals.Password)
 			if err != nil {
 				return nil, err
 			}

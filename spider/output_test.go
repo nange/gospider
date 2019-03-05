@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/nange/gospider/common"
@@ -39,7 +38,8 @@ func (s *testOutputSuite) TestDBOutputNormal() {
 
 	task := s.baseTask
 	ctx, cancel := context.WithCancel(context.Background())
-	gsCtx := newContext(ctx, cancel, &task, nil, nil)
+	gsCtx, err := newContext(ctx, cancel, &task, nil, nil)
+	s.Require().NoError(err)
 	gsCtx.setOutputDB(db)
 
 	mock.ExpectExec("(?i)insert into `test_table` (.+) values").
@@ -71,7 +71,8 @@ func (s *testOutputSuite) TestDBOutputMult() {
 		"test_mult_2": &MultipleNamespaceConf{OutputFields: []string{"field1", "field2"}},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	gsCtx := newContext(ctx, cancel, &task, nil, nil)
+	gsCtx, err := newContext(ctx, cancel, &task, nil, nil)
+	s.Require().NoError(err)
 	gsCtx.setOutputDB(db)
 
 	mock.ExpectExec("(?i)insert into `test_mult_1` (.+) values").
@@ -103,27 +104,17 @@ func (s *testOutputSuite) TestCSVOutputNormal() {
 	task.TaskConfig.OutputConfig.CSVConf.CSVFilePath = "./csv_output"
 
 	ctx, cancel := context.WithCancel(context.Background())
-	gsCtx := newContext(ctx, cancel, &task, nil, nil)
+	gsCtx, err := newContext(ctx, cancel, &task, nil, nil)
+	s.Require().NoError(err)
 
 	row := map[int]interface{}{
 		0: "field_value1",
 		1: "field_value2",
 	}
-	err := gsCtx.Output(row)
+	err = gsCtx.Output(row)
 	s.NoError(err)
 
-	gsCtx.ctlCancel()
-	fileExist := false
-	for i := 0; i < 3; i++ {
-		if !fileExist {
-			time.Sleep(500 * time.Millisecond)
-		}
-		fileExist = s.FileExists("./csv_output/test_table.csv")
-		if fileExist {
-			break
-		}
-	}
-	s.True(fileExist)
+	s.FileExists("./csv_output/test_table.csv")
 
 	// mult csv output
 	task.TaskRule.OutputToMultipleNamespace = true
@@ -132,7 +123,8 @@ func (s *testOutputSuite) TestCSVOutputNormal() {
 		"test_mult_2": &MultipleNamespaceConf{OutputFields: []string{"field1", "field2"}},
 	}
 	ctx, cancel = context.WithCancel(context.Background())
-	gsCtx2 := newContext(ctx, cancel, &task, nil, nil)
+	gsCtx2, err := newContext(ctx, cancel, &task, nil, nil)
+	s.Require().NoError(err)
 
 	err = gsCtx2.Output(row, "test_mult_1")
 	s.NoError(err)

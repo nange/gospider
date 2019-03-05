@@ -28,7 +28,7 @@ func GetTaskList(c *gin.Context) {
 	}
 	log.Infof("get task list req:%+v", req)
 
-	tasks, count, err := model.GetTaskList(core.GetDB(), req.Size, req.Offset)
+	tasks, count, err := model.GetTaskList(core.GetGormDB(), req.Size, req.Offset)
 	if err != nil {
 		log.Errorf("GetTaskList failed! err:%+v", err)
 		c.String(http.StatusInternalServerError, "")

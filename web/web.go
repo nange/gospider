@@ -18,13 +18,13 @@ type Server struct {
 	db   *gorm.DB
 }
 
-func (s *Server) SetDB(gdb *gorm.DB) {
+func (s *Server) SetGromDB(gdb *gorm.DB) {
 	s.db = gdb
 	s.db.LogMode(true)
 }
 
 func (s *Server) Run() error {
-	core.SetDB(s.db)
+	core.SetGormDB(s.db)
 	if err := core.AutoMigrate(); err != nil {
 		return errors.Wrap(err, "model auto migrate failed")
 	}

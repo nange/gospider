@@ -42,7 +42,7 @@ func (gs *GoSpider) Run() error {
 	if err != nil {
 		return errors.Wrap(err, "new gorm db failed")
 	}
-	gs.web.SetDB(db)
+	gs.web.SetGromDB(db)
 
 	return errors.Wrap(gs.web.Run(), "web run failed")
 }

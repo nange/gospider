@@ -27,7 +27,7 @@ func GetTaskByID(c *gin.Context) {
 
 	// query task info from db
 	task := &model.Task{}
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).One(task)
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).One(task)
 	if err != nil {
 		logrus.Errorf("GetTaskByID query model task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.String(http.StatusInternalServerError, "")

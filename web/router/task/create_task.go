@@ -26,29 +26,32 @@ func CreateTask(c *gin.Context) {
 	var req CreateTaskReq
 	if err := c.BindJSON(&req); err != nil {
 		log.Errorf("bind json failed! err:%+v", err)
-		c.String(http.StatusBadRequest, "")
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	log.Infof("req:%+v", req)
 
 	task := req.Task
 	task.Status = common.TaskStatusRunning
-	if err := task.Create(core.GetDB()); err != nil {
+	if err := task.Create(core.GetGormDB()); err != nil {
 		log.Errorf("create task failed! err:%+v", err)
-		c.Data(http.StatusInternalServerError, "", nil)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	spiderTask, err := service.GetSpiderTaskByModel(&task)
 	if err != nil {
 		log.Errorf("spider get model task failed! err:%+v", err)
-		c.String(http.StatusInternalServerError, "")
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	err = spider.Run(spiderTask, service.GetMTSChan())
-	if err != nil {
+	s := spider.New(spiderTask, service.GetMTSChan())
+	if spiderTask.OutputConfig.Type == common.OutputTypeMySQL {
+		s.SetDB(core.GetDB())
+	}
+	if err := s.Run(); err != nil {
 		log.Errorf("spider run task failed! err:%+v", err)
-		c.String(http.StatusInternalServerError, "")
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 

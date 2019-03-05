@@ -45,7 +45,7 @@ func StopTask(c *gin.Context) {
 	spider.CancelTask(taskID)
 
 	// set task status to TaskStatusStopped
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).GetUpdater().SetStatus(common.TaskStatusStopped).Update()
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).GetUpdater().SetStatus(common.TaskStatusStopped).Update()
 	if err != nil {
 		log.Errorf("update task status err:%+v", errors.WithStack(err))
 		c.String(http.StatusInternalServerError, "")

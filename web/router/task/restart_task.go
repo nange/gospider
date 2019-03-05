@@ -38,7 +38,7 @@ func RestartTask(c *gin.Context) {
 
 	// query task info from db
 	task := &model.Task{}
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).One(task)
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).One(task)
 	if err != nil {
 		log.Errorf("RestartTaskReq query model task fail, taskID: %v , err: %+v", taskIDStr, err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -66,7 +66,7 @@ func RestartTask(c *gin.Context) {
 		return
 	}
 	// update task status
-	err = model.NewTaskQuerySet(core.GetDB()).IDEq(taskID).GetUpdater().SetStatus(common.TaskStatusCompleted).Update()
+	err = model.NewTaskQuerySet(core.GetGormDB()).IDEq(taskID).GetUpdater().SetStatus(common.TaskStatusCompleted).Update()
 	if err != nil {
 		// stop cron task
 		if ct := service.GetCronTask(taskID); ct != nil {

@@ -43,7 +43,7 @@ func NewCronTask(taskID uint64, cronSpec string, retCh chan<- common.MTS) (*Cron
 
 func (ct *CronTask) Run() {
 	task := &model.Task{}
-	err := model.NewTaskQuerySet(core.GetDB()).IDEq(ct.taskID).One(task)
+	err := model.NewTaskQuerySet(core.GetGormDB()).IDEq(ct.taskID).One(task)
 	if err != nil {
 		log.Errorf("run cron task failed, query task err:%+v", errors.WithStack(err))
 		return
@@ -58,7 +58,11 @@ func (ct *CronTask) Run() {
 		log.Errorf("run cron task failed, err:%+v", errors.WithStack(err))
 		return
 	}
-	if err := spider.Run(spiderTask, ct.retCh); err != nil {
+	s := spider.New(spiderTask, ct.retCh)
+	if spiderTask.OutputConfig.Type == common.OutputTypeMySQL {
+		s.SetDB(core.GetDB())
+	}
+	if err := s.Run(); err != nil {
 		log.Errorf("run cron task failed, err:%+v", err)
 		ct.retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusUnexceptedExited}
 		return

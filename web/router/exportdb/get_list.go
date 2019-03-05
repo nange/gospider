@@ -28,7 +28,7 @@ func GetExportDBList(c *gin.Context) {
 	}
 	log.Infof("get sysdb list req:%+v", req)
 
-	tasks, count, err := model.GetExportDBList(core.GetDB(), req.Size, req.Offset)
+	tasks, count, err := model.GetExportDBList(core.GetGormDB(), req.Size, req.Offset)
 	if err != nil {
 		log.Errorf("GetExportDBList failed! err [%+v]", err)
 		c.String(http.StatusInternalServerError, "")

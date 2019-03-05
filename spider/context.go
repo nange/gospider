@@ -4,13 +4,18 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/gocolly/colly"
 	"github.com/nange/gospider/common"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type Context struct {
@@ -23,43 +28,79 @@ type Context struct {
 
 	collyContext *colly.Context
 	// output
-	outputDB   *sql.DB
-	outputChan chan *outputRecord
+	outputDB       *sql.DB
+	outputCSVFiles map[string]io.WriteCloser
 }
 
-func newContext(ctx context.Context, cancel context.CancelFunc, task *Task, c *colly.Collector, nextC *colly.Collector) *Context {
+func newContext(ctx context.Context, cancel context.CancelFunc, task *Task, c *colly.Collector, nextC *colly.Collector) (*Context, error) {
 	gsCtx := &Context{
-		task:       task,
-		c:          c,
-		nextC:      nextC,
-		ctlCtx:     ctx,
-		ctlCancel:  cancel,
-		outputChan: make(chan *outputRecord, 64),
+		task:      task,
+		c:         c,
+		nextC:     nextC,
+		ctlCtx:    ctx,
+		ctlCancel: cancel,
 	}
 
 	if task.OutputConfig.Type == common.OutputTypeCSV {
-		go gsCtx.asyncWriteCSVFile()
+		gsCtx.outputCSVFiles = make(map[string]io.WriteCloser)
+		csvConf := task.OutputConfig.CSVConf
+		if task.OutputToMultipleNamespace {
+			for ns, conf := range task.MultipleNamespaceConf {
+				csvname := fmt.Sprintf("%s.csv", ns)
+				if err := createCSVFileIfNeeded(csvConf.CSVFilePath, csvname, conf.OutputFields); err != nil {
+					return nil, err
+				}
+				outputPath := path.Join(csvConf.CSVFilePath, csvname)
+				csvfile, err := os.OpenFile(outputPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+				if err != nil {
+					return nil, errors.Wrapf(err, "open csv file [%s] failed", csvname)
+				}
+				gsCtx.outputCSVFiles[ns] = csvfile
+			}
+		} else {
+			csvname := fmt.Sprintf("%s.csv", task.Namespace)
+			if err := createCSVFileIfNeeded(csvConf.CSVFilePath, csvname, task.OutputFields); err != nil {
+				return nil, err
+			}
+			outputPath := path.Join(csvConf.CSVFilePath, csvname)
+			csvfile, err := os.OpenFile(outputPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+			if err != nil {
+				return nil, errors.Wrapf(err, "open csv file [%s] failed", csvname)
+			}
+			gsCtx.outputCSVFiles[task.Namespace] = csvfile
+		}
+
 	}
 
-	return gsCtx
+	return gsCtx, nil
 }
 
 func (ctx *Context) cloneWithReq(req *colly.Request) *Context {
 	newctx := context.WithValue(ctx.ctlCtx, "req", req)
 
 	return &Context{
-		task:       ctx.task,
-		c:          ctx.c,
-		nextC:      ctx.nextC,
-		ctlCtx:     newctx,
-		ctlCancel:  ctx.ctlCancel,
-		outputDB:   ctx.outputDB,
-		outputChan: ctx.outputChan,
+		task:           ctx.task,
+		c:              ctx.c,
+		nextC:          ctx.nextC,
+		ctlCtx:         newctx,
+		ctlCancel:      ctx.ctlCancel,
+		outputDB:       ctx.outputDB,
+		outputCSVFiles: ctx.outputCSVFiles,
 	}
 }
 
 func (ctx *Context) setOutputDB(db *sql.DB) {
 	ctx.outputDB = db
+}
+
+func (ctx *Context) closeCSVFileIfNeeded() {
+	if len(ctx.outputCSVFiles) == 0 {
+		return
+	}
+	for ns, closer := range ctx.outputCSVFiles {
+		log.Debugf("closing csv file [%s]", ns+".csv")
+		closer.Close()
+	}
 }
 
 func (ctx *Context) GetRequest() *Request {

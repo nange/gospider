@@ -20,7 +20,7 @@ func ManageTaskStatus() {
 		select {
 		case mts := <-mtsCh:
 			task := &model.Task{}
-			err := model.NewTaskQuerySet(core.GetDB()).IDEq(mts.ID).One(task)
+			err := model.NewTaskQuerySet(core.GetGormDB()).IDEq(mts.ID).One(task)
 			if err != nil {
 				log.Errorf("query model task err: %+v", err)
 				break
@@ -31,7 +31,7 @@ func ManageTaskStatus() {
 				task.Counts += 1
 			}
 
-			if err := task.Update(core.GetDB(), model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
+			if err := task.Update(core.GetGormDB(), model.TaskDBSchema.Status, model.TaskDBSchema.Counts); err != nil {
 				log.Errorf("update task status err:%+v", errors.WithStack(err))
 				break
 			}

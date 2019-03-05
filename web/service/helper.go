@@ -38,7 +38,7 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 
 	edb := model.ExportDB{}
 	if hasOutputConstraints(rule) && task.OutputType == common.OutputTypeMySQL && task.AutoMigrate {
-		query := model.NewExportDBQuerySet(core.GetDB())
+		query := model.NewExportDBQuerySet(core.GetGormDB())
 		if err := query.IDEq(task.OutputExportDBID).One(&edb); err != nil {
 			return nil, errors.Wrapf(err, "task.OutputExportDBID [%v]", task.OutputExportDBID)
 		}
@@ -74,7 +74,7 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 		},
 	}
 	if task.OutputType == common.OutputTypeMySQL {
-		config.OutputConfig.MySQLConf = spider.MySQLConf{
+		config.OutputConfig.MySQLConf = common.MySQLConf{
 			Host:     edb.Host,
 			Port:     edb.Port,
 			User:     edb.User,

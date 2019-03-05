@@ -1,6 +1,7 @@
 package core
 
 import (
+	"database/sql"
 	"reflect"
 
 	"github.com/jinzhu/gorm"
@@ -11,12 +12,16 @@ var modelList []Model
 
 var db *gorm.DB
 
-func SetDB(gdb *gorm.DB) {
+func SetGormDB(gdb *gorm.DB) {
 	db = gdb
 }
 
-func GetDB() *gorm.DB {
+func GetGormDB() *gorm.DB {
 	return db
+}
+
+func GetDB() *sql.DB {
+	return db.DB()
 }
 
 type Model interface {

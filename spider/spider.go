@@ -12,83 +12,100 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Run(task *Task, retCh chan<- common.MTS) error {
-	var db *sql.DB
-	var err error
-	if task.OutputConfig.Type == common.OutputTypeMySQL {
-		db, err = newDB(task.TaskConfig.OutputConfig.MySQLConf)
-		if err != nil {
-			log.Errorf("newDB failed! err:%#v", err)
-			return err
-		}
-	}
+type Spider struct {
+	task  *Task
+	retCh chan<- common.MTS
+	db    *sql.DB
+}
 
-	c, err := newCollector(task.TaskConfig)
+func New(task *Task, retCh chan<- common.MTS) *Spider {
+	return &Spider{
+		task:  task,
+		retCh: retCh,
+	}
+}
+
+func (s *Spider) SetDB(db *sql.DB) {
+	s.db = db
+}
+
+func (s *Spider) Run() error {
+	c, err := newCollector(s.task.TaskConfig)
 	if err != nil {
 		log.Errorf("new collector err:%+v", err)
 		return err
 	}
 
-	nodesLen := len(task.Rule.Nodes)
+	nodesLen := len(s.task.Rule.Nodes)
 	collectors := make([]*colly.Collector, 0, nodesLen)
-	for i := 0; i < len(task.Rule.Nodes); i++ {
+	for i := 0; i < len(s.task.Rule.Nodes); i++ {
 		nextC := c.Clone()
 		collectors = append(collectors, nextC)
 	}
 
 	ctxCtl, cancel := context.WithCancel(context.Background())
-	if err := addTaskCtrl(task.ID, cancel); err != nil {
-		return errors.Wrapf(err, "addTaskCtrl failed")
-	}
-
+	ctxs := make([]*Context, 0, nodesLen)
 	for i := 0; i < nodesLen; i++ {
 		var ctx *Context
 		if i != nodesLen-1 {
-			ctx = newContext(ctxCtl, cancel, task, collectors[i], collectors[i+1])
+			ctx, err = newContext(ctxCtl, cancel, s.task, collectors[i], collectors[i+1])
 		} else {
-			ctx = newContext(ctxCtl, cancel, task, collectors[i], nil)
+			ctx, err = newContext(ctxCtl, cancel, s.task, collectors[i], nil)
 		}
-		if task.OutputConfig.Type == common.OutputTypeMySQL {
-			ctx.setOutputDB(db)
+		if err != nil {
+			return err
+		}
+		ctxs = append(ctxs, ctx)
+		if s.task.OutputConfig.Type == common.OutputTypeMySQL {
+			ctx.setOutputDB(s.db)
 		}
 
-		addCallback(ctx, task.Rule.Nodes[i])
+		addCallback(ctx, s.task.Rule.Nodes[i])
 	}
 
-	headCtx := newContext(ctxCtl, cancel, task, c, collectors[0])
+	headCtx, err := newContext(ctxCtl, cancel, s.task, c, collectors[0])
+	if err != nil {
+		return err
+	}
+	if s.task.OutputConfig.Type == common.OutputTypeMySQL {
+		headCtx.setOutputDB(s.db)
+	}
 	headWrapper := func(ctx *Context) (err error) {
 		defer func() {
 			if e := recover(); e != nil {
 				if v, ok := e.(error); ok {
 					err = v
 				} else {
-					str := fmt.Sprintf("%v", e)
-					err = errors.New(str)
+					err = fmt.Errorf("%v", e)
 				}
 				log.Errorf("Head unexcepted exited, err: %+v, stack:\n%s", e, string(debug.Stack()))
 			}
 		}()
-		return task.Rule.Head(ctx)
+		return s.task.Rule.Head(ctx)
 	}
 	if err := headWrapper(headCtx); err != nil {
 		log.Errorf("exec rule head func err:%#v", err)
 		return errors.WithStack(err)
 	}
+	if err := addTaskCtrl(s.task.ID, cancel); err != nil {
+		return errors.Wrapf(err, "addTaskCtrl failed")
+	}
 
+	//TODO: 目前的db需要关闭，需要改进为不需要关闭的模式，提取到core目录中
 	go func() {
-		if db != nil {
-			defer db.Close()
-		}
-
 		for i := 0; i < nodesLen; i++ {
 			collectors[i].Wait()
-			log.Infof("task:%s %d step completed...", task.Name, i+1)
+			log.Infof("task:%s %d step completed...", s.task.Name, i+1)
 		}
 
-		CancelTask(task.ID)
-		retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusCompleted}
+		CancelTask(s.task.ID)
+		s.retCh <- common.MTS{ID: s.task.ID, Status: common.TaskStatusCompleted}
 
-		log.Infof("task:%s run completed...", task.Name)
+		for _, ctx := range ctxs {
+			ctx.closeCSVFileIfNeeded()
+		}
+
+		log.Infof("task:%s run completed...", s.task.Name)
 	}()
 
 	return nil

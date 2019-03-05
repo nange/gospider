@@ -2,11 +2,11 @@ package spider
 
 import (
 	"crypto/tls"
-	"database/sql"
-	"fmt"
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/nange/gospider/common"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly"
@@ -53,19 +53,11 @@ type Limit struct {
 type OutputConfig struct {
 	Type      string
 	CSVConf   CSVConf
-	MySQLConf MySQLConf
+	MySQLConf common.MySQLConf
 }
 
 type CSVConf struct {
 	CSVFilePath string
-}
-
-type MySQLConf struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
 }
 
 func newCollector(config TaskConfig) (*colly.Collector, error) {
@@ -145,19 +137,4 @@ func newCollector(config TaskConfig) (*colly.Collector, error) {
 	}
 
 	return c, nil
-}
-
-func newDB(conf MySQLConf) (*sql.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%t&loc=%s",
-		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName, "utf8mb4", true, "Local")
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	db.SetConnMaxLifetime(time.Hour)
-	db.SetMaxIdleConns(2)
-	db.SetMaxOpenConns(10)
-
-	return db, nil
 }

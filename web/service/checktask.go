@@ -13,7 +13,7 @@ import (
 // 2. restart task if status is TaskStatusCompleted, TaskStatusRunning
 func CheckTask() {
 	log.Infof("starting check task goroutine")
-	qs := model.NewTaskQuerySet(core.GetDB())
+	qs := model.NewTaskQuerySet(core.GetGormDB())
 
 	tasks := make([]model.Task, 0)
 	if err := qs.All(&tasks); err != nil {
@@ -28,7 +28,7 @@ func CheckTask() {
 	for _, task := range tasks {
 		if task.Status == common.TaskStatusRunning {
 			log.Infof("set task status to TaskStatusUnexceptedExited, taskID:%v", task.ID)
-			err := model.NewTaskQuerySet(core.GetDB()).IDEq(task.ID).
+			err := model.NewTaskQuerySet(core.GetGormDB()).IDEq(task.ID).
 				GetUpdater().SetStatus(common.TaskStatusUnexceptedExited).Update()
 			if err != nil {
 				log.Errorf("update task status err: %+v", err)
