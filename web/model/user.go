@@ -74,10 +74,9 @@ func InitAdminUserIfNeeded(db *gorm.DB) error {
 		user.Avatar = "/admin/gopher.png"
 		user.Introduction = "admin user"
 		user.Roles = "admin"
-		if err := user.Create(db); err != nil {
-			return err
-		}
+
+		return user.Create(db)
 	}
 
-	return nil
+	return err
 }
