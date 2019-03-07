@@ -39,10 +39,10 @@ func TestAutoMigrateHack(t *testing.T) {
 	// multiple output table case
 	rule.OutputToMultipleNamespace = true
 	rule.MultipleNamespaceConf = map[string]*MultipleNamespaceConf{
-		"test_mult_table": &MultipleNamespaceConf{
+		"test_mult_table": {
 			OutputFields: []string{"mtable_field1", "mtable_field1"},
 		},
-		"test_mult_table2": &MultipleNamespaceConf{
+		"test_mult_table2": {
 			OutputFields: []string{"mtable_field1", "mtable_field1"},
 		},
 	}

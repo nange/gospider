@@ -6,7 +6,7 @@ import (
 
 func (s *testModelSuite) TestGenUserHashPassword() {
 	hash, err := GenUserHashPassword("admin")
-	s.NoErrorf(err, "shoudl gen hash password success")
+	s.NoErrorf(err, "should gen hash password success")
 	s.T().Logf("hash:%s", hash)
 }
 

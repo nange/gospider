@@ -67,8 +67,8 @@ func (s *testOutputSuite) TestDBOutputMult() {
 	task := s.baseTask
 	task.TaskRule.OutputToMultipleNamespace = true
 	task.TaskRule.MultipleNamespaceConf = map[string]*MultipleNamespaceConf{
-		"test_mult_1": &MultipleNamespaceConf{OutputFields: []string{"field1", "field2"}},
-		"test_mult_2": &MultipleNamespaceConf{OutputFields: []string{"field1", "field2"}},
+		"test_mult_1": {OutputFields: []string{"field1", "field2"}},
+		"test_mult_2": {OutputFields: []string{"field1", "field2"}},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	gsCtx, err := newContext(ctx, cancel, &task, nil, nil)
@@ -119,8 +119,8 @@ func (s *testOutputSuite) TestCSVOutputNormal() {
 	// mult csv output
 	task.TaskRule.OutputToMultipleNamespace = true
 	task.TaskRule.MultipleNamespaceConf = map[string]*MultipleNamespaceConf{
-		"test_mult_1": &MultipleNamespaceConf{OutputFields: []string{"field1", "field2"}},
-		"test_mult_2": &MultipleNamespaceConf{OutputFields: []string{"field1", "field2"}},
+		"test_mult_1": {OutputFields: []string{"field1", "field2"}},
+		"test_mult_2": {OutputFields: []string{"field1", "field2"}},
 	}
 	ctx, cancel = context.WithCancel(context.Background())
 	gsCtx2, err := newContext(ctx, cancel, &task, nil, nil)

@@ -38,8 +38,8 @@ func TestTaskRule(t *testing.T) {
 					return nil
 				},
 				Nodes: map[int]*Node{
-					0: &Node{},
-					2: &Node{},
+					0: {},
+					2: {},
 				},
 			},
 		})
@@ -54,7 +54,7 @@ func TestTaskRule(t *testing.T) {
 				return nil
 			},
 			Nodes: map[int]*Node{
-				0: &Node{},
+				0: {},
 			},
 		},
 	})

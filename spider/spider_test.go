@@ -92,8 +92,8 @@ func (s *testSpiderSuite) TestRunFail() {
 			return errors.New("some error")
 		},
 		Nodes: map[int]*Node{
-			0: &Node{},
-			1: &Node{},
+			0: {},
+			1: {},
 		},
 	}
 	task := s.task
