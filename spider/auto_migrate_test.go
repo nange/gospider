@@ -59,35 +59,35 @@ func TestAutoMigrateHack(t *testing.T) {
 }
 
 func TestNewSqlString(t *testing.T) {
-	s1 := NewSqlString(10)
+	s1 := NewSQLString(10)
 	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", s1)
 
-	s2 := NewSqlString(10, "default string")
+	s2 := NewSQLString(10, "default string")
 	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT 'default string'", s2)
 }
 
 func TestNewStringsConstraints(t *testing.T) {
 	cons := NewStringsConstraints([]string{"field1", "field2", "field3"}, 10, 20, 30)
 	assert.Equal(t, 3, len(cons))
-	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons["field1"].Sql)
-	assert.Equal(t, "VARCHAR(20) NOT NULL DEFAULT ''", cons["field2"].Sql)
-	assert.Equal(t, "VARCHAR(30) NOT NULL DEFAULT ''", cons["field3"].Sql)
+	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons["field1"].SQL)
+	assert.Equal(t, "VARCHAR(20) NOT NULL DEFAULT ''", cons["field2"].SQL)
+	assert.Equal(t, "VARCHAR(30) NOT NULL DEFAULT ''", cons["field3"].SQL)
 }
 
 func TestNewConstraints(t *testing.T) {
 	cons := NewConstraints([]string{"field1", "field2"}, 10, 20)
 	assert.Equal(t, 2, len(cons))
-	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons["field1"].Sql)
-	assert.Equal(t, "VARCHAR(20) NOT NULL DEFAULT ''", cons["field2"].Sql)
+	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons["field1"].SQL)
+	assert.Equal(t, "VARCHAR(20) NOT NULL DEFAULT ''", cons["field2"].SQL)
 
 	cons2 := NewConstraints([]string{"field1", "field2"}, 10)
 	assert.Equal(t, 2, len(cons2))
-	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons2["field1"].Sql)
-	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons2["field2"].Sql)
+	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons2["field1"].SQL)
+	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons2["field2"].SQL)
 
 	cons3 := NewConstraints([]string{"field1"}, "VARCHAR(10) NOT NULL DEFAULT ''")
 	assert.Equal(t, 1, len(cons3))
-	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons3["field1"].Sql)
+	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons3["field1"].SQL)
 
 	assert.Panics(t, func() {
 		NewConstraints([]string{"field1", "field2"}, "VARCHAR(10) NOT NULL DEFAULT ''")
@@ -104,9 +104,9 @@ func TestNewConstraints(t *testing.T) {
 
 	cons4 := NewConstraints([]string{"field1", "field2", "field3"}, 10, "VARCHAR(20) NOT NULL DEFAULT ''", 30)
 	assert.Equal(t, 3, len(cons4))
-	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons4["field1"].Sql)
-	assert.Equal(t, "VARCHAR(20) NOT NULL DEFAULT ''", cons4["field2"].Sql)
-	assert.Equal(t, "VARCHAR(30) NOT NULL DEFAULT ''", cons4["field3"].Sql)
+	assert.Equal(t, "VARCHAR(10) NOT NULL DEFAULT ''", cons4["field1"].SQL)
+	assert.Equal(t, "VARCHAR(20) NOT NULL DEFAULT ''", cons4["field2"].SQL)
+	assert.Equal(t, "VARCHAR(30) NOT NULL DEFAULT ''", cons4["field3"].SQL)
 
 	assert.Panics(t, func() {
 		NewConstraints([]string{"field1", "field2", "field3"}, 10, 20.0, 30)

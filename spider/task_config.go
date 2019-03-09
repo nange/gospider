@@ -6,14 +6,16 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/nange/gospider/common"
-
+	// import the mysql driver
 	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
+	"github.com/nange/gospider/common"
 	"github.com/pkg/errors"
 )
 
+// TaskConfig is the config of a task
 type TaskConfig struct {
 	CronSpec     string
 	Option       Option
@@ -22,6 +24,7 @@ type TaskConfig struct {
 	OutputConfig OutputConfig
 }
 
+// Option is the config option of a task
 type Option struct {
 	UserAgent              string
 	MaxDepth               int
@@ -36,6 +39,7 @@ type Option struct {
 	RequestTimeout         time.Duration
 }
 
+// Limit is the limit of a task
 type Limit struct {
 	Enable bool
 	// DomainRegexp is a regular expression to match against domains
@@ -50,12 +54,14 @@ type Limit struct {
 	Parallelism int
 }
 
+// OutputConfig is the output config of a task
 type OutputConfig struct {
 	Type      string
 	CSVConf   CSVConf
 	MySQLConf common.MySQLConf
 }
 
+// CSVConf is the csv conf of a task
 type CSVConf struct {
 	CSVFilePath string
 }

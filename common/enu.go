@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// TaskStatus the task status type define
 type TaskStatus uint8
 
 const (

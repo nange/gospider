@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"time"
 
+	// import the mysql driver
 	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 )
 
+// MySQLConf is the mysql conf
 type MySQLConf struct {
 	Host         string
 	Port         int
@@ -20,6 +23,7 @@ type MySQLConf struct {
 	MaxLifetime  time.Duration
 }
 
+// NewGormDB return a new gorm db instance
 func NewGormDB(conf MySQLConf) (*gorm.DB, error) {
 	args := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName)

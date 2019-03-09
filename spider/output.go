@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Output output a row data
 func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 	var outputFields []string
 	var ns string

@@ -12,12 +12,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Spider the spider define
 type Spider struct {
 	task  *Task
 	retCh chan<- common.MTS
 	db    *sql.DB
 }
 
+// New create a new spider object
 func New(task *Task, retCh chan<- common.MTS) *Spider {
 	return &Spider{
 		task:  task,
@@ -25,10 +27,12 @@ func New(task *Task, retCh chan<- common.MTS) *Spider {
 	}
 }
 
+// SetDB set the underlayer output db
 func (s *Spider) SetDB(db *sql.DB) {
 	s.db = db
 }
 
+// Run run a spider task
 func (s *Spider) Run() error {
 	c, err := newCollector(s.task.TaskConfig)
 	if err != nil {

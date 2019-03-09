@@ -9,6 +9,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
+// Request the object of each request
 type Request struct {
 	URL     *url.URL
 	Headers *http.Header
@@ -35,6 +36,7 @@ func newRequest(req *colly.Request, ctx *Context) *Request {
 	}
 }
 
+// Response the object of each response
 type Response struct {
 	StatusCode int
 	Body       []byte
@@ -54,14 +56,17 @@ func newResponse(res *colly.Response, ctx *Context) *Response {
 	}
 }
 
+// Save save the response to file
 func (res *Response) Save(fileName string) error {
 	return res.res.Save(fileName)
 }
 
+// FileName the filename of response
 func (res *Response) FileName() string {
 	return res.res.FileName()
 }
 
+// HTMLElement the html element object
 type HTMLElement struct {
 	Name     string
 	Text     string
@@ -83,22 +88,27 @@ func newHTMLElement(el *colly.HTMLElement, ctx *Context) *HTMLElement {
 	}
 }
 
+// Attr return the html element attr value
 func (h *HTMLElement) Attr(k string) string {
 	return h.el.Attr(k)
 }
 
+// ChildText the child text content of h
 func (h *HTMLElement) ChildText(goquerySelector string) string {
 	return h.el.ChildText(goquerySelector)
 }
 
+// ChildAttr the child attr value of h
 func (h *HTMLElement) ChildAttr(goquerySelector, attrName string) string {
 	return h.el.ChildAttr(goquerySelector, attrName)
 }
 
+// ChildAttrs the child attr list of h
 func (h *HTMLElement) ChildAttrs(goquerySelector, attrName string) []string {
 	return h.el.ChildAttrs(goquerySelector, attrName)
 }
 
+// ForEach calls callback on each goquerySelector element
 func (h *HTMLElement) ForEach(goquerySelector string, callback func(int, *HTMLElement)) {
 	cb := func(i int, el *colly.HTMLElement) {
 		callback(i, newHTMLElement(el, h.Request.ctx))
@@ -106,6 +116,7 @@ func (h *HTMLElement) ForEach(goquerySelector string, callback func(int, *HTMLEl
 	h.el.ForEach(goquerySelector, cb)
 }
 
+// XMLElement the xml element object
 type XMLElement struct {
 	Name     string
 	Text     string
@@ -127,18 +138,22 @@ func newXMLElement(el *colly.XMLElement, ctx *Context) *XMLElement {
 	}
 }
 
+// Attr return the xml element attr value
 func (x *XMLElement) Attr(k string) string {
 	return x.el.Attr(k)
 }
 
+// ChildText the child text content of x
 func (x *XMLElement) ChildText(xpathQuery string) string {
 	return x.ChildText(xpathQuery)
 }
 
+// ChildAttr the child attr value of x
 func (x *XMLElement) ChildAttr(xpathQuery, attrName string) string {
 	return x.el.ChildAttr(xpathQuery, attrName)
 }
 
+// ChildAttrs the child attr list of x
 func (x *XMLElement) ChildAttrs(xpathQuery, attrName string) []string {
 	return x.el.ChildAttrs(xpathQuery, attrName)
 }

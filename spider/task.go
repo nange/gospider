@@ -8,12 +8,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Task is a task define
 type Task struct {
 	ID uint64
 	TaskRule
 	TaskConfig
 }
 
+// NewTask return a new task object
 func NewTask(id uint64, rule TaskRule, config TaskConfig) *Task {
 	return &Task{
 		ID:         id,
@@ -39,6 +41,7 @@ func addTaskCtrl(taskID uint64, cancelFunc context.CancelFunc) error {
 	return nil
 }
 
+// CancelTask cancel a task by taskID
 func CancelTask(taskID uint64) bool {
 	ctlMu.Lock()
 	defer ctlMu.Unlock()
