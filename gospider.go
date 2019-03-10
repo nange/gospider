@@ -1,3 +1,5 @@
+// GoSpider is a simple go crawler framework.
+// User only need to care about the rules of page, provides web page to manage task. Base on colly.
 package gospider
 
 import (
