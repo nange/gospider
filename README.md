@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.com/nange/gospider.svg?branch=master)](https://travis-ci.org/nange/gospider)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nange/gospider)](https://goreportcard.com/report/github.com/nange/gospider)
 [![codecov.io](https://codecov.io/github/nange/gospider/branch/master/graph/badge.svg)](https://codecov.io/github/nange/gospider)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fnange%2Fgospider.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fnange%2Fgospider?ref=badge_shield)
 
 # gospider
 golang实现的爬虫框架，使用者只需关心页面规则，提供web管理界面。基于[colly](https://github.com/gocolly/colly)开发。
