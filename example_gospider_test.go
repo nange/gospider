@@ -1,12 +1,12 @@
 package gospider_test
 
 import (
-	"github.com/labstack/gommon/log"
 	"github.com/nange/gospider"
+	log "github.com/sirupsen/logrus"
 )
 
-// Example quitstart
-func ExampleGoSpider_Run() {
+//quitstart
+func Example() {
 	// if gospider.New() has no argments, will use env parameters
 	// gs := gospider.New()
 
