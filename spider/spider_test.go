@@ -1,13 +1,12 @@
 package spider
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/pkg/errors"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/nange/gospider/common"
@@ -24,11 +23,30 @@ func (s *testSpiderSuite) SetupSuite() {
 	task := Task{
 		ID: 1,
 		TaskRule: TaskRule{
-			Name:         "test_task",
-			Namespace:    "test_table",
-			OutputFields: []string{"field1", "field2"},
+			Name:                   "test_task",
+			Namespace:              "test_table",
+			OutputFields:           []string{"field1", "field2"},
+			AllowURLRevisit:        true,
+			IgnoreRobotsTxt:        true,
+			ParseHTTPErrorResponse: true,
+			InsecureSkipVerify:     true,
+			DisableCookies:         true,
 		},
 		TaskConfig: TaskConfig{
+			Option: Option{
+				UserAgent: "gospider",
+				MaxDepth:  10,
+				//AllowedDomains: []string{"localhost", "127.0.0.1"},
+				MaxBodySize:    100000,
+				RequestTimeout: time.Second,
+			},
+			Limit: Limit{
+				Enable:      true,
+				DomainGlob:  "*",
+				Delay:       time.Millisecond,
+				RandomDelay: 100 * time.Millisecond,
+				Parallelism: 2,
+			},
 			OutputConfig: OutputConfig{Type: common.OutputTypeMySQL},
 		},
 	}
