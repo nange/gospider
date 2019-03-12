@@ -151,6 +151,22 @@ func (s *testSpiderSuite) getTaskRule() *Rule {
 				ctx.PutReqContextValue("category", category)
 				return ctx.VisitForNextWithContext(link)
 			},
+			`html`: func(ctx *Context, el *HTMLElement) error {
+				childText := el.ChildText(`.item`)
+				s.Equal("guoneiguoji", childText)
+				childAttr := el.ChildAttr(`.item a`, "href")
+				s.Equal("/guonei", childAttr)
+				childAttrs := el.ChildAttrs(`.item a`, "href")
+				s.ElementsMatch([]string{"/guonei", "/guoji"}, childAttrs)
+				el.ForEach(`.item a`, func(i int, element *HTMLElement) {
+					if i == 0 {
+						s.Equal("guonei", element.Text)
+					} else if i == 1 {
+						s.Equal("guoji", element.Text)
+					}
+				})
+				return nil
+			},
 		},
 	}
 	step2 := &Node{
