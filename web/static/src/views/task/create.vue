@@ -112,8 +112,7 @@ export default {
       submit_disable: false,
       rules: {
         task_name: [{ required: true, message: 'task name should not be empty', trigger: 'blur' }],
-        task_rule_name: [{ required: true, message: 'please select rule name', trigger: 'change' }],
-        output_type: [{ required: true, message: 'please select export type', trigger: 'change' }]
+        task_rule_name: [{ required: true, message: 'please select rule name', trigger: 'change' }]
       }
     }
   },
