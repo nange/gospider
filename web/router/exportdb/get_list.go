@@ -26,17 +26,18 @@ func GetExportDBList(c *gin.Context) {
 		c.String(http.StatusBadRequest, "")
 		return
 	}
-	log.Infof("get sysdb list req:%+v", req)
+	log.Infof("get exportdb list req:%+v", req)
 
-	tasks, count, err := model.GetExportDBList(core.GetGormDB(), req.Size, req.Offset)
+	exportdbs, count, err := model.GetExportDBList(core.GetGormDB(), req.Size, req.Offset)
 	if err != nil {
 		log.Errorf("GetExportDBList failed! err [%+v]", err)
 		c.String(http.StatusInternalServerError, "")
 		return
 	}
+	log.Infof("exportdbs:%+v", exportdbs)
 
 	c.JSON(http.StatusOK, &GetExportDBListResp{
 		Total: count,
-		Data:  tasks,
+		Data:  exportdbs,
 	})
 }
