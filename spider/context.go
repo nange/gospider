@@ -200,7 +200,7 @@ func (ctx *Context) Post(URL string, requestData map[string]string) error {
 	return ctx.c.Post(ctx.AbsoluteURL(URL), requestData)
 }
 
-// Post issues a POST to the specified URL with current context
+// PostWithContext issues a POST to the specified URL with current context
 func (ctx *Context) PostWithContext(URL string, requestData map[string]string) error {
 	return ctx.RequestWithContext("POST", ctx.AbsoluteURL(URL), createFormReader(requestData), nil)
 }

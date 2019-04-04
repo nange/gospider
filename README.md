@@ -34,6 +34,7 @@ MySQL
 gospider可以配置一下相关环境变量: 
 GOSPIDER_DB_HOST、GOSPIDER_DB_PORT、GOSPIDER_DB_USER、GOSPIDER_DB_PASSWORD、GOSPIDER_DB_NAME、GOSPIDER_WEB_IP、GOSPIDER_WEB_PORT
 
+本地开发环境: [安装](https://github.com/nange/gospider/wiki/Install)
 
 ## 使用方式
 `_example` 目录提供了使用实例, rule目录里面包含了爬取规则, 编译成功后直接运行。在浏览器打开: http://localhost:8080/admin
