@@ -166,6 +166,11 @@ func (ctx *Context) Visit(URL string) error {
 	return ctx.c.Visit(ctx.AbsoluteURL(URL))
 }
 
+// VisitWithContext issues a GET to the specified URL with current context
+func (ctx *Context) VisitWithContext(URL string) error {
+	return ctx.RequestWithContext("GET", ctx.AbsoluteURL(URL), nil, nil)
+}
+
 // VisitForNext issues a GET to the specified URL for next step
 func (ctx *Context) VisitForNext(URL string) error {
 	return ctx.nextC.Visit(ctx.AbsoluteURL(URL))
@@ -187,12 +192,17 @@ func (ctx *Context) reqContextClone() *colly.Context {
 
 // VisitForNextWithContext issues a GET to the specified URL for next step with previous context
 func (ctx *Context) VisitForNextWithContext(URL string) error {
-	return ctx.nextC.Request("GET", ctx.AbsoluteURL(URL), nil, ctx.reqContextClone(), nil)
+	return ctx.RequestForNextWithContext("GET", ctx.AbsoluteURL(URL), nil, nil)
 }
 
 // Post issues a POST to the specified URL
 func (ctx *Context) Post(URL string, requestData map[string]string) error {
 	return ctx.c.Post(ctx.AbsoluteURL(URL), requestData)
+}
+
+// Post issues a POST to the specified URL with current context
+func (ctx *Context) PostWithContext(URL string, requestData map[string]string) error {
+	return ctx.RequestWithContext("POST", ctx.AbsoluteURL(URL), createFormReader(requestData), nil)
 }
 
 // PostForNext issues a POST to the specified URL for next step
@@ -202,7 +212,7 @@ func (ctx *Context) PostForNext(URL string, requestData map[string]string) error
 
 // PostForNextWithContext issues a POST to the specified URL for next step with previous context
 func (ctx *Context) PostForNextWithContext(URL string, requestData map[string]string) error {
-	return ctx.nextC.Request("POST", ctx.AbsoluteURL(URL), createFormReader(requestData), ctx.reqContextClone(), nil)
+	return ctx.RequestForNextWithContext("POST", ctx.AbsoluteURL(URL), createFormReader(requestData), nil)
 }
 
 // PostRawForNext issues a rawData POST to the specified URL
