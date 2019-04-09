@@ -3,6 +3,12 @@ sudo: false
 go:
   - 1.11.x
   - 1.12.x
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
 script:
   - go vet ./...
   - go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
