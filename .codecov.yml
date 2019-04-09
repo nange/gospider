@@ -1,0 +1,3 @@
+ignore:
+  - "web/model/**/*"
+  - "web/static/**/*"
