@@ -52,6 +52,10 @@ func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
 		if err := ctx.outputToCSV(row, outputFields, ns); err != nil {
 			return err
 		}
+	case common.OutputTypeStdout:
+		if err := ctx.outputToStdout(row, outputFields, ns); err != nil {
+			return err
+		}
 	default:
 		return ErrOutputTypeNotSupported
 	}
@@ -96,6 +100,11 @@ func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, t
 		return errors.WithStack(err)
 	}
 
+	return nil
+}
+
+func (ctx *Context) outputToStdout(row map[int]interface{}, outputFields []string, ns string) error {
+	fmt.Printf("output row:%+v\n", row)
 	return nil
 }
 
