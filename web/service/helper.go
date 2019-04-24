@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/nange/gospider/web/core"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/nange/gospider/common"
 	"github.com/nange/gospider/spider"
 	"github.com/nange/gospider/web/model"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
@@ -37,14 +37,16 @@ func GetSpiderTaskByModel(task *model.Task) (*spider.Task, error) {
 	}
 
 	edb := model.ExportDB{}
-	if hasOutputConstraints(rule) && task.OutputType == common.OutputTypeMySQL && task.AutoMigrate {
+	if task.OutputType == common.OutputTypeMySQL {
 		query := model.NewExportDBQuerySet(core.GetGormDB())
 		if err := query.IDEq(task.OutputExportDBID).One(&edb); err != nil {
 			return nil, errors.Wrapf(err, "task.OutputExportDBID [%v]", task.OutputExportDBID)
 		}
-		err = autoMigrate(&edb, rule)
-		if err != nil {
-			log.Errorf("autoMigrate err [%+v]", errors.WithStack(err))
+		if hasOutputConstraints(rule) && task.AutoMigrate {
+			err = autoMigrate(&edb, rule)
+			if err != nil {
+				log.Errorf("autoMigrate err [%+v]", errors.WithStack(err))
+			}
 		}
 	}
 
