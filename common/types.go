@@ -1,8 +1,9 @@
 package common
 
 const (
-	OutputTypeMySQL = "mysql"
-	OutputTypeCSV   = "csv"
+	OutputTypeMySQL  = "mysql"
+	OutputTypeCSV    = "csv"
+	OutputTypeStdout = "stdout"
 )
 
 type MTS struct {
