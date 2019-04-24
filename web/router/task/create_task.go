@@ -46,9 +46,6 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 	s := spider.New(spiderTask, service.GetMTSChan())
-	if spiderTask.OutputConfig.Type == common.OutputTypeMySQL {
-		s.SetDB(core.GetDB())
-	}
 	if err := s.Run(); err != nil {
 		log.Errorf("spider run task failed! err:%+v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

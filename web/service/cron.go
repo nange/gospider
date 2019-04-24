@@ -59,9 +59,6 @@ func (ct *CronTask) Run() {
 		return
 	}
 	s := spider.New(spiderTask, ct.retCh)
-	if spiderTask.OutputConfig.Type == common.OutputTypeMySQL {
-		s.SetDB(core.GetDB())
-	}
 	if err := s.Run(); err != nil {
 		log.Errorf("run cron task failed, err:%+v", err)
 		ct.retCh <- common.MTS{ID: task.ID, Status: common.TaskStatusUnexceptedExited}
