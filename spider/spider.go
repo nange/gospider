@@ -114,6 +114,9 @@ func (s *Spider) Run() error {
 
 		for _, ctx := range ctxs {
 			ctx.closeCSVFileIfNeeded()
+			if ctx.outputDB != nil {
+				ctx.outputDB.Close()
+			}
 		}
 
 		log.Infof("task:%s run completed...", s.task.Name)
