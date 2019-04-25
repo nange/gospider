@@ -48,6 +48,7 @@
             <el-select v-model="form.output_type" placeholder="please select" @change="outputTypeChange">
               <el-option key="mysql" label="MYSQL" value="mysql"></el-option>
               <el-option key="csv" label="CSV" value="csv"></el-option>
+              <el-option key="stdout" label="STDOUT" value="stdout"></el-option>
             </el-select>
             <el-select v-model="form.output_exportdb_id" placeholder="please select" v-if="showExportDB">
               <el-option
