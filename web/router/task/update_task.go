@@ -85,7 +85,7 @@ func UpdateTask(c *gin.Context) {
 		model.TaskDBSchema.LimitDomainRegexp, model.TaskDBSchema.LimitDomainGlob,
 		model.TaskDBSchema.LimitDelay, model.TaskDBSchema.LimitRandomDelay,
 		model.TaskDBSchema.LimitParallelism, model.TaskDBSchema.ProxyURLs,
-		model.TaskDBSchema.OptRequestTimeout,
+		model.TaskDBSchema.OptRequestTimeout, model.TaskDBSchema.AutoMigrate,
 	); err != nil {
 		// task roll back
 		if err := cronTaskStopAndCreate(taskID, oldtask.Status, task, *oldtask); err != nil {
