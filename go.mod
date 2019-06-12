@@ -8,30 +8,24 @@ require (
 	github.com/antchfx/htmlquery v0.0.0-20180524052033-b4407197cfe8 // indirect
 	github.com/antchfx/xmlquery v0.0.0-20180524052823-9188d8442369 // indirect
 	github.com/antchfx/xpath v0.0.0-20180524052354-077bca4d2caa // indirect
-	github.com/appleboy/gin-jwt v0.0.0-20190216100112-ca1084e5d5a2
+	github.com/appleboy/gin-jwt/v2 v2.6.2
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20180824013952-8fac8b954edb // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
-	github.com/gin-gonic/gin v1.3.0
-	github.com/go-sql-driver/mysql v1.4.0
+	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/gin-gonic/gin v1.4.0
+	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-xorm/builder v0.3.4
 	github.com/gobuffalo/packr v1.11.1
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly v1.2.0
-	github.com/golang/protobuf v1.1.0 // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/jinzhu/gorm v1.9.1
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20180511015916-ed742868f2ae // indirect
-	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
 	github.com/kennygrant/sanitize v1.2.3 // indirect
-	github.com/lib/pq v1.0.0 // indirect
-	github.com/mattn/go-isatty v0.0.3 // indirect
-	github.com/mattn/go-sqlite3 v1.9.0 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
 	github.com/pkg/errors v0.8.0
@@ -40,16 +34,10 @@ require (
 	github.com/sirupsen/logrus v1.0.5
 	github.com/stretchr/testify v1.3.0
 	github.com/temoto/robotstxt v0.0.0-20170603013557-9e4646fa7053 // indirect
-	github.com/ugorji/go v1.1.1 // indirect
-	golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67
-	golang.org/x/net v0.0.0-20180702212446-ed29d75add3d // indirect
-	golang.org/x/sys v0.0.0-20180704094941-151529c776cd // indirect
-	golang.org/x/text v0.3.0 // indirect
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	google.golang.org/appengine v1.1.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
-	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	gopkg.in/yaml.v2 v2.2.1 // indirect
 )
