@@ -104,7 +104,11 @@ func (ctx *Context) outputToDB(row map[int]interface{}, outputFields []string, t
 }
 
 func (ctx *Context) outputToStdout(row map[int]interface{}, outputFields []string, ns string) error {
-	fmt.Printf("output row:%+v\n", row)
+	data := make(map[string]interface{})
+	for i, field := range outputFields {
+		data[field] = row[i]
+	}
+	fmt.Printf("output row:%+v\n", data)
 	return nil
 }
 
