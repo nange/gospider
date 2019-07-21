@@ -8,18 +8,32 @@ import (
 
 	"github.com/nange/gospider/spider"
 	log "github.com/sirupsen/logrus"
+
 )
 
 func init() {
 	spider.Register(rule)
 }
-
+var (
+	outputFields=[]string{"city","adname","big_category","sub_category","shop_name", "address", "tel", "photos"}
+	constraints= spider.NewConstraints(outputFields,
+		"VARCHAR(16) NOT NULL DEFAULT ''",
+		"VARCHAR(16)  NOT NULL",
+		"VARCHAR(128) NOT NULL",
+		"VARCHAR(128) NOT NULL",
+		"VARCHAR(128) NOT NULL",
+		"VARCHAR(128) NOT NULL",
+		"VARCHAR(32)  NOT NULL",
+		"VARCHAR(256) NOT NULL",
+	)
+)
 // NOTICE: 目前这个例子仅实现了抓取美食类商家
 var rule = &spider.TaskRule{
-	Name:            "大众点评商家数据",
-	Description:     "抓取大众点评上全国各大城市所有类型的商家详情数据",
-	Namespace:       "dianping_shop",
-	OutputFields:    []string{"city", "adname", "big_category", "sub_category", "shop_name", "address", "tel", "photos"},
+	Name:            	"大众点评商家数据",
+	Description:     	"抓取大众点评上全国各大城市所有类型的商家详情数据",
+	Namespace:       	"dianping_shop",
+	OutputFields:    	outputFields,
+	OutputConstraints:	constraints,
 	AllowURLRevisit: true,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error { // 定义入口

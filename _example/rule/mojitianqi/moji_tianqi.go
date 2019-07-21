@@ -13,13 +13,30 @@ import (
 func init() {
 	spider.Register(rule)
 }
-
+var (
+	outputFields=[]string{"province", "area", "aqi", "quality_grade", "pm10", "pm25", "no2", "so2", "o3", "co", "tip", "publish_time"}
+	constraints= spider.NewConstraints(outputFields,
+		"VARCHAR(16) NOT NULL DEFAULT ''",
+		"VARCHAR(16)  NOT NULL",
+		"VARCHAR(128) NOT NULL",
+		"VARCHAR(8) NOT NULL",
+		"VARCHAR(16) NOT NULL",
+		"VARCHAR(16) NOT NULL",
+		"VARCHAR(16)  NOT NULL",
+		"VARCHAR(16)  NOT NULL",
+		"VARCHAR(16)  NOT NULL",
+		"VARCHAR(16)  NOT NULL",
+		"VARCHAR(256) NOT NULL",
+		"VARCHAR(256) NOT NULL",
+	)
+)
 var rule = &spider.TaskRule{
-	Name:           "墨迹天气全国空气质量",
-	Description:    "抓取墨迹天气全国各个城市区县空气质量数据",
-	Namespace:      "moji_tianqi",
-	DisableCookies: true,
-	OutputFields:   []string{"province", "area", "aqi", "quality_grade", "pm10", "pm25", "no2", "so2", "o3", "co", "tip", "publish_time"},
+	Name:           	"墨迹天气全国空气质量",
+	Description:    	"抓取墨迹天气全国各个城市区县空气质量数据",
+	Namespace:      	"moji_tianqi",
+	DisableCookies: 	true,
+	OutputFields:   	outputFields,
+	OutputConstraints:	constraints,
 	Rule: &spider.Rule{
 		Head: func(ctx *spider.Context) error { // 定义入口
 			return ctx.VisitForNext("https://tianqi.moji.com/aqi/china")
