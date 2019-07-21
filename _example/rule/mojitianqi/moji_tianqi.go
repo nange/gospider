@@ -28,7 +28,6 @@ var (
 		"VARCHAR(16)  NOT NULL DEFAULT ''",
 		"VARCHAR(256) NOT NULL DEFAULT ''",
 		"VARCHAR(256) NOT NULL DEFAULT ''",
-		"VARCHAR(256) NOT NULL DEFAULT ''",
 	)
 )
 var rule = &spider.TaskRule{
