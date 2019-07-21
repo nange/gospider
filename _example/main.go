@@ -5,6 +5,7 @@ import (
 	_ "github.com/nange/gospider/_example/rule/baidunews"
 	_ "github.com/nange/gospider/_example/rule/dianping"
 	_ "github.com/nange/gospider/_example/rule/mojitianqi"
+	_ "github.com/nange/gospider/_example/rule/stackoverflow"
 	log "github.com/sirupsen/logrus"
 )
 
