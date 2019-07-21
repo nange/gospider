@@ -18,13 +18,13 @@ var (
 	outputFields=[]string{"city","adname","big_category","sub_category","shop_name", "address", "tel", "photos"}
 	constraints= spider.NewConstraints(outputFields,
 		"VARCHAR(16) NOT NULL DEFAULT ''",
-		"VARCHAR(16)  NOT NULL",
-		"VARCHAR(128) NOT NULL",
-		"VARCHAR(128) NOT NULL",
-		"VARCHAR(128) NOT NULL",
-		"VARCHAR(128) NOT NULL",
-		"VARCHAR(32)  NOT NULL",
-		"VARCHAR(256) NOT NULL",
+		"VARCHAR(16)  NOT NULL DEFAULT ''",
+		"VARCHAR(128) NOT NULL DEFAULT ''",
+		"VARCHAR(128) NOT NULL DEFAULT ''",
+		"VARCHAR(128) NOT NULL DEFAULT ''",
+		"VARCHAR(128) NOT NULL DEFAULT ''",
+		"VARCHAR(32)  NOT NULL DEFAULT ''",
+		"VARCHAR(256) NOT NULL DEFAULT ''",
 	)
 )
 // NOTICE: 目前这个例子仅实现了抓取美食类商家
