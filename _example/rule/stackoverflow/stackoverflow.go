@@ -9,7 +9,7 @@ func init()  {
 }
 
 var (
-	outputFields=[]string{"Question_title","Question_Detail","Question_Tags","Answer_List"}
+	outputFields=[]string{"question_title","question_detail","question_tags","answer_list"}
 	constraints= spider.NewConstraints(outputFields,
 			"VARCHAR(512) NOT NULL DEFAULT ''",
 			"TEXT",
@@ -20,7 +20,7 @@ var (
 var rule=&spider.TaskRule{
 	Name:			"StackOverFlow",
 	Description:	"StackOverFlow Highly Quality QA",
-	Namespace:		"StackOverFlow_EN",
+	Namespace:		"stackoverflow_en",
 	OutputFields:	outputFields,
 	OutputConstraints:constraints,
 	Rule:			&spider.Rule{
