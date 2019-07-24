@@ -14,8 +14,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Output output a row data
-func (ctx *Context) Output(row map[int]interface{}, namespace ...string) error {
+type Outputer interface {
+	Output() error
+}
+
+func (ctx *Context) Output(value interface{}, namespace ...string) error {
+	switch v := value.(type) {
+	case map[int]interface{}:
+		return ctx.OutputDefault(v, namespace...)
+	case Outputer:
+		return ctx.OutputCustom(v, namespace...)
+	default:
+		return ErrOutputParamNotSupported
+	}
+}
+
+// Output output custom by user
+func (ctx *Context) OutputCustom(o Outputer, namespace ...string) error {
+	return errors.WithStack(o.Output())
+}
+
+// Output output a row data by default
+func (ctx *Context) OutputDefault(row map[int]interface{}, namespace ...string) error {
 	var outputFields []string
 	var ns string
 

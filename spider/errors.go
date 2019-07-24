@@ -28,8 +28,10 @@ var (
 	ErrTooManyOutputNamespace = errors.New("too many output namespace")
 	// ErrOutputToMultipleTableDisabled is the error thrown if "OutputToMultipleTable" is false
 	ErrOutputToMultipleTableDisabled = errors.New("output to multiple tables disabled")
-	// ErrOutputTypeNotSupported is the error type for unkonow output type
+	// ErrOutputTypeNotSupported is the error type for unknown output type
 	ErrOutputTypeNotSupported = errors.New("output type not supported")
 	// ErrMultConfNamespaceNotFound is the error type for mult conf namespace not found
 	ErrMultConfNamespaceNotFound = errors.New("mult conf namespace not found")
+	// ErrOutputParamNotSupported is the error type for unknown output param
+	ErrOutputParamNotSupported = errors.New("output param not supported ")
 )

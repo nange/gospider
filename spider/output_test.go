@@ -133,6 +133,34 @@ func (s *testOutputSuite) TestCSVOutputNormal() {
 
 }
 
+type TestOutputFunc struct {
+	Err error
+}
+
+func (f TestOutputFunc) Output() error {
+	if f.Err != nil {
+		return f.Err
+	}
+	return nil
+}
+
+func (s *testOutputSuite) TestOutputFunc() {
+	task := s.baseTask
+	ctx, cancel := context.WithCancel(context.Background())
+	gsCtx, err := newContext(ctx, cancel, &task, nil, nil)
+	s.Require().NoError(err)
+
+	noErr := TestOutputFunc{}
+	err = gsCtx.Output(noErr)
+	s.NoError(err)
+
+	hasErr := TestOutputFunc{
+		Err: ErrTooManyOutputNamespace,
+	}
+	err = gsCtx.Output(hasErr)
+	s.Equal(err.Error(), ErrTooManyOutputNamespace.Error())
+}
+
 func TestOutputSuite(t *testing.T) {
 	suite.Run(t, new(testOutputSuite))
 }
