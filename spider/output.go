@@ -30,8 +30,8 @@ func (ctx *Context) Output(value interface{}, namespace ...string) error {
 }
 
 // Output output custom by user
-func (ctx *Context) OutputCustom(fn Outputer, namespace ...string) error {
-	return errors.WithStack(fn.Output())
+func (ctx *Context) OutputCustom(o Outputer, namespace ...string) error {
+	return errors.WithStack(o.Output())
 }
 
 // Output output a row data by default
