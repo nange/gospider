@@ -19,15 +19,14 @@ type Outputer interface {
 }
 
 func (ctx *Context) Output(value interface{}, namespace ...string) error {
-	switch value.(type) {
+	switch v := value.(type) {
 	case map[int]interface{}:
-		return ctx.OutputDefault(value.(map[int]interface{}), namespace...)
+		return ctx.OutputDefault(v, namespace...)
 	case Outputer:
-		return ctx.OutputCustom(value.(Outputer), namespace...)
+		return ctx.OutputCustom(v, namespace...)
 	default:
 		return ErrOutputParamNotSupported
 	}
-	return ErrOutputParamNotSupported
 }
 
 // Output output custom by user
