@@ -272,7 +272,7 @@ func (ctx *Context) Abort() {
 	}
 }
 
-//GetOutputDB get database of  current context
+// GetOutputDB get database of current context
 func (ctx *Context) GetOutputDB() *sql.DB {
 	return ctx.outputDB
 }
