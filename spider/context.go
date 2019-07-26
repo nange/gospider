@@ -37,7 +37,6 @@ type Context struct {
 	outputCSVFiles map[string]io.WriteCloser
 }
 
-
 func newContext(ctx context.Context, cancel context.CancelFunc, task *Task, c *colly.Collector, nextC *colly.Collector) (*Context, error) {
 	gsCtx := &Context{
 		task:      task,
