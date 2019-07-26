@@ -37,6 +37,7 @@ type Context struct {
 	outputCSVFiles map[string]io.WriteCloser
 }
 
+
 func newContext(ctx context.Context, cancel context.CancelFunc, task *Task, c *colly.Collector, nextC *colly.Collector) (*Context, error) {
 	gsCtx := &Context{
 		task:      task,
@@ -270,6 +271,11 @@ func (ctx *Context) Abort() {
 	if req, ok := ctx.ctlCtx.Value(reqContexKey).(*colly.Request); ok {
 		req.Abort()
 	}
+}
+
+//GetOutputDB get database of  current context
+func (ctx *Context) GetOutputDB() *sql.DB {
+	return ctx.outputDB
 }
 
 func createFormReader(data map[string]string) io.Reader {
