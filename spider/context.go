@@ -272,6 +272,11 @@ func (ctx *Context) Abort() {
 	}
 }
 
+//GetOutputDB get database of  current context
+func (ctx *Context) GetOutputDB() *sql.DB {
+	return ctx.outputDB
+}
+
 func createFormReader(data map[string]string) io.Reader {
 	form := url.Values{}
 	for k, v := range data {
