@@ -80,7 +80,15 @@ func (s *Spider) Run() error {
 		return err
 	}
 	if s.task.OutputConfig.Type == common.OutputTypeMySQL {
-		headCtx.setOutputDB(s.db)
+		if s.db != nil {
+			headCtx.setOutputDB(s.db)
+		} else {
+			db, err := common.NewDB(s.task.OutputConfig.MySQLConf)
+			if err != nil {
+				return err
+			}
+			headCtx.setOutputDB(db)
+		}
 	}
 	headWrapper := func(ctx *Context) (err error) {
 		defer func() {
