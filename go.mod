@@ -29,9 +29,9 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.3.0
 	github.com/temoto/robotstxt v0.0.0-20170603013557-9e4646fa7053 // indirect
-	github.com/ugorji/go/codec v1.1.7 // indirect
-	golang.org/x/crypto v0.0.0-20190422162423-af44ce270edf
-	golang.org/x/text v0.3.0
+	github.com/ugorji/go v1.1.7 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/text v0.3.8
 	google.golang.org/appengine v1.1.0 // indirect
 )
 
